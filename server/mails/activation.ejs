@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Verify Your Flyobo Travel Account</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .header {
+            background-color: #4B0082;
+            color: #ffffff;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .content {
+            padding: 30px;
+            line-height: 1.6;
+        }
+
+        .content p {
+            font-size: 16px;
+            margin-bottom: 18px;
+        }
+
+        .otp-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .otp-code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #4B0082;
+            background: #f1f1f1;
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 2px dashed #4B0082;
+            letter-spacing: 4px;
+        }
+
+        .btn-verify {
+            display: inline-block;
+            background-color: #4B0082;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .warning {
+            font-size: 15px;
+            color: #555;
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            background-color: #f1f1f1;
+            padding: 20px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .otp-code {
+                font-size: 28px;
+                padding: 15px 30px;
+            }
+
+            .btn-verify {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://via.placeholder.com/150x50?text=Flyobo+Logo" alt="Flyobo Travel Logo" style="height:50px;" />
+        </div>
+
+        <div class="header">
+            <h1>Welcome to <span style="color: #FFD700;">Flyobo Travel</span></h1>
+            <p>Your adventure starts here</p>
+        </div>
+
+        <div class="content">
+            <p>Hello <strong><%= name %></strong>,</p>
+
+            <p>Thank you for joining Flyobo Travel! To complete your account registration and secure your profile, please use the One-Time Password (OTP) shown below:</p>
+
+            <div class="otp-container">
+                <span class="otp-code"><%= otp %></span>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="https://your-frontend-domain.com/activate?email=<%= encodeURIComponent(email) %>&otp=<%= otp %>" class="btn-verify">Verify Account</a>
+            </div>
+
+            <p class="warning">
+                ⚠️ This OTP is valid for <strong>10 minutes</strong> only. Do not share it with anyone for your safety.
+            </p>
+
+            <p>If you didn’t request this email, please ignore it or contact our support immediately.</p>
+
+            <p>We’re excited to have you onboard. Welcome to the Flyobo Travel community!</p>
+
+            <p>Best regards,<br/><strong>The Flyobo Travel Team</strong></p>
+        </div>
+
+        <div class="footer">
+            &copy; <%= new Date().getFullYear() %> Flyobo Travel. All rights reserved.
+        </div>
+    </div>
+</body>
+
+</html>
