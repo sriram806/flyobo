@@ -1,6 +1,23 @@
 import { config } from "dotenv";
+import fs from "fs";
+import path from "path";
 
-config({ path: `.env.${process.env.NODE_ENV || 'development'}.local || .env` });
+// Robust .env loading with sensible fallbacks
+const NODE = process.env.NODE_ENV || "development";
+const candidates = [
+  `.env.${NODE}.local`,
+  `.env.${NODE}`,
+  `.env.local`,
+  `.env`,
+];
+
+for (const file of candidates) {
+  const full = path.resolve(process.cwd(), file);
+  if (fs.existsSync(full)) {
+    config({ path: full });
+    break;
+  }
+}
 
 export const {
     PORT,

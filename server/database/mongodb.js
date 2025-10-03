@@ -3,7 +3,19 @@ import { MONGO_URI,NODE_ENV } from "../config/env.js";
 
 const connecttoDatabase = async ()=>{
     try{
-        await mongoose.connect(MONGO_URI);
+        if (!MONGO_URI) {
+            throw new Error("MONGO_URI is not defined. Please set it in your .env file.");
+        }
+
+        // Recommended Mongoose settings
+        mongoose.set('strictQuery', true);
+
+        await mongoose.connect(MONGO_URI, {
+            serverSelectionTimeoutMS: 10000, // 10s to find a server
+            socketTimeoutMS: 20000,          // 20s I/O timeout
+            // directConnection can help for single-node URIs
+            // directConnection: true,
+        });
         console.log(`MONGODB connection is Successful and in ${NODE_ENV} mode`);
     }catch(error){
         console.error('Error connecting to database: ',error);
