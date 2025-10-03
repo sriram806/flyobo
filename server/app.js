@@ -34,6 +34,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://flyobo.onrender.com',
+  'https://flyobo.vercel.app/'
 ];
 
 app.use(cors({
