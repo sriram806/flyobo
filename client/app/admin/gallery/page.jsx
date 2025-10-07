@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import AdminProtected from "@/app/hooks/adminProtected";
 
 const CATEGORIES = [
   "nature",
@@ -30,11 +31,19 @@ const AdminGalleryPage = () => {
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState("");
 
+  const authHeader = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    return token ? { Authorization: `Bearer ${token}` } : undefined;
+  };
+
   const fetchItems = async () => {
     try {
       setLoading(true);
       setError("");
-      const { data } = await axios.get(`${API_BASE}/gallery`, { withCredentials: true });
+      const { data } = await axios.get(`${API_BASE}/gallery`, {
+        withCredentials: true,
+        headers: authHeader(),
+      });
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to fetch gallery");
@@ -49,7 +58,6 @@ const AdminGalleryPage = () => {
       return;
     }
     fetchItems();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_BASE]);
 
   const onCreate = async (e) => {
@@ -70,7 +78,10 @@ const AdminGalleryPage = () => {
           .map((t) => t.trim())
           .filter(Boolean),
       };
-      const { data } = await axios.post(`${API_BASE}/gallery`, payload, { withCredentials: true });
+      const { data } = await axios.post(`${API_BASE}/gallery`, payload, {
+        withCredentials: true,
+        headers: authHeader(),
+      });
       setItems((prev) => [data, ...prev]);
       setTitle("");
       setImage("");
@@ -90,7 +101,10 @@ const AdminGalleryPage = () => {
     try {
       setLoading(true);
       setError("");
-      await axios.delete(`${API_BASE}/gallery/${id}`, { withCredentials: true });
+      await axios.delete(`${API_BASE}/gallery/${id}`, {
+        withCredentials: true,
+        headers: authHeader(),
+      });
       setItems((prev) => prev.filter((x) => x._id !== id));
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to delete item");
@@ -100,6 +114,7 @@ const AdminGalleryPage = () => {
   };
 
   return (
+    <AdminProtected>
     <div className="min-h-screen px-4 py-6 lg:px-8">
       <h1 className="text-2xl font-bold">Admin • Gallery</h1>
       <p className="text-sm text-gray-600">Create, list and delete gallery items.</p>
@@ -195,6 +210,7 @@ const AdminGalleryPage = () => {
         </table>
       </div>
     </div>
+    </AdminProtected>
   );
 };
 

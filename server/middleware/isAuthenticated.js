@@ -5,9 +5,9 @@ import User from "../models/user.model.js";
 
 const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     try {
-        const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+        const token = req.cookies.token;
         if (!token) {
-            return res.status(401).json({ success: false, message: "Access token missing. Please login." });
+            return res.status(401).json({ success: false, message: "Token missing. Please login." });
         }   
         
         const decoded = jwt.verify(token, JWT_SECRET);

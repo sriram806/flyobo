@@ -51,8 +51,12 @@ const AdminDashboard = () => {
       if (!API_URL) return;
       setLoading(true);
       try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
         // Users
-        const { data: userData } = await axios.get(`${API_URL}/analytics/users`, { withCredentials: true });
+        const { data: userData } = await axios.get(`${API_URL}/analytics/users`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         if (!mounted) return;
         const uData = userData?.data || {};
         setUserAnalytics({
@@ -61,7 +65,10 @@ const AdminDashboard = () => {
         });
 
         // Packages
-        const { data: packageData } = await axios.get(`${API_URL}/analytics/packages`, { withCredentials: true });
+        const { data: packageData } = await axios.get(`${API_URL}/analytics/packages`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         if (!mounted) return;
         const pData = packageData?.data || {};
         setPackageAnalytics({
@@ -78,7 +85,11 @@ const AdminDashboard = () => {
     const fetchLatestUsers = async () => {
       if (!API_URL) return;
       try {
-        const { data } = await axios.get(`${API_URL}/user/get-all-users`, { withCredentials: true });
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        const { data } = await axios.get(`${API_URL}/user/get-all-users`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         const list = data?.users || data?.data || [];
         setLatestUsers(list.slice(0, 5));
       } catch (_) {}
@@ -87,7 +98,11 @@ const AdminDashboard = () => {
     const fetchRecentPackages = async () => {
       if (!API_URL) return;
       try {
-        const { data } = await axios.get(`${API_URL}/package/get-packages`, { withCredentials: true });
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        const { data } = await axios.get(`${API_URL}/package/get-packages`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         const list = Array.isArray(data?.packages) ? data.packages : data?.data?.packages || [];
         const sortByDate = (x) => new Date(x?.updatedAt || x?.createdAt || 0).getTime();
         setRecentPackages([...list].sort((a, b) => sortByDate(b) - sortByDate(a)).slice(0, 5));
