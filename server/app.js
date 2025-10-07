@@ -1,11 +1,11 @@
 import express from 'express';
-import cors from 'cors';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import { Server } from 'socket.io';
 import connecttoDatabase from './database/mongodb.js';
-import { CLOUD_API_KEY, CLOUD_NAME, CLOUD_SECRET_KEY, PORT } from './config/env.js';
+import { CLOUD_API_KEY, CLOUD_NAME, CLOUD_SECRET_KEY, PORT, FRONTEND_URL, ORIGIN } from './config/env.js';
+
 import { v2 as cloudinary } from 'cloudinary';
 
 // Routes
@@ -21,6 +21,8 @@ connecttoDatabase();
 // Middleware
 app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
+// behind proxies (Render/other) to ensure secure cookies & protocol detection
+app.set('trust proxy', 1);
 
 // Cloudinary config
 cloudinary.config({
@@ -36,6 +38,12 @@ const allowedOrigins = [
   'https://flyobo.onrender.com',
   'https://flyobo.vercel.app'
 ];
+// add env-provided origins if present
+for (const extra of [FRONTEND_URL, ORIGIN]) {
+  if (extra && !allowedOrigins.includes(extra)) {
+    allowedOrigins.push(extra);
+  }
+}
 
 app.use(cors({
   origin: (origin, callback) => {

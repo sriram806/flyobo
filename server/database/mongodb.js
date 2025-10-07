@@ -12,9 +12,7 @@ const connecttoDatabase = async ()=>{
 
         await mongoose.connect(MONGO_URI, {
             serverSelectionTimeoutMS: 10000, // 10s to find a server
-            socketTimeoutMS: 20000,          // 20s I/O timeout
-            // directConnection can help for single-node URIs
-            // directConnection: true,
+            socketTimeoutMS: 20000,    
         });
         console.log(`MONGODB connection is Successful and in ${NODE_ENV} mode`);
     }catch(error){

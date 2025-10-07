@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import sendMail from "../config/nodemailer.js";
 import { generateOTP } from "../services/otp.services.js";
 import { createSendToken } from "../services/auth.services.js";
+import { NODE_ENV } from "../config/env.js";
 
 // 1. Registration
 export const registration = async (req, res) => {
@@ -159,7 +160,7 @@ export const login = async (req, res) => {
 // 5. Logout
 export const logout = async (req, res) => {
   try {
-    res.cookie("access_token", "logout", {
+    res.cookie("token", "logout", {
       expires: new Date(Date.now() + 5 * 1000),
       httpOnly: true,
       secure: NODE_ENV === "production",
