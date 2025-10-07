@@ -1,20 +1,19 @@
-import Gallery from '../models/gallery.model.js';
+import Gallery from "../models/gallery.model.js";
 
 export const getGalleryItems = async (req, res) => {
   try {
-    const { category, tag } = req.query;
-    let query = {};
+    const { category, tag, search } = req.query;
+    const query = {};
 
-    if (category) query.category = category;
-    if (tag) query.tags = tag;
+    if (category) query.category = category.toLowerCase();
+    if (tag) query.tags = { $in: [tag.toLowerCase()] };
+    if (search) query.title = { $regex: search, $options: "i" };
 
-    const items = await Gallery.find(query)
-      .populate('uploadedBy', 'name')
-      .sort('-createdAt');
+    const items = await Gallery.find(query).populate("uploadedBy", "name email").sort({ createdAt: -1 });
 
-    res.json(items);
+    res.status(200).json(items);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: "Failed to fetch gallery items", error: error.message });
   }
 };
 
@@ -28,28 +27,35 @@ export const uploadGalleryItem = async (req, res) => {
     const savedItem = await galleryItem.save();
     res.status(201).json(savedItem);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Failed to upload gallery item", error: error.message });
   }
 };
 
-export const toggleLike = async (req, res) => {
+export const updateGalleryItem = async (req, res) => {
   try {
-    const item = await Gallery.findById(req.params.id);
-    if (!item) {
-      return res.status(404).json({ message: 'Gallery item not found' });
+    const { id } = req.params;
+    const updates = req.body;
+
+    const galleryItem = await Gallery.findById(id);
+    if (!galleryItem) {
+      return res.status(404).json({ message: "Gallery item not found" });
     }
 
-    const likeIndex = item.likes.indexOf(req.user._id);
-    if (likeIndex === -1) {
-      item.likes.push(req.user._id);
-    } else {
-      item.likes.splice(likeIndex, 1);
+    if (
+      galleryItem.uploadedBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Not authorized to update this item" });
     }
 
-    await item.save();
-    res.json(item);
+    Object.keys(updates).forEach((key) => {
+      galleryItem[key] = updates[key];
+    });
+
+    const updatedItem = await galleryItem.save();
+    res.status(200).json(updatedItem);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Failed to update gallery item", error: error.message });
   }
 };
 
@@ -57,19 +63,19 @@ export const deleteGalleryItem = async (req, res) => {
   try {
     const item = await Gallery.findById(req.params.id);
     if (!item) {
-      return res.status(404).json({ message: 'Gallery item not found' });
+      return res.status(404).json({ message: "Gallery item not found" });
     }
 
     if (
       item.uploadedBy.toString() !== req.user._id.toString() &&
-      req.user.role !== 'admin'
+      req.user.role !== "admin"
     ) {
-      return res.status(403).json({ message: 'Not authorized to delete this item' });
+      return res.status(403).json({ message: "Not authorized to delete this item" });
     }
 
-    await item.remove();
-    res.json({ message: 'Gallery item removed' });
+    await item.deleteOne();
+    res.status(200).json({ message: "Gallery item deleted successfully" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Failed to delete gallery item", error: error.message });
   }
 };

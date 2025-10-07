@@ -14,6 +14,7 @@ import AdminPackages from "../components/Admin/AdminPackages";
 import { useRouter } from "next/navigation";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
+import AdminGallery from "../components/Admin/AdminGallery";
 
 export default function AdminLayout({ children }) {
   const [open, setOpen] = useState(false);
@@ -26,7 +27,8 @@ export default function AdminLayout({ children }) {
     dashboard: "/admin",
     users: "/admin/users", // create this page to enable navigation
     package: "/admin/packages",
-    reports: "/admin/reports", // create this page to enable navigation
+    reports: "/admin/reports", 
+    gallery: "/admin/gallery" // create this page to enable navigation
   };
   const handleLogout = () => {
     dispatch(logout());
@@ -59,6 +61,7 @@ export default function AdminLayout({ children }) {
                 {selected === "users" && (<AdminUsers />)}
                 {selected === "package" && (<AdminPackages />)}
                 {selected === "reports" && <ProfileSetting />}
+                {selected === "gallery" && <AdminGallery />}
               </>
             )}
           </section>

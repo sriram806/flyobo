@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import {
   HiOutlineUser, HiOutlineBookmark, HiOutlineHeart, HiOutlineCog,
-  HiOutlineLogout, HiOutlineBell, HiOutlineSearch
+  HiOutlineLogout, HiOutlineBell, HiOutlineSearch,
+  HiOutlineCamera
 } from "react-icons/hi";
 import { usePathname } from "next/navigation";
 
@@ -16,6 +17,7 @@ const items = [
       { key: "users", label: "Users", icon: HiOutlineUser },
       { key: "package", label: "Packages", icon: HiOutlineBookmark },
       { key: "reports", label: "Reports", icon: HiOutlineBell },
+      { key: "gallery", label: "Gallery", icon: HiOutlineCamera}
     ],
   },
 ];
