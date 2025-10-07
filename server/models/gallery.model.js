@@ -11,9 +11,14 @@ const gallerySchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['nature', 'group', 'city', 'adventure', 'wildlife', 'culture', 'beach', 'heritage', 'nature', 'other'],
-        required: true
+        enum: ['nature', 'group', 'city', 'adventure', 'wildlife', 'culture', 'beach', 'heritage', 'other'],
+        required: true,
+        lowercase: true,
+        trim: true
     },
+    tags: [{ type: String, trim: true, lowercase: true }],
+    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: {
         type: Date,
         default: Date.now

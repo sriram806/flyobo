@@ -9,7 +9,6 @@ export const getGalleryItems = async (req, res) => {
     if (tag) query.tags = tag;
 
     const items = await Gallery.find(query)
-      .populate('location', 'name')
       .populate('uploadedBy', 'name')
       .sort('-createdAt');
 

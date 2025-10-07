@@ -15,6 +15,7 @@ import userRoute from './routes/user.route.js';
 import analyticsRoute from './routes/analytics.route.js';
 import packageRouter from './routes/package.route.js';
 import layoutRoute from './routes/layout.route.js';
+import galleryRoute from './routes/gallery.route.js';
 
 const app = express();
 connecttoDatabase();
@@ -22,7 +23,6 @@ connecttoDatabase();
 // Middleware
 app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
-// behind proxies (Render/other) to ensure secure cookies & protocol detection
 app.set('trust proxy', 1);
 
 // Cloudinary config
@@ -137,6 +137,7 @@ app.use('/api/v1/user', userRoute);
 app.use('/api/v1/package', packageRouter);
 app.use('/api/v1/analytics', analyticsRoute);
 app.use('/api/v1/layout', layoutRoute);
+app.use('/api/v1/gallery', galleryRoute);
 
 
 
