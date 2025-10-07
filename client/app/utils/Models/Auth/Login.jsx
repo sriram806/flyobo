@@ -40,6 +40,14 @@ const Login = ({ setRoute, setOpen }) => {
                 { withCredentials: true }
             );
 
+            const token = data?.token;
+            if (token) {
+                try {
+                    localStorage.setItem('auth_token', token);
+                    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                } catch {}
+            }
+
             const user = data?.user || data?.data?.user || { email, name: email?.split('@')?.[0] || "User" };
             dispatch(setAuthUser(user));
             if (setOpen) {

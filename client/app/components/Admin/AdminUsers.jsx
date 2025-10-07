@@ -28,9 +28,11 @@ export default function AdminUsers() {
     if (!API_URL) return;
     try {
       setLoading(true);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
       const { data } = await axios.get(`${API_URL}/user/get-all-users`, {
         params: { q, page, limit: PageSize },
         withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       const list = data?.users || data?.data || [];
       setItems(list);
@@ -51,7 +53,11 @@ export default function AdminUsers() {
     if (!API_URL) return;
     if (!confirm("Delete this user? This cannot be undone.")) return;
     try {
-      await axios.delete(`${API_URL}/user/${id}`, { withCredentials: true });
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      await axios.delete(`${API_URL}/user/${id}`, {
+        withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       toast.success("User deleted");
       // refresh
       if (items.length === 1 && page > 1) setPage((p) => p - 1); else load();
