@@ -26,6 +26,8 @@ const Login = ({ setRoute, setOpen }) => {
         e.preventDefault();
         try {
             setLoading(true);
+            setErrors({ email: "", password: "" });
+            
             const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
             if (!API_URL) {
                 toast.error("API base URL is not configured. Set NEXT_PUBLIC_BACKEND_URL in .env.local and restart the dev server.");
@@ -37,26 +39,54 @@ const Login = ({ setRoute, setOpen }) => {
             const { data } = await axios.post(
                 endpoint,
                 { email, password, remember },
-                { withCredentials: true }
+                { 
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
 
+            // Store token if provided (fallback method)
             const token = data?.token;
             if (token) {
                 try {
                     localStorage.setItem('auth_token', token);
                     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-                } catch {}
+                } catch (tokenError) {
+                    console.warn('Failed to store token:', tokenError);
+                }
             }
 
-            const user = data?.user || data?.data?.user || { email, name: email?.split('@')?.[0] || "User" };
+            // Get user data from response
+            const user = data?.user || data?.data?.user;
+            if (!user) {
+                throw new Error("User data not received from server");
+            }
+
+            // Update Redux store
             dispatch(setAuthUser(user));
+            
+            // Close modal
             if (setOpen) {
                 setOpen(false);
             }
+            
             toast.success(data?.message || "Signed in successfully.");
         } catch (err) {
-            console.error(err);
-            const msg = err?.response?.data?.message || err?.message || "Failed to sign in. Please try again.";
+            console.error('Login error:', err);
+            
+            // Handle specific error cases
+            const serverMessage = err?.response?.data?.message;
+            if (err?.response?.status === 401) {
+                if (serverMessage?.toLowerCase().includes('email') || serverMessage?.toLowerCase().includes('user')) {
+                    setErrors(prev => ({ ...prev, email: serverMessage }));
+                } else if (serverMessage?.toLowerCase().includes('password')) {
+                    setErrors(prev => ({ ...prev, password: serverMessage }));
+                }
+            }
+            
+            const msg = serverMessage || err?.message || "Failed to sign in. Please try again.";
             toast.error(msg);
         } finally {
             setLoading(false);

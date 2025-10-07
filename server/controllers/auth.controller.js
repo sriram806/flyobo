@@ -160,10 +160,12 @@ export const login = async (req, res) => {
 // 5. Logout
 export const logout = async (req, res) => {
   try {
-    res.cookie("token", "logout", {
-      expires: new Date(Date.now() + 5 * 1000),
+    res.cookie("token", "", {
+      expires: new Date(0),
       httpOnly: true,
       secure: NODE_ENV === "production",
+      sameSite: NODE_ENV === "production" ? "none" : "lax",
+      path: '/'
     });
     res.status(200).json({ success: true, message: "Logout successful" });
   } catch (error) {

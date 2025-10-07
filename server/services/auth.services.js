@@ -30,10 +30,19 @@ export const createSendToken = (user, statusCode, res, message) => {
         secure: NODE_ENV === "production",
         sameSite: NODE_ENV === "production" ? "none" : "lax",
         maxAge: parseExpiryToMs(JWT_EXPIRES_IN),
+        path: '/',
+        domain: NODE_ENV === "production" ? undefined : undefined // Let browser handle domain
     };
+    
+    // Set cookie
     res.cookie("token", token, cookieOptions);
+    
+    // Clean user data
     user.password = undefined;
     user.otp = undefined;
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpireAt = undefined;
+    
     res.status(statusCode).json({
         success: true,
         message: message,
