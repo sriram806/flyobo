@@ -7,18 +7,33 @@ const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     try {
         let token = null;
         
-        // Try to get token from cookies first (primary method)
+        // Strategy 1: Try to get token from cookies (primary method)
         token = req.cookies.token;
+        console.log('🍪 Cookie token:', token ? 'PRESENT' : 'NONE');
         
-        // If no cookie token, try Authorization header (fallback)
+        // Strategy 2: Try Authorization header (fallback)
         if (!token && req.headers.authorization) {
             const authHeader = req.headers.authorization;
             if (authHeader.startsWith('Bearer ')) {
                 token = authHeader.substring(7);
+                console.log('🔑 Bearer token:', token ? 'PRESENT' : 'NONE');
             }
         }
         
+        // Strategy 3: Try custom auth header (additional fallback)
+        if (!token && req.headers['x-auth-token']) {
+            token = req.headers['x-auth-token'];
+            console.log('🎫 Custom auth token:', token ? 'PRESENT' : 'NONE');
+        }
+        
         if (!token) {
+            console.log('❌ No token found in request:', {
+                cookies: Object.keys(req.cookies || {}),
+                authHeader: req.headers.authorization ? 'PRESENT' : 'NONE',
+                origin: req.headers.origin,
+                userAgent: req.headers['user-agent']?.substring(0, 50) + '...'
+            });
+            
             return res.status(401).json({ 
                 success: false, 
                 message: "Access denied. No token provided. Please login." 

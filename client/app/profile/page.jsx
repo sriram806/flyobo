@@ -10,8 +10,10 @@ import { toast } from "react-hot-toast";
 import SideBarProfile from "../components/Profile/SideBarProfile";
 import ProfileInfo from "../components/Profile/ProfileInfo";
 import ProfileSetting from "../components/Profile/ProfileSetting";
+import ProfileBookings from "../components/Profile/ProfileBookings";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
+import FavouriteBookings from "../components/Profile/FavouriteBookings";
 
 const Page = () => {
   const router = useRouter();
@@ -49,17 +51,9 @@ const Page = () => {
           <section className="lg:col-span-3">
             {selected === "overview" && <ProfileInfo />}
 
-            {selected === "bookings" && (
-              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-gray-700 dark:text-gray-300">
-                Coming soon: Your bookings will appear here.
-              </div>
-            )}
+            {selected === "bookings" && <ProfileBookings />}
 
-            {selected === "wishlist" && (
-              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-gray-700 dark:text-gray-300">
-                Coming soon: Your wishlist of destinations.
-              </div>
-            )}
+            {selected === "wishlist" && <FavouriteBookings />}
 
             {selected === "settings" && <ProfileSetting />}
           </section>

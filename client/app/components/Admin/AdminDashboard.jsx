@@ -25,9 +25,14 @@ const AdminDashboard = () => {
 
   const [userAnalytics, setUserAnalytics] = useState({ last12Months: [], total: 0 });
   const [packageAnalytics, setPackageAnalytics] = useState({ last12Months: [], total: 0 });
+  const [bookingsAnalytics, setBookingsAnalytics] = useState({ last12Months: [], total: 0 });
   const [loading, setLoading] = useState(false);
   const [latestUsers, setLatestUsers] = useState([]);
   const [recentPackages, setRecentPackages] = useState([]);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [revenue, setRevenue] = useState({ daily: 0, weekly: 0, monthly: 0, yearly: 0 });
+  const [allUsers, setAllUsers] = useState([]);
+  const [allPackages, setAllPackages] = useState([]);
 
   const initials = (name = "") => {
     const parts = String(name).trim().split(/\s+/);
@@ -75,6 +80,18 @@ const AdminDashboard = () => {
           last12Months: pData.last12MonthsData || [],
           total: pData.total ?? 0,
         });
+
+        // Bookings
+        const { data: bookingsData } = await axios.get(`${API_URL}/analytics/bookings`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        if (!mounted) return;
+        const bData = bookingsData?.data || {};
+        setBookingsAnalytics({
+          last12Months: bData.last12MonthsData || [],
+          total: bData.total ?? 0,
+        });
       } catch (err) {
         toast.error(err?.response?.data?.message || err?.message || "Failed to fetch analytics");
       } finally {
@@ -92,7 +109,8 @@ const AdminDashboard = () => {
         });
         const list = data?.users || data?.data || [];
         setLatestUsers(list.slice(0, 5));
-      } catch (_) {}
+        setAllUsers(list);
+      } catch (_) { }
     };
 
     const fetchRecentPackages = async () => {
@@ -106,12 +124,66 @@ const AdminDashboard = () => {
         const list = Array.isArray(data?.packages) ? data.packages : data?.data?.packages || [];
         const sortByDate = (x) => new Date(x?.updatedAt || x?.createdAt || 0).getTime();
         setRecentPackages([...list].sort((a, b) => sortByDate(b) - sortByDate(a)).slice(0, 5));
-      } catch (_) {}
+        setAllPackages(list);
+      } catch (_) { }
+    };
+
+    const fetchRecentBookings = async () => {
+      if (!API_URL) return;
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        const { data } = await axios.get(`${API_URL}/bookings`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        const bookings = data?.bookings || data?.data || [];
+        // Build lookup maps for email and package price/title
+        const userById = new Map(allUsers.map(u => [String(u._id || u.id), u]));
+        const packageById = new Map(allPackages.map(p => [String(p._id || p.id), p]));
+
+        // Enrich bookings
+        const enriched = bookings.map(b => {
+          const u = userById.get(String(b.userId));
+          const p = packageById.get(String(b.packageId));
+          const price = Number(p?.price || 0);
+          return {
+            ...b,
+            userEmail: u?.email || '',
+            packageTitle: p?.title || '',
+            amount: isNaN(price) ? 0 : price,
+          };
+        });
+
+        // Sort by createdAt desc and take last 5
+        const sorted = enriched.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        setRecentBookings(sorted.slice(0, 5));
+
+        // Compute revenue totals
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startOfWeek = new Date(startOfDay); startOfWeek.setDate(startOfWeek.getDate() - 6); // last 7 days
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+        const sum = (from) => enriched.reduce((acc, b) => {
+          const t = new Date(b.createdAt || 0);
+          return acc + (t >= from ? (b.amount || 0) : 0);
+        }, 0);
+
+        setRevenue({
+          daily: sum(startOfDay),
+          weekly: sum(startOfWeek),
+          monthly: sum(startOfMonth),
+          yearly: sum(startOfYear),
+        });
+      } catch (_) { }
     };
 
     fetchAnalytics();
     fetchLatestUsers();
     fetchRecentPackages();
+    // fetch bookings after lookups
+    setTimeout(fetchRecentBookings, 0);
 
     return () => {
       mounted = false;
@@ -141,6 +213,17 @@ const AdminDashboard = () => {
   }), [packageAnalytics.last12Months]);
   const userTrend = useMemo(() => calculateTrend(userSeries), [userSeries]);
   const packageTrend = useMemo(() => calculateTrend(packageSeries), [packageSeries]);
+  const bookingsSeries = useMemo(() => (bookingsAnalytics.last12Months || []).map((x) => {
+    const value = Number(x?.value ?? x?.count ?? 0);
+    let label = x?.label;
+    if (!label && x?.month) {
+      const [y, m] = String(x.month).split("-");
+      const dt = new Date(Number(y), Number(m) - 1, 1);
+      label = dt.toLocaleString(undefined, { month: "short" });
+    }
+    return { label: label ?? "", value };
+  }), [bookingsAnalytics.last12Months]);
+  const bookingsTrend = useMemo(() => calculateTrend(bookingsSeries), [bookingsSeries]);
 
   return (
     <div className="space-y-6">
@@ -151,9 +234,21 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard label="Total Users" value={loading ? "..." : userAnalytics.total} trend={userTrend} />
         <StatCard label="Total Packages" value={loading ? "..." : packageAnalytics.total} trend={packageTrend} />
+        <StatCard label="Total Bookings" value={loading ? "..." : bookingsAnalytics.total} trend={bookingsTrend} />
+      </div>
+
+      {/* Revenue breakdown */}
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Revenue Overview</h2>
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="Today" value={`₹${Number(revenue.daily).toLocaleString('en-IN')}`} />
+          <StatCard label="Last 7 Days" value={`₹${Number(revenue.weekly).toLocaleString('en-IN')}`} />
+          <StatCard label="This Month" value={`₹${Number(revenue.monthly).toLocaleString('en-IN')}`} />
+          <StatCard label="This Year" value={`₹${Number(revenue.yearly).toLocaleString('en-IN')}`} />
+        </div>
       </div>
 
       {/* Users Table */}
@@ -220,6 +315,40 @@ const AdminDashboard = () => {
                     <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{p.destination || '-'}</td>
                     <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{p.duration ?? p.days ?? 0} days</td>
                     <td className="px-4 py-2 text-gray-600 dark:text-gray-400">₹{Number(p.price || 0).toLocaleString('en-IN')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Recent Bookings */}
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Recent Bookings</h2>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">Latest 5 bookings</p>
+        {recentBookings.length === 0 ? (
+          <p className="text-sm text-gray-600 dark:text-gray-400">No bookings yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm text-left border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+              <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                <tr>
+                  <th className="px-4 py-2">Booking</th>
+                  <th className="px-4 py-2">User (Email)</th>
+                  <th className="px-4 py-2">Package</th>
+                  <th className="px-4 py-2">Amount</th>
+                  <th className="px-4 py-2">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {recentBookings.map((b) => (
+                  <tr key={b._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="px-4 py-2 text-gray-900 dark:text-white">{String(b._id).slice(0, 8)}…</td>
+                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{b.userEmail || '-'}</td>
+                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{b.packageTitle || '-'}</td>
+                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">₹{Number(b.amount || 0).toLocaleString('en-IN')}</td>
+                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{b.createdAt ? new Date(b.createdAt).toLocaleString() : '-'}</td>
                   </tr>
                 ))}
               </tbody>

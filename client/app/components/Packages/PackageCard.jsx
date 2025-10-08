@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import WishlistButton from "../Wishlist/WishlistButton";
 
 export default function PackageCard({ pkg, loading }) {
   const imgSrc = pkg?.images?.url || pkg?.image ||
@@ -17,9 +18,19 @@ export default function PackageCard({ pkg, loading }) {
         {loading ? (
           <div className="w-full h-full animate-pulse bg-gray-200 dark:bg-gray-700" />
         ) : (
-          <Link href={`/packages/${pkg?.slug || pkg?.id || pkg?._id || "item"}`} className="block h-full">
-            <img src={imgSrc} alt={pkg?.title || "Package"} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" draggable={false} />
-          </Link>
+          <>
+            <Link href={`/packages/${pkg?.slug || pkg?.id || pkg?._id || "item"}`} className="block h-full">
+              <img src={imgSrc} alt={pkg?.title || "Package"} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" draggable={false} />
+            </Link>
+            {/* Wishlist Button */}
+            <div className="absolute top-3 right-3">
+              <WishlistButton 
+                packageId={pkg?._id || pkg?.id} 
+                size="sm"
+                variant="default"
+              />
+            </div>
+          </>
         )}
       </div>
       <div className="p-4">

@@ -147,7 +147,7 @@ const UpdateAvatar = ({ avatarUrl = null, disabled = false, onChange, onRemove, 
                         type="button"
                         onClick={handleSubmit}
                         disabled={disabled || uploading || !inputRef.current || !inputRef.current.files?.length}
-                        className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm bg-rose-600 text-white hover:bg-rose-700 ${
+                        className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm bg-sky-600 text-white hover:bg-sky-700 ${
                             disabled || uploading || !inputRef.current || !inputRef.current.files?.length ? "opacity-60 cursor-not-allowed" : ""
                           }`}
                     >

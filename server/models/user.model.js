@@ -59,6 +59,40 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  // Track packages booked by the user
+  packages: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Package',
+      }
+    ],
+    default: [],
+  },
+  // User preferences and settings
+  preferences: {
+    currency: {
+      type: String,
+      default: 'USD'
+    },
+    language: {
+      type: String,
+      default: 'en'
+    },
+    notifications: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false },
+      push: { type: Boolean, default: true }
+    }
+  },
+  // User statistics
+  stats: {
+    totalBookings: { type: Number, default: 0 },
+    totalSpent: { type: Number, default: 0 },
+    favoriteDestinations: [String],
+    lastBookingDate: Date,
+    wishlistCount: { type: Number, default: 0 }
+  },
   createdAt: {
     type: Date,
     default: Date.now,

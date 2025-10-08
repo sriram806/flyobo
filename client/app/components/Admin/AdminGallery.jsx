@@ -32,7 +32,6 @@ export default function AdminGallery() {
   const [tags, setTags] = useState("");
   const [editId, setEditId] = useState(null);
 
-  // Ensure pasting into the Image URL field works reliably across browsers
   const handleImagePaste = (e) => {
     try {
       const text = e.clipboardData?.getData("text") || window.clipboardData?.getData("Text") || "";
@@ -41,7 +40,7 @@ export default function AdminGallery() {
         setImage(text.trim());
       }
     } catch (err) {
-      // Fallback: let default paste behavior occur
+
     }
   };
 
@@ -281,7 +280,6 @@ export default function AdminGallery() {
                 items.map((it) => (
                   <tr key={it._id} className="border-t border-gray-100 dark:border-gray-800">
                     <td className="border px-3 py-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={it.image}
                         alt={it.title}

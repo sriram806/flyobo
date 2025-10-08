@@ -36,6 +36,8 @@ const Login = ({ setRoute, setOpen }) => {
             const base = API_URL.replace(/\/$/, "");
             const endpoint = `${base}/auth/login`;
 
+            console.log('🔐 Attempting login to:', endpoint);
+
             const { data } = await axios.post(
                 endpoint,
                 { email, password, remember },
@@ -47,14 +49,19 @@ const Login = ({ setRoute, setOpen }) => {
                 }
             );
 
-            // Store token if provided (fallback method)
+            console.log('✅ Login response:', { hasToken: !!data?.token, hasUser: !!data?.user || !!data?.data?.user });
+
+            // Store token using improved method
             const token = data?.token;
             if (token) {
                 try {
+                    // Store in multiple places for reliability
                     localStorage.setItem('auth_token', token);
+                    sessionStorage.setItem('auth_token', token);
                     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                    console.log('🎫 Token stored successfully');
                 } catch (tokenError) {
-                    console.warn('Failed to store token:', tokenError);
+                    console.warn('⚠️ Failed to store token:', tokenError);
                 }
             }
 
@@ -72,7 +79,7 @@ const Login = ({ setRoute, setOpen }) => {
                 setOpen(false);
             }
             
-            toast.success(data?.message || "Signed in successfully.");
+            toast.success(data?.message || "Signed in successfully!");
         } catch (err) {
             console.error('Login error:', err);
             

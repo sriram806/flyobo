@@ -110,7 +110,7 @@ export default function EditProfilePage() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-rose-500"
+                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
                       placeholder="Your name"
                     />
                   </div>
@@ -122,7 +122,7 @@ export default function EditProfilePage() {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-rose-500"
+                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
                       placeholder="+1 555 123 4567"
                     />
                   </div>
@@ -134,7 +134,7 @@ export default function EditProfilePage() {
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={4}
-                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-rose-500"
+                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
                       placeholder="Tell us about yourself"
                     />
                   </div>
@@ -148,7 +148,7 @@ export default function EditProfilePage() {
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-2 rounded-lg bg-rose-600 text-white px-4 py-2 text-sm hover:bg-rose-700"
+                      className="inline-flex items-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2 text-sm hover:bg-sky-700"
                     >
                       Save Changes
                     </button>

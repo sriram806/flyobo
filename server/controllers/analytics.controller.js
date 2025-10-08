@@ -1,3 +1,4 @@
+import Booking from "../models/bookings.model.js";
 import Package from "../models/package.model.js";
 import User from "../models/user.model.js";
 import { generateLast12MonthsData } from "../services/analytics.services.js";
@@ -6,7 +7,6 @@ export const getUserAnalytics = async (req, res) => {
   try {
     const last12MonthsData = await generateLast12MonthsData(User, { filter: { status: "active" } });
 
-    // Total users count
     const totalUsers = await User.countDocuments();
 
     res.status(200).json({
@@ -42,6 +42,29 @@ export const getPackageAnalytics = async (req, res) => {
     });
   } catch (error) {
     console.error("Error generating package analytics:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getBookingsAnalytics = async (req, res) => {
+  try {
+    const last12MonthsData = await generateLast12MonthsData(Booking, { filter: { status: "active" } });
+
+    const totalBookings = await Booking.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      message: "Bookings analytics fetched successfully",
+      data: {
+        last12MonthsData: last12MonthsData.last12Months,
+        total: totalBookings,
+      },
+    });
+  } catch (error) {
+    console.error("Error generating bookings analytics:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

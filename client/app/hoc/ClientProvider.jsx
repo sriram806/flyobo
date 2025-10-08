@@ -5,12 +5,12 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/redux/store";
 import Loading from "@/app/components/LoadingScreen/Loading";
-import { initializeAuth } from "@/app/utils/auth";
+import authManager from "@/app/utils/auth-manager";
 
 const ClientProvider = ({ children }) => {
     useEffect(() => {
-        // Initialize authentication utilities
-        initializeAuth();
+        // Initialize authentication manager
+        authManager.init();
     }, []);
 
     return (

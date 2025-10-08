@@ -16,6 +16,9 @@ import analyticsRoute from './routes/analytics.route.js';
 import packageRouter from './routes/package.route.js';
 import layoutRoute from './routes/layout.route.js';
 import galleryRoute from './routes/gallery.route.js';
+import notificationRoute from './routes/notification.route.js';
+import bookingsRouter from './routes/bookings.route.js';
+import wishlistRoute from './routes/wishlist.route.js';
 
 const app = express();
 connecttoDatabase();
@@ -32,31 +35,47 @@ cloudinary.config({
   api_secret: CLOUD_SECRET_KEY
 });
 
-// CORS
+// CORS Configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
+  'http://localhost:3001',
   'https://flyobo.onrender.com',
-  'https://flyobo.vercel.app'
+  'https://flyobo.vercel.app',
+  'https://www.flyobo.com',
+  'https://flyobo.com'
 ];
-// add env-provided origins if present
+
+// Add env-provided origins if present
 for (const extra of [FRONTEND_URL, ORIGIN]) {
   if (extra && !allowedOrigins.includes(extra)) {
     allowedOrigins.push(extra);
   }
 }
 
+console.log('🌐 CORS allowed origins:', allowedOrigins);
+
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, postman, etc.)
+    // or if origin is in allowed list
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn('❌ CORS blocked origin:', origin);
+      callback(new Error(`Origin ${origin} not allowed by CORS policy`));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
   credentials: true,
+  optionsSuccessStatus: 200 // Support legacy browsers
 }));
 app.options('*', cors());
 
@@ -138,6 +157,9 @@ app.use('/api/v1/package', packageRouter);
 app.use('/api/v1/analytics', analyticsRoute);
 app.use('/api/v1/layout', layoutRoute);
 app.use('/api/v1/gallery', galleryRoute);
+app.use('/api/v1/bookings', bookingsRouter);
+app.use('/api/v1/wishlist', wishlistRoute);
+app.use('/api/v1/notification', notificationRoute);
 
 
 

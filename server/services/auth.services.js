@@ -25,30 +25,44 @@ export const signToken = (id) => {
 
 export const createSendToken = (user, statusCode, res, message) => {
     const token = signToken(user._id);
+    
+    // Enhanced cookie options for better compatibility
     const cookieOptions = {
         httpOnly: true,
-        secure: NODE_ENV === "production",
-        sameSite: NODE_ENV === "production" ? "none" : "lax",
+        secure: NODE_ENV === "production", // Only use secure in production
+        sameSite: NODE_ENV === "production" ? "none" : "lax", // "none" for cross-origin in production
         maxAge: parseExpiryToMs(JWT_EXPIRES_IN),
         path: '/',
-        domain: NODE_ENV === "production" ? undefined : undefined // Let browser handle domain
+        // Don't set domain in production - let browser handle it
     };
+    
+    console.log('🍪 Setting cookie with options:', {
+        ...cookieOptions,
+        token: token ? `${token.substring(0, 20)}...` : 'NONE'
+    });
     
     // Set cookie
     res.cookie("token", token, cookieOptions);
     
     // Clean user data
-    user.password = undefined;
-    user.otp = undefined;
-    user.resetPasswordOtp = undefined;
-    user.resetPasswordOtpExpireAt = undefined;
+    const safeUser = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isAccountVerified: user.isAccountVerified,
+        avatar: user.avatar,
+        createdAt: user.createdAt
+    };
+    
+    console.log('✅ Token created successfully for user:', user.email);
     
     res.status(statusCode).json({
         success: true,
         message: message,
-        token,
+        token, // Include token in response for client-side storage
         data: {
-            user
+            user: safeUser
         }
     });
 }
