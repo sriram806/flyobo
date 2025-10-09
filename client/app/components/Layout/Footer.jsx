@@ -58,7 +58,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2"><FiMapPin className="mt-0.5" /> Visakhapatnam<br />Andhra Pradesh, India - 530044</li>
               <li className="flex items-center gap-2"><FiPhone /> +91 92912 37399</li>
-              <li className="flex items-center gap-2"><FiMail /> wecare@flyobo.com</li>
+              <li className="flex items-center gap-2"><FiMail /> team.flyobo@gmail.com</li>
             </ul>
           </div>
         </div>
