@@ -8,7 +8,7 @@ import TopDestinations from './components/Home/TopDestinations';
 import BoldShowcase from './components/Home/BoldShowcase';
 import Newsletter from './components/Home/Newsletter';
 import Footer from './components/Layout/Footer';
-import ThemeTest from './components/ThemeTest';
+import WhatsApp from './components/styles/whatsapp';
 
 const Home = () => {
   const [open, setOpen] = useState(false);
@@ -35,7 +35,7 @@ const Home = () => {
       <BoldShowcase />
       <Newsletter />
       <Footer />
-      <ThemeTest />
+      <WhatsApp />
     </div>
   );
 };

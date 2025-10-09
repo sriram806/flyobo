@@ -4,85 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Your Flyobo Travel Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #f4f4f4;
             margin: 0;
-            padding: 30px;
+            padding: 32px;
+            color: #333;
         }
         .container {
             max-width: 600px;
             margin: auto;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
             overflow: hidden;
         }
         .header {
-            background-color: #4B0082;
+            background: linear-gradient(90deg, #4B0082, #00b4d8);
             color: #fff;
-            padding: 25px 30px;
+            padding: 36px 24px;
+            text-align: center;
         }
         .header h1 {
             margin: 0;
-            font-size: 26px;
+            font-size: 28px;
+        }
+        .header span {
+            color: #FFD700;
         }
         .header p {
-            margin: 5px 0 0;
+            margin: 8px 0 0;
             font-size: 16px;
         }
         .content {
-            padding: 30px;
+            padding: 36px 24px;
+            line-height: 1.7;
+        }
+        .content p {
+            margin-bottom: 18px;
+            font-size: 16px;
         }
         .otp-container {
             text-align: center;
-            margin: 30px 0;
+            margin: 32px 0;
         }
         .otp-code {
             display: inline-block;
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 6px;
             color: #4B0082;
             background: #f0f0f0;
-            padding: 14px 28px;
-            border-radius: 8px;
+            padding: 16px 32px;
+            border-radius: 12px;
             border: 2px dashed #4B0082;
         }
+        .cta-btn {
+            display: inline-block;
+            background-color: #4B0082;
+            color: #fff;
+            text-decoration: none;
+            padding: 14px 36px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(75, 0, 130, 0.3);
+            transition: all 0.3s ease;
+        }
+        .cta-btn:hover {
+            background-color: #3a0075;
+            transform: translateY(-2px);
+        }
         .warning {
-            font-size: 16px;
+            font-size: 14px;
             color: #555;
+            text-align: center;
+            margin-top: 16px;
         }
         .footer {
             background-color: #f1f1f1;
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             font-size: 13px;
             color: #777;
+            margin-top: 32px;
+        }
+        @media (max-width: 600px) {
+            .otp-code {
+                font-size: 28px;
+                padding: 12px 24px;
+                letter-spacing: 4px;
+            }
+            .cta-btn {
+                padding: 12px 24px;
+                font-size: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Welcome to <span style="color: #FFD700;">Flyobo Travel</span>!</h1>
+            <h1>Welcome to <span>Flyobo Travel</span>!</h1>
             <p>Let's get your account verified.</p>
         </div>
+
         <div class="content">
-            <p style="font-size: 18px; margin-bottom: 16px;">Hello <strong><%= name %></strong>,</p>
-            <p style="font-size: 16px; margin-bottom: 16px;">To complete your registration and secure your account, please use the One-Time Password (OTP) below:</p>
+            <p>Hello <strong><%= name %></strong>,</p>
+            <p>To complete your registration and secure your account, please use the One-Time Password (OTP) below:</p>
             
             <div class="otp-container">
                 <span class="otp-code"><%= otp %></span>
             </div>
 
+            <div style="text-align:center;">
+                <a href="https://flyobo.com/verify?email=<%= encodeURIComponent(email) %>&otp=<%= otp %>" class="cta-btn">Verify Account</a>
+            </div>
+
             <p class="warning">⚠️ This OTP is valid for <strong>10 minutes</strong>. Please do not share it with anyone.</p>
-            <p style="margin-top: 30px;">Need help? Feel free to reply to this email or contact our support team.</p>
-            <p style="margin-top: 40px;">With gratitude,<br/><strong>The Flyobo Travel Team</strong></p>
+
+            <p>If you need help, feel free to reply to this email or contact our support team.</p>
+
+            <p style="margin-top: 32px;">With gratitude,<br/><strong>The Flyobo Travel Team</strong></p>
         </div>
+
         <div class="footer">
             © <%= new Date().getFullYear() %> Flyobo Travel. All rights reserved.
         </div>
     </div>
 </body>
-</html> 
+</html>

@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import WishlistButton from "../Wishlist/WishlistButton";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
 export default function PackageCard({ pkg, loading }) {
   const imgSrc = pkg?.images?.url || pkg?.image ||
@@ -10,6 +13,76 @@ export default function PackageCard({ pkg, loading }) {
   const originalPrice = Number(pkg?.estimatedPrice || 0);
   const hasDiscount = originalPrice > currentPrice && currentPrice > 0;
   const discountPct = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
+
+  // Favourites integration (using user routes)
+  const [isFav, setIsFav] = useState(false);
+  const [favBusy, setFavBusy] = useState(false);
+  const packageId = pkg?._id || pkg?.id || pkg?.slug;
+  const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  const getAuthConfig = () => {
+    if (typeof window === "undefined") return { withCredentials: true };
+    const token = localStorage.getItem("auth_token") || localStorage.getItem("token");
+    const cfg = { withCredentials: true };
+    if (token) cfg.headers = { Authorization: `Bearer ${token}` };
+    return cfg;
+  };
+
+  const fetchIsFavourite = async () => {
+    if (!API_URL || !packageId) return false;
+    try {
+      const { data } = await axios.get(`${API_URL}/user/profile`, getAuthConfig());
+      const user = data?.user;
+      const favA = user?.favoritePackages || user?.favouritePackages || [];
+      return favA.some((id) => String(id) === String(packageId));
+    } catch {
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    async function initFav() {
+      if (!packageId) return;
+      const inFav = await fetchIsFavourite();
+      if (active) setIsFav(Boolean(inFav));
+    }
+    initFav();
+    return () => {
+      active = false;
+    };
+  }, [packageId]);
+
+  const onToggleFav = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (!packageId || favBusy) return;
+    setFavBusy(true);
+    // optimistic update
+    setIsFav((v) => !v);
+    let ok = false;
+    try {
+      if (!API_URL) throw new Error("Missing API URL");
+      if (isFav) {
+        await axios.delete(`${API_URL}/user/favourite-packages/${packageId}`, {
+          ...getAuthConfig(),
+          data: { packageId }
+        });
+        ok = true;
+      } else {
+        await axios.put(
+          `${API_URL}/user/favourite-packages`,
+          { packageId },
+          getAuthConfig()
+        );
+        ok = true;
+      }
+    } catch (err) {
+      ok = false;
+    }
+    if (!ok) setIsFav((v) => !v);
+    setFavBusy(false);
+  };
   return (
     <article
       className="group relative overflow-hidden rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm"
@@ -24,11 +97,25 @@ export default function PackageCard({ pkg, loading }) {
             </Link>
             {/* Wishlist Button */}
             <div className="absolute top-3 right-3">
-              <WishlistButton 
-                packageId={pkg?._id || pkg?.id} 
-                size="sm"
-                variant="default"
-              />
+              <button
+                type="button"
+                onClick={onToggleFav}
+                disabled={favBusy}
+                aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+                title={isFav ? "Remove from favourites" : "Add to favourites"}
+                className={`inline-flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-colors ${
+                  isFav
+                    ? "bg-rose-600 text-white hover:bg-rose-700"
+                    : "bg-white/90 text-gray-700 hover:bg-white dark:bg-gray-900/80 dark:text-gray-200 dark:hover:bg-gray-900"
+                } ${favBusy ? "opacity-70 cursor-not-allowed" : ""}`}
+              >
+                {/* Heart Icon via react-icons */}
+                {isFav ? (
+                  <AiFillHeart className="w-5 h-5" />
+                ) : (
+                  <AiOutlineHeart className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </>
         )}
@@ -86,3 +173,4 @@ export default function PackageCard({ pkg, loading }) {
     </article>
   );
 }
+

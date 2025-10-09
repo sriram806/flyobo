@@ -6,9 +6,34 @@ import Package from "../models/package.model.js";
 import { getAllBookingsServices, newBooking } from "../services/booking.services.js";
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 
+// Helper: compute total amount with add-ons and discounts
+const computeTotals = (basePrice, travelers = 1, addOns = [], discount) => {
+    const travelersCount = Math.max(1, Number(travelers) || 1);
+    const addOnsTotal = Array.isArray(addOns)
+        ? addOns.reduce((sum, a) => sum + (Number(a?.price) || 0) * (Number(a?.quantity) || 1), 0)
+        : 0;
+    const subtotal = (Number(basePrice) || 0) * travelersCount + addOnsTotal;
+    let total = subtotal;
+    if (discount) {
+        const amountOff = Number(discount.amount) || 0;
+        const pctOff = Number(discount.percentage) || 0;
+        total = subtotal - amountOff - (pctOff > 0 ? (subtotal * pctOff) / 100 : 0);
+    }
+    return Math.max(0, Math.round(total));
+};
+
 export const createBooking = async (req, res) => {
     try {
-        const { packageId, payment_info } = req.body;
+        const {
+            packageId,
+            travelers,
+            startDate,
+            endDate,
+            customerInfo,
+            addOns,
+            discountApplied,
+            payment_info,
+        } = req.body;
 
         const user = await User.findById(req.user._id);
         const PackageExistInUser = user.packages.some((pkg) => pkg._id.toString() === packageId);
@@ -26,10 +51,37 @@ export const createBooking = async (req, res) => {
                 message: "Package not Found!"
             });
         }
+        // Basic validations
+        if (!travelers || !startDate || !customerInfo?.name || !customerInfo?.email || !customerInfo?.phone) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields: travelers, startDate, customerInfo(name,email,phone)"
+            });
+        }
+
+        const totalAmount = computeTotals(pkg.price, travelers, addOns, discountApplied);
+        const normalizedPayment = {
+            amount: Number(payment_info?.amount) || totalAmount,
+            currency: payment_info?.currency || 'INR',
+            method: payment_info?.method || 'card',
+            status: payment_info?.status || 'pending',
+            transactionId: payment_info?.transactionId,
+            paidAt: payment_info?.paidAt,
+        };
+
         const data = {
             packageId: pkg._id,
             userId: user._id,
-            payment_info
+            travelers: Number(travelers),
+            startDate: new Date(startDate),
+            endDate: endDate ? new Date(endDate) : undefined,
+            customerInfo,
+            addOns: Array.isArray(addOns) ? addOns : [],
+            discountApplied: discountApplied || undefined,
+            totalAmount,
+            payment_info: normalizedPayment,
+            source: 'website',
+            status: 'pending',
         };
 
         const booking = await newBooking(data, req, res);
@@ -85,9 +137,21 @@ export const getAllBookings = async (req, res) => {
 
 export const adminCreateBooking = async (req, res) => {
     try {
-        const { userId, packageId, payment_info } = req.body;
-        if (!userId || !packageId) {
-            return res.status(400).json({ success: false, message: "userId and packageId are required" });
+        const {
+            userId,
+            packageId,
+            travelers,
+            startDate,
+            endDate,
+            customerInfo,
+            addOns,
+            discountApplied,
+            payment_info,
+            source,
+            status,
+        } = req.body;
+        if (!userId || !packageId || !travelers || !startDate || !customerInfo?.name || !customerInfo?.email || !customerInfo?.phone) {
+            return res.status(400).json({ success: false, message: "Missing required fields: userId, packageId, travelers, startDate, customerInfo(name,email,phone)" });
         }
 
         const user = await User.findById(userId);
@@ -101,7 +165,30 @@ export const adminCreateBooking = async (req, res) => {
             return res.status(400).json({ success: false, message: "User already has this package" });
         }
 
-        const data = { packageId: pkg._id, userId: user._id, payment_info };
+        const totalAmount = computeTotals(pkg.price, travelers, addOns, discountApplied);
+        const normalizedPayment = {
+            amount: Number(payment_info?.amount) || totalAmount,
+            currency: payment_info?.currency || 'INR',
+            method: payment_info?.method || 'cash', // default offline
+            status: payment_info?.status || 'pending',
+            transactionId: payment_info?.transactionId,
+            paidAt: payment_info?.paidAt,
+        };
+
+        const data = {
+            packageId: pkg._id,
+            userId: user._id,
+            travelers: Number(travelers),
+            startDate: new Date(startDate),
+            endDate: endDate ? new Date(endDate) : undefined,
+            customerInfo,
+            addOns: Array.isArray(addOns) ? addOns : [],
+            discountApplied: discountApplied || undefined,
+            totalAmount,
+            payment_info: normalizedPayment,
+            source: source || 'agent',
+            status: status || 'pending',
+        };
         const booking = await newBooking(data, req, res);
 
         await Notification.create({

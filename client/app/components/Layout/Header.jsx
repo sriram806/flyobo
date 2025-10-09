@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import ThemeSwitcher from "../../utils/ThemeSwitcher";
-import { HiOutlineMenuAlt3, HiOutlineUserCircle } from "react-icons/hi";
+import { HiOutlineMenuAlt3, HiOutlineUserCircle, HiOutlineBell } from "react-icons/hi";
 import CustomModel from "../../utils/Models/CustomModel";
 import Login from "../../utils/Models/Auth/Login";
 import SignUp from "../../utils/Models/Auth/SignUp";
@@ -16,12 +16,17 @@ import ForgetPassword from "../../utils/Models/User/ForgetPassword";
 import ResetPassword from "../../utils/Models/User/ResetPassword";
 import Navitems from "../Navbar/Navitems";
 import UserMenu from "../Navbar/UserMenu";
+import axios from "axios";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 
 
 const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
     const user = useSelector((state) => state?.auth?.user);
     const dispatch = useDispatch();
     const [openSidebar, setOpenSidebar] = useState(false);
+    const [openNotif, setOpenNotif] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [loadingNotif, setLoadingNotif] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -33,6 +38,53 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const unreadCount = notifications?.filter((n) => n?.status !== 'read')?.length || 0;
+
+    const fetchNotifications = async () => {
+        if (!API_URL) return;
+        try {
+            setLoadingNotif(true);
+            const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+            const { data } = await axios.get(`${API_URL}/notification`, {
+                withCredentials: true,
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+            if (data?.success && Array.isArray(data.notifications)) {
+                setNotifications(data.notifications);
+            }
+        } catch (err) {
+            // show toast only if dropdown is open to avoid noise
+            if (openNotif) toast.error(err?.response?.data?.message || 'Failed to load notifications');
+        } finally {
+            setLoadingNotif(false);
+        }
+    };
+
+    const markAsRead = async (id) => {
+        if (!API_URL || !id) return;
+        try {
+            const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+            const { data } = await axios.put(`${API_URL}/notification/${id}`, {}, {
+                withCredentials: true,
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+            if (data?.success && Array.isArray(data.notifications)) {
+                setNotifications(data.notifications);
+            }
+        } catch (err) {
+            toast.error(err?.response?.data?.message || 'Failed to update notification');
+        }
+    };
+
+    useEffect(() => {
+        if (openNotif) {
+            fetchNotifications();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [openNotif]);
 
     const handleClose = (e) => {
         if (e.target.id === "screen") {
@@ -55,6 +107,55 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                             <div className="flex">
                                 <ThemeSwitcher />
                             </div>
+                            {/* Notifications */}
+                            {user && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setOpenNotif((v) => !v)}
+                                        className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        aria-label="Notifications"
+                                    >
+                                        <HiOutlineBell size={22} className="text-gray-900 dark:text-white" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] flex items-center justify-center">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
+                                    {openNotif && (
+                                        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl z-[1200]">
+                                            <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                                <span className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</span>
+                                                {loadingNotif && <span className="text-xs text-gray-500">Loading...</span>}
+                                            </div>
+                                            <ul className="divide-y divide-gray-200 dark:divide-gray-800">
+                                                {notifications?.length === 0 && (
+                                                    <li className="p-4 text-sm text-gray-600 dark:text-gray-400">No notifications</li>
+                                                )}
+                                                {notifications?.map((n) => (
+                                                    <li key={n?._id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                                        <div className="flex items-start gap-3">
+                                                            <div className={`mt-1 w-2 h-2 rounded-full ${n?.status === 'read' ? 'bg-gray-300 dark:bg-gray-600' : 'bg-emerald-500'}`}></div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={n?.title}>{n?.title}</div>
+                                                                <div className="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2" title={n?.message}>{n?.message}</div>
+                                                                {n?.status !== 'read' && (
+                                                                    <button
+                                                                        onClick={() => markAsRead(n?._id)}
+                                                                        className="mt-2 text-xs text-sky-600 hover:text-sky-700 dark:text-sky-400"
+                                                                    >
+                                                                        Mark as read
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             {user ? (
                                 <UserMenu
                                     user={user}
@@ -88,7 +189,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                             <HiOutlineMenuAlt3 size={24} className="text-gray-900 dark:text-white" />
                         </button>
                         <Link href="/" className="flex items-center gap-2">
-                            <span className="text-xl font-extrabold tracking-tight text-rose-600">Flyobo</span>
+                            <Image src={'/images/banner.png'} alt="Flyobo" width={100} height={100} />
                         </Link>
                         <div className="flex items-center gap-2">
                             <ThemeSwitcher />

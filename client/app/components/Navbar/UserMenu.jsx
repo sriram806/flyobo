@@ -98,26 +98,6 @@ export default function UserMenu({ user, onLogout, variant = "desktop" }) {
               Profile
             </button>
             <button
-              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800"
-              role="menuitem"
-              onClick={() => {
-                setOpen(false);
-                router.push("/bookings");
-              }}
-            >
-              My Bookings
-            </button>
-            <button
-              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800"
-              role="menuitem"
-              onClick={() => {
-                setOpen(false);
-                router.push("/wishlist");
-              }}
-            >
-              My Wishlist
-            </button>
-            <button
               className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/20 focus:outline-none focus:bg-rose-50 dark:focus:bg-rose-900/20"
               role="menuitem"
               onClick={() => {

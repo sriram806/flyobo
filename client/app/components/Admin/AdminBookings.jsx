@@ -21,7 +21,16 @@ export default function AdminBookings() {
   // selection by email/title for creation
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newPackageTitle, setNewPackageTitle] = useState("");
-  const [newPaymentStatus, setNewPaymentStatus] = useState("");
+  const [newPaymentStatus, setNewPaymentStatus] = useState("pending");
+  const [newPaymentMethod, setNewPaymentMethod] = useState("cash");
+
+  // required booking fields
+  const [newTravelers, setNewTravelers] = useState(1);
+  const [newStartDate, setNewStartDate] = useState("");
+  const [newEndDate, setNewEndDate] = useState("");
+  const [custName, setCustName] = useState("");
+  const [custEmail, setCustEmail] = useState("");
+  const [custPhone, setCustPhone] = useState("");
 
   // lookup data
   const [users, setUsers] = useState([]); // { _id, email, name }
@@ -120,6 +129,11 @@ export default function AdminBookings() {
       toast.error("Email and Package title are required");
       return;
     }
+    // required by server
+    if (!newTravelers || !newStartDate || !custName || !custEmail || !custPhone) {
+      toast.error("Travelers, Start date, and Customer name/email/phone are required");
+      return;
+    }
     // map to ids
     const user = users.find(u => u.email?.toLowerCase() === newUserEmail.trim().toLowerCase());
     const pkg = packages.find(p => p.title?.toLowerCase() === newPackageTitle.trim().toLowerCase());
@@ -132,7 +146,19 @@ export default function AdminBookings() {
       const payload = {
         userId: user._id,
         packageId: pkg._id,
-        payment_info: newPaymentStatus ? { status: newPaymentStatus } : undefined,
+        travelers: Number(newTravelers),
+        startDate: newStartDate,
+        endDate: newEndDate || undefined,
+        customerInfo: {
+          name: custName,
+          email: custEmail,
+          phone: custPhone,
+        },
+        payment_info: {
+          method: newPaymentMethod,
+          status: newPaymentStatus,
+        },
+        source: 'agent',
       };
       const { data } = await axios.post(`${API_URL}/bookings/admin`, payload, {
         withCredentials: true,
@@ -142,7 +168,14 @@ export default function AdminBookings() {
         toast.success("Booking created");
         setNewUserEmail("");
         setNewPackageTitle("");
-        setNewPaymentStatus("");
+        setNewPaymentStatus("pending");
+        setNewPaymentMethod("cash");
+        setNewTravelers(1);
+        setNewStartDate("");
+        setNewEndDate("");
+        setCustName("");
+        setCustEmail("");
+        setCustPhone("");
         setPage(1);
         await load();
       } else {
@@ -185,6 +218,7 @@ export default function AdminBookings() {
 
         {/* Admin create booking */}
         <form onSubmit={createBookingAdmin} className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
+          {/* User email */}
           <div>
             <input
               list="user-emails"
@@ -192,6 +226,7 @@ export default function AdminBookings() {
               value={newUserEmail}
               onChange={(e)=>setNewUserEmail(e.target.value)}
               className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+              required
             />
             <datalist id="user-emails">
               {users.map(u => (
@@ -199,6 +234,7 @@ export default function AdminBookings() {
               ))}
             </datalist>
           </div>
+          {/* Package title */}
           <div>
             <input
               list="package-titles"
@@ -206,6 +242,7 @@ export default function AdminBookings() {
               value={newPackageTitle}
               onChange={(e)=>setNewPackageTitle(e.target.value)}
               className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+              required
             />
             <datalist id="package-titles">
               {packages.map(p => (
@@ -213,12 +250,98 @@ export default function AdminBookings() {
               ))}
             </datalist>
           </div>
-          <input
-            placeholder="Payment status (optional)"
-            value={newPaymentStatus}
-            onChange={(e)=>setNewPaymentStatus(e.target.value)}
-            className="rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
-          />
+          {/* Travelers */}
+          <div>
+            <input
+              type="number"
+              min={1}
+              placeholder="Travelers"
+              value={newTravelers}
+              onChange={(e)=>setNewTravelers(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+              required
+            />
+          </div>
+          {/* Start date */}
+          <div>
+            <input
+              type="date"
+              placeholder="Start date"
+              value={newStartDate}
+              onChange={(e)=>setNewStartDate(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+              required
+            />
+          </div>
+          {/* End date (optional) */}
+          <div>
+            <input
+              type="date"
+              placeholder="End date (optional)"
+              value={newEndDate}
+              onChange={(e)=>setNewEndDate(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+            />
+          </div>
+          {/* Customer name */}
+          <div>
+            <input
+              placeholder="Customer name"
+              value={custName}
+              onChange={(e)=>setCustName(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+              required
+            />
+          </div>
+          {/* Customer email */}
+          <div>
+            <input
+              type="email"
+              placeholder="Customer email"
+              value={custEmail}
+              onChange={(e)=>setCustEmail(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+              required
+            />
+          </div>
+          {/* Customer phone */}
+          <div>
+            <input
+              placeholder="Customer phone"
+              value={custPhone}
+              onChange={(e)=>setCustPhone(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+              required
+            />
+          </div>
+          {/* Payment method */}
+          <div>
+            <select
+              value={newPaymentMethod}
+              onChange={(e)=>setNewPaymentMethod(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+            >
+              <option value="cash">Cash</option>
+              <option value="upi">UPI</option>
+              <option value="other">Other</option>
+              <option value="card">Card</option>
+              <option value="paypal">PayPal</option>
+              <option value="bank_transfer">Bank Transfer</option>
+            </select>
+          </div>
+          {/* Payment status */}
+          <div>
+            <select
+              value={newPaymentStatus}
+              onChange={(e)=>setNewPaymentStatus(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none"
+            >
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="failed">Failed</option>
+              <option value="refunded">Refunded</option>
+            </select>
+          </div>
           <button
             type="submit"
             disabled={creating}

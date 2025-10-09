@@ -18,7 +18,6 @@ import layoutRoute from './routes/layout.route.js';
 import galleryRoute from './routes/gallery.route.js';
 import notificationRoute from './routes/notification.route.js';
 import bookingsRouter from './routes/bookings.route.js';
-import wishlistRoute from './routes/wishlist.route.js';
 
 const app = express();
 connecttoDatabase();
@@ -158,7 +157,6 @@ app.use('/api/v1/analytics', analyticsRoute);
 app.use('/api/v1/layout', layoutRoute);
 app.use('/api/v1/gallery', galleryRoute);
 app.use('/api/v1/bookings', bookingsRouter);
-app.use('/api/v1/wishlist', wishlistRoute);
 app.use('/api/v1/notification', notificationRoute);
 
 

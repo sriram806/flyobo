@@ -21,17 +21,18 @@ export const getNotification = async (req, res) => {
 // Update Notifications
 export const UpdateNotification = async (req, res) => {
     try {
-        const notification = await Notification.findById(req.params.id);
+        const { id } = req.params;
+        const notification = await Notification.findByIdAndUpdate(
+            id,
+            { $set: { status: 'read' } },
+            { new: true }
+        );
         if (!notification) {
-            return res.status(500).json({
+            return res.status(404).json({
                 success: false,
-                message: error
-            })
-        } else {
-            notification.status ? notification.status = 'read' : notification.status;
+                message: 'Notification not found'
+            });
         }
-
-        await notification.save();
 
         const notifications = await Notification.find().sort({ createdAt: -1 });
 
@@ -50,6 +51,6 @@ export const UpdateNotification = async (req, res) => {
 // Delete Notifications
 cron.schedule("0 0 0 * * *", async () => {
     const thirtyDayAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    await Notification.deleteMany({ status: "read", createdAt: { sit: thirtyDayAgo } })
+    await Notification.deleteMany({ status: "read", createdAt: { $lt: thirtyDayAgo } })
     console.log('Delete Read Notifications');
 })

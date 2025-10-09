@@ -7,8 +7,6 @@ export const navItemsData = [
   { name: "Packages", url: "/packages" },
   { name: "About", url: "/about" },
   { name: "Gallery", url: "/gallery" },
-  { name: "Wishlist", url: "/wishlist" },
-  { name: "My Bookings", url: "/bookings" },
   { name: "FAQ", url: "/faq" },
 ];
 
