@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import AdminProtected from "../../hooks/adminProtected";
 import BookingAnalytics from "../../components/Admin/BookingAnalytics";
-import WishlistAnalytics from "../../components/Admin/WishlistAnalytics";
 import { BarChart3, Heart, TrendingUp } from "lucide-react";
 
 export default function AdminAnalyticsPage() {
@@ -15,12 +14,6 @@ export default function AdminAnalyticsPage() {
       name: 'Booking Analytics',
       icon: BarChart3,
       component: BookingAnalytics
-    },
-    {
-      id: 'wishlist',
-      name: 'Wishlist Analytics', 
-      icon: Heart,
-      component: WishlistAnalytics
     }
   ];
 
