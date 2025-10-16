@@ -6,12 +6,10 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@/redux/authSlice";
-import { useRouter } from "next/navigation";
 
 const ProfileSetting = () => {
   const user = useSelector((state) => state?.auth?.user);
   const dispatch = useDispatch();
-  const router = useRouter();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -40,7 +38,7 @@ const ProfileSetting = () => {
 
       await axios.put(
         `${API_URL}/user/change-password`,
-        { currentPassword, newPassword },
+        { oldPassword: currentPassword, newPassword },
         {
           withCredentials: true,
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -77,18 +75,23 @@ const ProfileSetting = () => {
       });
 
       toast.success("Your account has been deleted successfully.");
-      dispatch(logout());
+      
+      // Clear all storage and state
       localStorage.clear();
       sessionStorage.clear();
-
+      
       // Clear cookies
       document.cookie?.split(";").forEach((c) => {
         const eqPos = c.indexOf("=");
         const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
       });
-
-      router.replace("/");
+      
+      // Dispatch logout after clearing storage
+      dispatch(logout());
+      
+      // Force page reload to ensure clean state
+      window.location.href = "/";
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || "Failed to delete account";
       toast.error(msg);

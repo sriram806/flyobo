@@ -22,12 +22,16 @@ const ProfileInfo = () => {
 
   const joinedDate = (() => {
     try {
-      if (!user?.createdAt) return "";
+      if (!user?.createdAt) return "Recently";
       const d = new Date(user.createdAt);
       if (isNaN(d.getTime())) return String(user.createdAt).slice(0, 10);
-      return d.toISOString().slice(0, 10);
+      return d.toLocaleDateString("en-US", { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
     } catch {
-      return "";
+      return "Recently";
     }
   })();
 

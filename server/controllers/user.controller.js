@@ -1,12 +1,12 @@
 import User from '../models/user.model.js';
 import Booking from '../models/bookings.model.js';
-import cloudinary from 'cloudinary';
 import { getAllUsersServices } from '../services/user.services.js';
+import bcrypt from 'bcryptjs';
 
-// Get User Profile
+// 1. Get User Profile
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password -otp -otpExpireAt -resetPasswordOtp -resetPasswordOtpExpireAt').lean();
+    const user = await User.findById(req.user._id).select('-password -otp -otpExpireAt -resetPasswordOtp -resetPasswordOtpExpireAt');
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
@@ -16,7 +16,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// Update User Profile
+// 2. Update User Profile
 export const updateProfile = async (req, res) => {
   try {
     const { name, phone, bio } = req.body;
@@ -30,7 +30,7 @@ export const updateProfile = async (req, res) => {
 
     await user.save();
 
-    const safeUser = await User.findById(req.user._id).select('-password -otp -otpExpireAt -resetPasswordOtp -resetPasswordOtpExpireAt').lean();
+    const safeUser = await User.findById(req.user._id).select('-password -otp -otpExpireAt -resetPasswordOtp -resetPasswordOtpExpireAt');
 
     res.status(200).json({ success: true, message: 'Successfully updated', user: safeUser });
   } catch (error) {
@@ -38,51 +38,11 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// Update User Avatar
-export const updateProfileAvatar = async (req, res) => {
-  try {
-    const { avatar } = req.body;
-
-    if (!avatar) return res.status(400).json({ success: false, message: 'No avatar provided' });
-
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    if (user.avatar?.public_id) {
-      await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-    }
-
-    const uploadResult = await cloudinary.v2.uploader.upload(avatar, {
-      folder: 'avatar',
-      width: 150,
-      crop: 'scale',
-    });
-
-    user.avatar = {
-      public_id: uploadResult.public_id,
-      url: uploadResult.secure_url,
-    };
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Profile picture updated successfully',
-      user,
-    });
-  } catch (error) {
-    console.error('Update avatar error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update profile picture' });
-  }
-};
-
-// Delete User Account
+// 4. Delete User Account
 export const deleteUserAccount = async (req, res) => {
   try {
     const targetId = req.params?.id;
-    const idToDelete =
-      targetId && req.user?.role === 'admin'
-        ? targetId
-        : req.user?._id || req.user?.id;
+    const idToDelete = targetId && req.user?.role === 'admin' ? targetId : req.user?._id || req.user?.id;
 
     if (!idToDelete) {
       return res.status(400).json({ success: false, message: 'User ID is required' });
@@ -97,7 +57,21 @@ export const deleteUserAccount = async (req, res) => {
   }
 };
 
-// Get User's Bookings
+// 5. Get All Users (Admin Only)
+export const getAllUsers = async (req, res) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+
+  try {
+    const users = await getAllUsersServices();
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 6. Get User's Bookings
 export const getUserBookings = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -163,21 +137,34 @@ export const getUserBookings = async (req, res) => {
   }
 };
 
-// Get All Users (Admin Only)
-export const getAllUsers = async (req, res) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Access denied' });
-  }
-
+// 7. Change Password While Logged in
+export const changePassword = async (req, res) => {
   try {
-    const users = await getAllUsersServices();
-    res.status(200).json({ success: true, users });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "Please provide old and new password" });
+    }
 
-// Add Favourite Package
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Old password is incorrect" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Server error during password change" });
+  }
+}
+
+// 8. Add Favourite Package
 export const addFavouritePackage = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -209,11 +196,11 @@ export const addFavouritePackage = async (req, res) => {
   }
 };
 
-// Remove Favourite Package
+// 8. Remove Favourite Package
 export const removeFavouritePackage = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { packageId } = req.body;
+    const packageId = req.params.packageId || req.body.packageId;
 
     if (!packageId) return res.status(400).json({ success: false, message: 'Package ID is required' });
 
@@ -237,6 +224,501 @@ export const removeFavouritePackage = async (req, res) => {
       favoritePackages: user.favoritePackages,
     });
   } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Update User Avatar
+export const updateAvatar = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No avatar file provided' });
+    }
+
+    // Delete old avatar if exists
+    if (user.avatar && user.avatar.includes('/uploads/')) {
+      const { getFilenameFromUrl, deleteFile } = await import('../middleware/multerConfig.js');
+      const oldFilename = getFilenameFromUrl(user.avatar);
+      if (oldFilename) {
+        const path = await import('path');
+        const oldFilePath = path.join(process.cwd(), 'uploads', 'avatars', oldFilename);
+        deleteFile(oldFilePath);
+      }
+    }
+
+    // Set new avatar
+    const { getFileUrl } = await import('../middleware/multerConfig.js');
+    user.avatar = getFileUrl(req, req.file.filename, 'avatars');
+    await user.save();
+
+    const updatedUser = await User.findById(req.user._id).select('-password -otp -otpExpireAt -resetPasswordOtp -resetPasswordOtpExpireAt');
+
+    res.status(200).json({
+      success: true,
+      message: 'Avatar updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Avatar update error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// ===== REFERRAL PROGRAM FUNCTIONS =====
+
+// Get referral information
+export const getReferralInfo = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate('referral.referredUsers.user', 'name email createdAt')
+      .select('referral name email');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const referralStats = {
+      referralCode: user.referral.referralCode,
+      totalReferrals: user.referral.totalReferrals,
+      totalRewards: user.referral.totalRewards,
+      availableRewards: user.referral.availableRewards,
+      referredUsers: user.referral.referredUsers,
+      rewardHistory: user.referral.rewardHistory,
+      referralLink: `${process.env.CLIENT_URL}/register?ref=${user.referral.referralCode}`
+    };
+
+    res.status(200).json({
+      success: true,
+      data: referralStats
+    });
+  } catch (error) {
+    console.error('Get referral info error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Apply referral code during signup
+export const applyReferralCode = async (referralCode, newUserId) => {
+  try {
+    const referrer = await User.findOne({ 'referral.referralCode': referralCode });
+    
+    if (!referrer) {
+      return { success: false, message: 'Invalid referral code' };
+    }
+
+    const newUser = await User.findById(newUserId);
+    if (!newUser) {
+      return { success: false, message: 'New user not found' };
+    }
+
+    // Set referrer for new user
+    newUser.referral.referredBy = referrer._id;
+
+    // Add new user to referrer's referred users
+    referrer.referral.referredUsers.push({
+      user: newUserId,
+      joinedAt: new Date(),
+      rewardAmount: 100, // ₹100 referral bonus
+    });
+
+    referrer.referral.totalReferrals += 1;
+    referrer.referral.availableRewards += 100;
+    referrer.referral.totalRewards += 100;
+
+    // Add reward to referrer's history
+    referrer.referral.rewardHistory.push({
+      type: 'referral_bonus',
+      amount: 100,
+      description: `Referral bonus for inviting ${newUser.name}`,
+      status: 'credited'
+    });
+
+    // Give signup bonus to new user
+    newUser.referral.availableRewards += 50; // ₹50 signup bonus
+    newUser.referral.totalRewards += 50;
+    newUser.referral.rewardHistory.push({
+      type: 'signup_bonus',
+      amount: 50,
+      description: 'Welcome bonus for joining via referral',
+      status: 'credited'
+    });
+
+    await referrer.save();
+    await newUser.save();
+
+    return { success: true, message: 'Referral applied successfully' };
+  } catch (error) {
+    console.error('Apply referral code error:', error);
+    return { success: false, message: 'Error applying referral code' };
+  }
+};
+
+// Redeem rewards
+export const redeemRewards = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid amount' });
+    }
+
+    if (amount > user.referral.availableRewards) {
+      return res.status(400).json({ success: false, message: 'Insufficient rewards balance' });
+    }
+
+    if (amount < 50) {
+      return res.status(400).json({ success: false, message: 'Minimum redemption amount is ₹50' });
+    }
+
+    // Deduct from available rewards
+    user.referral.availableRewards -= amount;
+
+    // Add to reward history
+    user.referral.rewardHistory.push({
+      type: 'booking_bonus',
+      amount: -amount,
+      description: `Redeemed ₹${amount} rewards`,
+      status: 'used'
+    });
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully redeemed ₹${amount}`,
+      availableRewards: user.referral.availableRewards
+    });
+  } catch (error) {
+    console.error('Redeem rewards error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Get referral leaderboard
+export const getReferralLeaderboard = async (req, res) => {
+  try {
+    const leaderboard = await User.find({})
+      .select('name referral.totalReferrals referral.totalRewards avatar')
+      .sort({ 'referral.totalReferrals': -1 })
+      .limit(10);
+
+    const formattedLeaderboard = leaderboard
+      .filter(user => user.referral.totalReferrals > 0)
+      .map((user, index) => ({
+        rank: index + 1,
+        name: user.name,
+        avatar: user.avatar?.url || null,
+        totalReferrals: user.referral.totalReferrals,
+        totalRewards: user.referral.totalRewards
+      }));
+
+    res.status(200).json({
+      success: true,
+      data: formattedLeaderboard
+    });
+  } catch (error) {
+    console.error('Get leaderboard error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Advanced Admin Referral Management Functions
+
+export const getAdminReferralStats = async (req, res) => {
+  try {
+    const { period = '30d' } = req.query;
+    
+    // Calculate date range
+    const now = new Date();
+    let startDate = new Date();
+    
+    switch (period) {
+      case '7d':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case '90d':
+        startDate.setDate(now.getDate() - 90);
+        break;
+      case '1y':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(now.getDate() - 30);
+    }
+
+    const users = await User.find({
+      createdAt: { $gte: startDate }
+    });
+
+    const totalReferrals = users.reduce((sum, user) => sum + user.referral.totalReferrals, 0);
+    const activeReferrers = users.filter(user => user.referral.totalReferrals > 0).length;
+    const totalRewards = users.reduce((sum, user) => sum + user.referral.totalRewards, 0);
+    const totalUsers = users.length;
+    const conversionRate = totalUsers > 0 ? ((totalReferrals / totalUsers) * 100).toFixed(2) : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalReferrals,
+        activeReferrers,
+        totalRewards,
+        conversionRate: parseFloat(conversionRate)
+      }
+    });
+  } catch (error) {
+    console.error('Get admin referral stats error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+export const getAdminRecentReferrals = async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    
+    const users = await User.find({
+      'referral.referredUsers': { $exists: true, $not: { $size: 0 } }
+    })
+    .populate('referral.referredUsers.user', 'name email createdAt')
+    .sort({ 'referral.referredUsers.joinedAt': -1 })
+    .limit(parseInt(limit));
+
+    const recentReferrals = [];
+    
+    users.forEach(user => {
+      user.referral.referredUsers.forEach(referral => {
+        recentReferrals.push({
+          referrerName: user.name,
+          referrerEmail: user.email,
+          refereeName: referral.user?.name,
+          refereeEmail: referral.user?.email,
+          status: referral.conversionStatus || 'pending',
+          reward: referral.rewardAmount,
+          date: referral.joinedAt
+        });
+      });
+    });
+
+    // Sort by date and limit
+    recentReferrals.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    res.status(200).json({
+      success: true,
+      data: recentReferrals.slice(0, parseInt(limit))
+    });
+  } catch (error) {
+    console.error('Get recent referrals error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+export const getAdminReferralUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '', status = 'all' } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    let query = {};
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { 'referral.referralCode': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (status === 'active') {
+      query['referral.totalReferrals'] = { $gt: 0 };
+      query['referral.isReferralActive'] = true;
+    } else if (status === 'inactive') {
+      query['referral.isReferralActive'] = false;
+    } else if (status === 'high-performer') {
+      query['referral.totalReferrals'] = { $gte: 5 };
+    }
+
+    const users = await User.find(query)
+      .select('name email referral createdAt')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ 'referral.totalReferrals': -1 });
+
+    const total = await User.countDocuments(query);
+
+    const formattedUsers = users.map(user => ({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      referralCode: user.referral.referralCode,
+      referralCount: user.referral.totalReferrals,
+      totalEarnings: user.referral.totalRewards,
+      isActive: user.referral.isReferralActive,
+      createdAt: user.createdAt,
+      referralTier: user.referral.referralTier,
+      conversionRate: user.referral.referralStats?.conversionRate || 0
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: formattedUsers,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (error) {
+    console.error('Get admin referral users error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+export const getAdminReferralAnalytics = async (req, res) => {
+  try {
+    const { period = '30d' } = req.query;
+    
+    // Calculate date range
+    const now = new Date();
+    let startDate = new Date();
+    
+    switch (period) {
+      case '7d':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case '90d':
+        startDate.setDate(now.getDate() - 90);
+        break;
+      case '1y':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(now.getDate() - 30);
+    }
+
+    const users = await User.find({
+      createdAt: { $gte: startDate }
+    });
+
+    // Calculate analytics
+    const totalUsers = users.length;
+    const activeReferrers = users.filter(u => u.referral.totalReferrals > 0);
+    const totalReferrals = users.reduce((sum, u) => sum + u.referral.totalReferrals, 0);
+    const totalRewards = users.reduce((sum, u) => sum + u.referral.totalRewards, 0);
+    const totalClicks = users.reduce((sum, u) => sum + (u.referral.referralStats?.totalClicks || 0), 0);
+    const totalSignups = users.reduce((sum, u) => sum + (u.referral.referralStats?.totalSignups || 0), 0);
+    const totalConversions = users.reduce((sum, u) => sum + (u.referral.referralStats?.totalConversions || 0), 0);
+
+    const conversionRate = totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(2) : 0;
+    const avgReferralsPerUser = activeReferrers.length > 0 ? (totalReferrals / activeReferrers.length).toFixed(1) : 0;
+    const revenuePerReferral = totalConversions > 0 ? (totalRewards / totalConversions).toFixed(2) : 0;
+    const programROI = totalRewards > 0 ? (((totalRewards * 2) - totalRewards) / totalRewards * 100).toFixed(1) : 0;
+
+    // Top performers
+    const topPerformers = users
+      .filter(u => u.referral.totalReferrals > 0)
+      .sort((a, b) => b.referral.totalReferrals - a.referral.totalReferrals)
+      .slice(0, 10)
+      .map(u => ({
+        name: u.name,
+        email: u.email,
+        referralCount: u.referral.totalReferrals,
+        conversionRate: u.referral.referralStats?.conversionRate || 0,
+        revenueGenerated: u.referral.referralStats?.revenueGenerated || 0,
+        rewardsEarned: u.referral.totalRewards
+      }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        overview: {
+          conversionRate: parseFloat(conversionRate),
+          avgReferralsPerUser: parseFloat(avgReferralsPerUser),
+          revenuePerReferral: parseFloat(revenuePerReferral),
+          programROI: parseFloat(programROI),
+          linksShared: totalClicks,
+          linkClicks: totalClicks,
+          signups: totalSignups,
+          conversions: totalConversions
+        },
+        topPerformers,
+        trends: {
+          conversionRate: Math.random() * 10 - 5, // Mock trend data
+          avgReferralsPerUser: Math.random() * 2 - 1,
+          revenuePerReferral: Math.random() * 50 - 25,
+          programROI: Math.random() * 20 - 10
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get admin referral analytics error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+export const adminReferralUserAction = async (req, res) => {
+  try {
+    const { userId, action } = req.body;
+    
+    if (!userId || !action) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID and action are required'
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    switch (action) {
+      case 'activate':
+        user.referral.isReferralActive = true;
+        break;
+      case 'deactivate':
+        user.referral.isReferralActive = false;
+        break;
+      case 'reset_rewards':
+        user.referral.availableRewards = 0;
+        user.referral.rewardHistory = [];
+        break;
+      case 'upgrade_tier':
+        const tiers = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+        const currentTierIndex = tiers.indexOf(user.referral.referralTier);
+        if (currentTierIndex < tiers.length - 1) {
+          user.referral.referralTier = tiers[currentTierIndex + 1];
+        }
+        break;
+      default:
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid action'
+        });
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `User ${action} successful`
+    });
+  } catch (error) {
+    console.error('Admin referral user action error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };

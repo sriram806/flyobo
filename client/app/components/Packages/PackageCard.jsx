@@ -7,7 +7,7 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
 export default function PackageCard({ pkg, loading }) {
-  const imgSrc = pkg?.images?.url || pkg?.image ||
+  const imgSrc = pkg?.images || pkg?.image ||
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop";
   const currentPrice = Number(pkg?.price || 0);
   const originalPrice = Number(pkg?.estimatedPrice || 0);

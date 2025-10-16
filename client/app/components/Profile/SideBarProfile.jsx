@@ -2,31 +2,24 @@
 
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  HiOutlineUser,
-  HiOutlineBookmark,
-  HiOutlineHeart,
-  HiOutlineCog,
-  HiOutlineLogout,
-  HiOutlineBell,
-  HiOutlineSearch,
-} from "react-icons/hi";
+import { User, Bookmark, Heart, Settings, LogOut, Bell, Search, Gift } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const items = [
   {
     section: "Profile",
     links: [
-      { key: "overview", label: "Overview", icon: HiOutlineUser },
-      { key: "bookings", label: "Bookings", icon: HiOutlineBookmark, badge: 2 },
-      { key: "wishlist", label: "Wishlist", icon: HiOutlineHeart },
+      { key: "overview", label: "Overview", icon: User },
+      { key: "bookings", label: "Bookings", icon: Bookmark, badge: 2 },
+      { key: "wishlist", label: "Wishlist", icon: Heart },
+      { key: "referral", label: "Referral Program", icon: Gift },
     ],
   },
   {
     section: "App",
     links: [
-      { key: "settings", label: "Settings", icon: HiOutlineCog },
-      { key: "notifications", label: "Notifications", icon: HiOutlineBell, badge: 5 },
+      { key: "settings", label: "Settings", icon: Settings },
+      { key: "notifications", label: "Notifications", icon: Bell, badge: 5 },
     ],
   },
 ];
@@ -63,7 +56,7 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
       {/* Search Input */}
       <div className="p-3">
         <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl focus-within:ring-2 focus-within:ring-sky-400">
-          <HiOutlineSearch className="text-gray-400" />
+          <Search className="h-4 w-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search..."
@@ -119,7 +112,7 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
           onClick={onLogout}
           className="mt-2 w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 transition-colors"
         >
-          <HiOutlineLogout className="h-5 w-5" />
+          <LogOut className="h-5 w-5" />
           <span>Logout</span>
         </button>
       </div>

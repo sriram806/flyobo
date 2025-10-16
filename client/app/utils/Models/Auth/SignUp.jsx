@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { setAuthUser } from '@/redux/authSlice';
 import ModalHeader from "../components/ModalHeader";
 import { HiOutlineUser } from "react-icons/hi";
+import ReferralInput from "../../../components/Auth/ReferralInput";
 
 
 const SignUp = ({ setOpen, setRoute }) => {
@@ -21,6 +22,7 @@ const SignUp = ({ setOpen, setRoute }) => {
   });
   const [showPwd, setShowPwd] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
   const [errors, setErrors] = useState({ name: "", email: "", password: "", terms: "" });
   const [loading, setLoading] = useState(false);
 
@@ -55,8 +57,6 @@ const SignUp = ({ setOpen, setRoute }) => {
       valid = false;
     }
 
-    // confirm password removed
-
     if (!acceptTerms) {
       next.terms = "You must accept the Terms to continue";
       valid = false;
@@ -82,13 +82,7 @@ const SignUp = ({ setOpen, setRoute }) => {
     try {
       setLoading(true);
       const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-      if (!API_URL) {
-        toast.error("API base URL is not configured. Set NEXT_PUBLIC_BACKEND_URL in .env.local and restart the dev server.");
-        throw new Error("Missing NEXT_PUBLIC_BACKEND_URL");
-      }
-      const base = API_URL.replace(/\/$/, "");
-      const endpoint = `${base}/auth/register`;
-      const res = await fetch(endpoint, {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -96,6 +90,7 @@ const SignUp = ({ setOpen, setRoute }) => {
           name: formData.name.trim(),
           email: formData.email.trim(),
           password: formData.password,
+          referralCode: referralCode.trim() || undefined,
         }),
       });
 
@@ -147,7 +142,7 @@ const SignUp = ({ setOpen, setRoute }) => {
         gradientClass="from-emerald-600 to-teal-500"
         shadowClass="shadow-emerald-600/20"
       />
-      <form onSubmit={handleSubmit} className="mt-6">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         {/* Name */}
         <div className="relative">
           <input
@@ -177,7 +172,7 @@ const SignUp = ({ setOpen, setRoute }) => {
         {errors.name && <p id="name-error" className={`${styles.errorText}`}>{errors.name}</p>}
 
         {/* Email */}
-        <div className="mt-4">
+        <div>
           <div className="relative">
             <input
               id="email"
@@ -207,7 +202,7 @@ const SignUp = ({ setOpen, setRoute }) => {
         </div>
 
         {/* Password */}
-        <div className="mt-4">
+        <div>
           <div className="relative">
             <input
               id="password"
@@ -248,7 +243,13 @@ const SignUp = ({ setOpen, setRoute }) => {
           {errors.password && <p id="password-error" className={`${styles.errorText}`}>{errors.password}</p>}
         </div>
 
-        {/* Confirm Password removed */}
+        {/* Referral Code */}
+        <div className="mt-6">
+          <ReferralInput 
+            onReferralChange={setReferralCode}
+            disabled={loading}
+          />
+        </div>
 
         {/* Terms */}
         <div className="mt-4">

@@ -31,7 +31,13 @@ export default function AdminLayout({ children }) {
     bookings: "/admin/bookings",
     reports: "/admin/reports",
     gallery: "/admin/gallery",
-    bookings: "/admin/bookings" 
+    "referrals-overview": "/admin/referrals",
+    "referrals-users": "/admin/referrals/users",
+    "referrals-analytics": "/admin/referrals/analytics",
+    "referrals-rewards": "/admin/referrals/rewards",
+    "referrals-leaderboard": "/admin/referrals/leaderboard",
+    "referrals-payouts": "/admin/referrals/payouts",
+    "referrals-settings": "/admin/referrals/settings"
   };
   const handleLogout = () => {
     dispatch(logout());

@@ -1,23 +1,46 @@
 import Package from '../models/package.model.js';
-import cloudinary from 'cloudinary';
 import { createPackage, getAllPackagesServices } from '../services/package.services.js';
+import { getFileUrl, deleteFile, getFilenameFromUrl } from '../middleware/multerConfig.js';
 import mongoose from 'mongoose';
+import path from 'path';
 
 // ✅ 1. CREATE A PACKAGE
 export const uploadPackage = async (req, res) => {
   try {
     const data = req.body;
-    let images = data.images;
 
-    if (images && typeof images === 'string') {
-      const myCloud = await cloudinary.v2.uploader.upload(images, {
-        folder: "package"
-      });
+    // Parse JSON fields that come as strings from FormData
+    if (data.itinerary && typeof data.itinerary === 'string') {
+      try {
+        data.itinerary = JSON.parse(data.itinerary);
+      } catch (e) {
+        data.itinerary = [];
+      }
+    }
+    
+    if (data.included && typeof data.included === 'string') {
+      try {
+        data.included = JSON.parse(data.included);
+      } catch (e) {
+        data.included = [];
+      }
+    }
+    
+    if (data.excluded && typeof data.excluded === 'string') {
+      try {
+        data.excluded = JSON.parse(data.excluded);
+      } catch (e) {
+        data.excluded = [];
+      }
+    }
 
-      data.images = {
-        public_id: myCloud.public_id,
-        url: myCloud.secure_url
-      };
+    // Handle boolean fields
+    if (data.featured !== undefined) {
+      data.featured = data.featured === 'true' || data.featured === true;
+    }
+
+    if (req.file) {
+      data.images = getFileUrl(req, req.file.filename, 'packages');
     }
 
     createPackage(data, res, req);
@@ -30,22 +53,53 @@ export const uploadPackage = async (req, res) => {
 export const EditPackage = async (req, res) => {
   try {
     const data = req.body;
-    const images = data.images;
+    const packageId = req.params.id;
 
-    if (images) {
-      await cloudinary.v2.uploader.destroy(images.public_id);
-
-      const myCloud = await cloudinary.v2.uploader.upload(images, {
-        folder: "package"
-      });
-
-      data.images = {
-        public_id: myCloud.public_id,
-        url: myCloud.secure_url
-      };
+    // Parse JSON fields that come as strings from FormData
+    if (data.itinerary && typeof data.itinerary === 'string') {
+      try {
+        data.itinerary = JSON.parse(data.itinerary);
+      } catch (e) {
+        data.itinerary = [];
+      }
+    }
+    
+    if (data.included && typeof data.included === 'string') {
+      try {
+        data.included = JSON.parse(data.included);
+      } catch (e) {
+        data.included = [];
+      }
+    }
+    
+    if (data.excluded && typeof data.excluded === 'string') {
+      try {
+        data.excluded = JSON.parse(data.excluded);
+      } catch (e) {
+        data.excluded = [];
+      }
     }
 
-    const packageId = req.params.id;
+    // Handle boolean fields
+    if (data.featured !== undefined) {
+      data.featured = data.featured === 'true' || data.featured === true;
+    }
+
+    // Handle image update
+    if (req.file) {
+      // Get existing package to delete old image
+      const existingPackage = await Package.findById(packageId);
+      if (existingPackage && existingPackage.images) {
+        const oldFilename = getFilenameFromUrl(existingPackage.images);
+        if (oldFilename) {
+          const oldFilePath = path.join(process.cwd(), 'uploads', 'packages', oldFilename);
+          deleteFile(oldFilePath);
+        }
+      }
+
+      // Upload new image
+      data.images = getFileUrl(req, req.file.filename, 'packages');
+    }
     const UpdatedPackage = await Package.findByIdAndUpdate(
       packageId,
       { $set: data },
@@ -187,3 +241,5 @@ export const deletePackage = async (req, res) => {
     });
   }
 };
+
+

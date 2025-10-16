@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import PackageImageUploader from "@/app/components/Packages/PackageImageUploader";
 
 const emptyForm = {
   title: "",
@@ -23,6 +24,8 @@ export default function Page() {
 
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [image, setImage] = useState(null);
+  const [error, setError] = useState("");
 
   const onChange = (key) => (e) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -35,18 +38,33 @@ export default function Page() {
 
     try {
       setSaving(true);
-      const payload = {
-        title: form.title.trim(),
-        description: form.description.trim(),
-        price: Number(form.price),
-        estimatedPrice: Number(form.estimatedPrice) || undefined,
-        duration: Number(form.duration) || 0,
-        destination: form.destination.trim(),
-        status: form.status,
-      };
+      setError("");
 
-      await axios.post(`${API_URL}/package/`, payload, {
+      const formData = new FormData();
+      formData.append('title', form.title.trim());
+      formData.append('description', form.description.trim());
+      formData.append('price', Number(form.price));
+      formData.append('estimatedPrice', Number(form.estimatedPrice) || 0);
+      formData.append('duration', Number(form.duration) || 0);
+      formData.append('destination', form.destination.trim());
+      formData.append('status', form.status);
+      
+      // Add image file
+      if (image && image.file) {
+        formData.append('image', image.file);
+      }
+
+      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      await axios.post(`${API_URL}/package/`, formData, {
         withCredentials: true,
+        headers,
       });
 
       toast.success("Package created");
@@ -57,6 +75,7 @@ export default function Page() {
         err?.message ||
         "Failed to create package";
       toast.error(msg);
+      setError(msg);
     } finally {
       setSaving(false);
     }
@@ -72,6 +91,12 @@ export default function Page() {
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Fill the details below to add a new package.
           </p>
+
+          {error && (
+            <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-red-700 dark:bg-red-950/40 dark:border-red-900">
+              {error}
+            </div>
+          )}
 
           <form
             onSubmit={submit}
@@ -100,6 +125,16 @@ export default function Page() {
                 onChange={onChange("description")}
                 className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
                 placeholder="Enter package description"
+              />
+            </div>
+
+            {/* Package Cover Image */}
+            <div className="sm:col-span-2">
+              <PackageImageUploader
+                image={image}
+                onImageChange={setImage}
+                disabled={saving}
+                label="Package Cover Image"
               />
             </div>
 

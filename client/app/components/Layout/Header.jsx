@@ -83,7 +83,6 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
         if (openNotif) {
             fetchNotifications();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [openNotif]);
 
     const handleClose = (e) => {

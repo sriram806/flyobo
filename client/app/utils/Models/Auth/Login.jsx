@@ -10,7 +10,6 @@ import { setAuthUser } from "@/redux/authSlice";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import ModalHeader from "../components/ModalHeader";
-import { HiOutlineLockClosed } from "react-icons/hi";
 
 const Login = ({ setRoute, setOpen }) => {
     const dispatch = useDispatch();
@@ -21,69 +20,46 @@ const Login = ({ setRoute, setOpen }) => {
     const [errors, setErrors] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             setLoading(true);
             setErrors({ email: "", password: "" });
-            
             const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
             if (!API_URL) {
-                toast.error("API base URL is not configured. Set NEXT_PUBLIC_BACKEND_URL in .env.local and restart the dev server.");
-                throw new Error("Missing NEXT_PUBLIC_BACKEND_URL");
+                toast.error("BASE API is Missing!");
             }
-            const base = API_URL.replace(/\/$/, "");
-            const endpoint = `${base}/auth/login`;
-
-            console.log('🔐 Attempting login to:', endpoint);
-
-            const { data } = await axios.post(
-                endpoint,
+            const { data } = await axios.post(`${API_URL}/auth/login`,
                 { email, password, remember },
-                { 
+                {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 }
             );
-
-            console.log('✅ Login response:', { hasToken: !!data?.token, hasUser: !!data?.user || !!data?.data?.user });
-
-            // Store token using improved method
             const token = data?.token;
             if (token) {
                 try {
-                    // Store in multiple places for reliability
                     localStorage.setItem('auth_token', token);
                     sessionStorage.setItem('auth_token', token);
                     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-                    console.log('🎫 Token stored successfully');
                 } catch (tokenError) {
                     console.warn('⚠️ Failed to store token:', tokenError);
                 }
             }
 
-            // Get user data from response
             const user = data?.user || data?.data?.user;
             if (!user) {
                 throw new Error("User data not received from server");
             }
 
-            // Update Redux store
             dispatch(setAuthUser(user));
-            
-            // Close modal
-            if (setOpen) {
-                setOpen(false);
-            }
-            
-            toast.success(data?.message || "Signed in successfully!");
+            if (setOpen) setOpen(false);
+            toast.success(data?.message || "Login successful");
         } catch (err) {
             console.error('Login error:', err);
-            
-            // Handle specific error cases
+
             const serverMessage = err?.response?.data?.message;
             if (err?.response?.status === 401) {
                 if (serverMessage?.toLowerCase().includes('email') || serverMessage?.toLowerCase().includes('user')) {
@@ -92,7 +68,6 @@ const Login = ({ setRoute, setOpen }) => {
                     setErrors(prev => ({ ...prev, password: serverMessage }));
                 }
             }
-            
             const msg = serverMessage || err?.message || "Failed to sign in. Please try again.";
             toast.error(msg);
         } finally {
@@ -107,13 +82,10 @@ const Login = ({ setRoute, setOpen }) => {
     return (
         <div className="w-full">
             <ModalHeader
-                icon={<HiOutlineLockClosed size={24} />}
                 title="Sign in to Flyobo"
                 description="Welcome back! Please enter your details."
-                gradientClass="from-indigo-600 to-blue-600"
-                shadowClass="shadow-indigo-600/20"
             />
-            <form onSubmit={handleSubmit} className="mt-6">
+            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                 <div className="relative">
                     <input
                         type="email"
@@ -144,7 +116,7 @@ const Login = ({ setRoute, setOpen }) => {
                     </p>
                 )}
 
-                <div className="mt-7">
+                <div>
                     <div className="relative">
                         <input
                             type={show ? "text" : "password"}
@@ -208,7 +180,7 @@ const Login = ({ setRoute, setOpen }) => {
                     disabled={!isFormValid()}
                     aria-busy={loading}
                     aria-disabled={!isFormValid()}
-                    className={`mt-14 ${styles.button} ${!isFormValid() ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`mt-8 ${styles.button} ${!isFormValid() ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                     {loading ? "Signing in..." : "Sign In"}
                 </button>
@@ -246,4 +218,4 @@ const Login = ({ setRoute, setOpen }) => {
     )
 }
 
-export default Login
+export default Login;

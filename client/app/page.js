@@ -6,6 +6,7 @@ import Header from './components/Layout/Header';
 import Hero from './components/Home/Hero';
 import TopDestinations from './components/Home/TopDestinations';
 import BoldShowcase from './components/Home/BoldShowcase';
+import ReferralBanner from './components/Home/ReferralBanner';
 import Newsletter from './components/Home/Newsletter';
 import Footer from './components/Layout/Footer';
 import WhatsApp from './components/styles/whatsapp';
@@ -33,6 +34,9 @@ const Home = () => {
       <Hero />
       <TopDestinations />
       <BoldShowcase />
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
+        <ReferralBanner />
+      </div>
       <Newsletter />
       <Footer />
       <WhatsApp />

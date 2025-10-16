@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import PackageImageUploader from "@/app/components/Packages/PackageImageUploader";
 
 const emptyForm = {
   title: "",
@@ -81,6 +82,7 @@ export default function Page() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [image, setImage] = useState(null);
 
   const [temp, setTemp] = useState({
     day: "", desc: "", activities: "", incItem: "", excItem: ""
@@ -110,6 +112,14 @@ export default function Page() {
         };
         setForm(normalized);
         setInitialForm(normalized);
+        
+        // Set existing image
+        if (pkg.images && pkg.images.trim() !== "") {
+          setImage({
+            url: pkg.images,
+            isNew: false
+          });
+        }
       } catch (err) {
         toast.error(err?.response?.data?.message || err?.message || "Failed to load package");
       } finally {
@@ -169,20 +179,37 @@ export default function Page() {
 
     try {
       setSaving(true);
-      const payload = {
-        title: form.title.trim(),
-        description: form.description.trim(),
-        price: Number(form.price),
-        estimatedPrice: form.estimatedPrice ? Number(form.estimatedPrice) : undefined,
-        duration: Number(form.duration) || 0,
-        destination: form.destination.trim(),
-        status: form.status,
-        featured: !!form.featured,
-        itinerary: form.itinerary.map(d => ({ ...d, activities: d.activities.filter(Boolean) })),
-        included: form.included,
-        excluded: form.excluded,
+      
+      const formData = new FormData();
+      formData.append('title', form.title.trim());
+      formData.append('description', form.description.trim());
+      formData.append('price', Number(form.price));
+      formData.append('estimatedPrice', form.estimatedPrice ? Number(form.estimatedPrice) : 0);
+      formData.append('duration', Number(form.duration) || 0);
+      formData.append('destination', form.destination.trim());
+      formData.append('status', form.status);
+      formData.append('featured', !!form.featured);
+      formData.append('itinerary', JSON.stringify(form.itinerary.map(d => ({ ...d, activities: d.activities.filter(Boolean) }))));
+      formData.append('included', JSON.stringify(form.included));
+      formData.append('excluded', JSON.stringify(form.excluded));
+      
+      // Add new image file if changed
+      if (image && image.isNew && image.file) {
+        formData.append('image', image.file);
+      }
+
+      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+      const headers = {
+        'Content-Type': 'multipart/form-data',
       };
-      await axios.put(`${API_URL}/package/edit-package/${id}`, payload, { withCredentials: true });
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      await axios.put(`${API_URL}/package/edit-package/${id}`, formData, { 
+        withCredentials: true,
+        headers,
+      });
       toast.success("Package updated");
       router.push("/admin/packages");
     } catch (err) {
@@ -289,6 +316,15 @@ export default function Page() {
                   <div className="space-y-1 md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                     <textarea value={form.description} onChange={onChange("description")} rows={3} className="w-full px-3.5 py-2.5 text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/60" />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <PackageImageUploader
+                      image={image}
+                      onImageChange={setImage}
+                      disabled={saving}
+                      label="Package Cover Image"
+                    />
                   </div>
                 </div>
               </div>

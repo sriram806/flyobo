@@ -27,22 +27,13 @@ export default function AdminGallery() {
   const [error, setError] = useState("");
 
   const [title, setTitle] = useState("");
-  const [image, setImage] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState("");
   const [editId, setEditId] = useState(null);
 
-  const handleImagePaste = (e) => {
-    try {
-      const text = e.clipboardData?.getData("text") || window.clipboardData?.getData("Text") || "";
-      if (text) {
-        e.preventDefault();
-        setImage(text.trim());
-      }
-    } catch (err) {
 
-    }
-  };
 
   const authHeader = () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
@@ -52,17 +43,45 @@ export default function AdminGallery() {
   const resetForm = () => {
     setEditId(null);
     setTitle("");
-    setImage("");
+    setImageFile(null);
+    setImagePreview("");
     setCategory("");
     setTags("");
   };
 
-  const onEdit = (it) => {
-    setEditId(it._id);
-    setTitle(it.title || "");
-    setImage(it.image || "");
-    setCategory(it.category || "");
-    setTags(Array.isArray(it.tags) ? it.tags.join(", ") : "");
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size must be less than 5MB');
+      return;
+    }
+
+    setImageFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const onEdit = (item) => {
+    setEditId(item._id);
+    setTitle(item.title);
+    setImageFile(null);
+    setImagePreview(item.image); // Show existing image as preview
+    setCategory(item.category);
+    setTags(Array.isArray(item.tags) ? item.tags.join(", ") : "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -90,32 +109,46 @@ export default function AdminGallery() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !image || !category) {
-      setError("Please provide title, image URL and category");
+    if (!title.trim() || !category) {
+      setError("Please fill all required fields");
+      return;
+    }
+
+    if (!editId && !imageFile) {
+      setError("Please select an image to upload");
       return;
     }
 
     try {
       setLoading(true);
       setError("");
-      const payload = {
-        title: title.trim(),
-        image: image.trim(),
-        category: String(category).toLowerCase().trim(),
-        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-      };
+
+      const formData = new FormData();
+      formData.append('title', title.trim());
+      formData.append('category', String(category).toLowerCase().trim());
+      formData.append('tags', tags.split(",").map((t) => t.trim()).filter(Boolean).join(','));
+      
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
 
       if (editId) {
-        const { data } = await axios.put(`${API_BASE}/gallery/${editId}`, payload, {
+        const { data } = await axios.put(`${API_BASE}/gallery/${editId}`, formData, {
           withCredentials: true,
-          headers: authHeader(),
+          headers: {
+            ...authHeader(),
+            'Content-Type': 'multipart/form-data',
+          },
         });
         setItems((prev) => prev.map((x) => (x._id === editId ? data : x)));
         toast.success("Gallery item updated!");
       } else {
-        const { data } = await axios.post(`${API_BASE}/gallery`, payload, {
+        const { data } = await axios.post(`${API_BASE}/gallery`, formData, {
           withCredentials: true,
-          headers: authHeader(),
+          headers: {
+            ...authHeader(),
+            'Content-Type': 'multipart/form-data',
+          },
         });
         setItems((prev) => [data, ...prev]);
         toast.success("Gallery item added!");
@@ -181,12 +214,9 @@ export default function AdminGallery() {
           />
 
           <input
-            type="url"
-            inputMode="url"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            onPaste={handleImagePaste}
-            placeholder="Image URL"
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
             disabled={loading}
             className="md:col-span-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-gray-900 dark:text-white disabled:opacity-60"
           />
@@ -236,11 +266,11 @@ export default function AdminGallery() {
           </div>
 
           {/* Image Preview */}
-          {image && (
+          {imagePreview && (
             <div className="md:col-span-12 mt-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={image}
+                src={imagePreview}
                 alt="Preview"
                 className="h-40 w-full object-cover rounded-lg border dark:border-gray-700"
               />

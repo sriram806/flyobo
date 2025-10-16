@@ -171,7 +171,7 @@ const Verification = ({ setOpen, setRoute }) => {
         shadowClass="shadow-sky-600/20"
       />
 
-      <form onSubmit={handleSubmit} className="mt-16">
+      <form onSubmit={handleSubmit} className="mt-12 space-y-6">
         <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4">
           {Array.from({ length: OTP_LENGTH }).map((_, i) => (
             <input

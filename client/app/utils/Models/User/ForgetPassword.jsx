@@ -63,7 +63,7 @@ const ForgetPassword = ({ setRoute, setOpen }) => {
   const isFormValid = () => email.length > 0 && !loading;
 
   return (
-    <div className="w-full flex items-center justify-center py-2">
+    <div className="w-full flex items-center justify-center py-4">
       <div className="w-full max-w-md mx-auto rounded-2xl p-6 sm:p-8">
         <ModalHeader
           icon={<HiOutlineLockClosed size={28} />}
@@ -73,7 +73,7 @@ const ForgetPassword = ({ setRoute, setOpen }) => {
           shadowClass="shadow-rose-500/20"
         />
 
-        <form onSubmit={handleSubmit} className="mt-6">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="relative">
             <input
               type="email"

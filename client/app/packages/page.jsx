@@ -85,7 +85,6 @@ export default function Page() {
         }
         const base = API_URL.replace(/\/$/, "");
         const url = `${base}/package/get-packages`;
-        // Fetch only active packages from server; use large limit to allow client-side filters/pagination
         const { data } = await axios.get(url, {
           params: { status: 'active', page: 1, limit: 1000 },
           withCredentials: true,

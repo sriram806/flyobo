@@ -8,10 +8,10 @@ export default function ModalHeader({
   description
 }) {
   return (
-    <div className="flex flex-col items-center text-center">
-      <h2 className={`${styles.title} !text-center`}>{title}</h2>
+    <div className="flex flex-col items-center text-center mb-2">
+      <h2 className={`${styles.title} !text-center mb-2`}>{title}</h2>
       {description ? (
-        <p className="text-sm text-gray-600 dark:text-gray-300 max-w-sm">{description}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300 max-w-sm leading-relaxed">{description}</p>
       ) : null}
     </div>
   );

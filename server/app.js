@@ -18,6 +18,8 @@ import layoutRoute from './routes/layout.route.js';
 import galleryRoute from './routes/gallery.route.js';
 import notificationRoute from './routes/notification.route.js';
 import bookingsRouter from './routes/bookings.route.js';
+import uploadRouter from './routes/upload.route.js';
+import referalRoute from './routes/referal.route.js';
 
 const app = express();
 connecttoDatabase();
@@ -52,12 +54,8 @@ for (const extra of [FRONTEND_URL, ORIGIN]) {
   }
 }
 
-console.log('🌐 CORS allowed origins:', allowedOrigins);
-
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, postman, etc.)
-    // or if origin is in allowed list
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -158,8 +156,11 @@ app.use('/api/v1/layout', layoutRoute);
 app.use('/api/v1/gallery', galleryRoute);
 app.use('/api/v1/bookings', bookingsRouter);
 app.use('/api/v1/notification', notificationRoute);
+app.use('/api/v1/upload', uploadRouter);
+app.use('/api/v1/referal', referalRoute);
 
-
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
 
 // Create HTTP server & attach Socket.IO
 const server = http.createServer(app);

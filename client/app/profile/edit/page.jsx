@@ -8,7 +8,6 @@ import Heading from "../../components/MetaData/Heading";
 import Header from "../../components/Layout/Header";
 import SideBarProfile from "../../components/Profile/SideBarProfile";
 import { toast } from "react-hot-toast";
-import UpdateAvatar from "../../components/Profile/UpdateAvatar";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "@/redux/authSlice";
@@ -27,8 +26,6 @@ export default function EditProfilePage() {
   const [bio, setBio] = useState(user?.bio || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [loading, setLoading] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(user?.avatar?.url || null);
-  const [avatarFile, setAvatarFile] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,23 +82,6 @@ export default function EditProfilePage() {
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-                  {/* Avatar */}
-                  <div>
-                    <UpdateAvatar
-                      avatarUrl={avatarPreview}
-                      onChange={(file, previewUrl) => {
-                        setAvatarFile(file);
-                        setAvatarPreview(previewUrl);
-                      }}
-                      onRemove={() => {
-                        setAvatarFile(null);
-                        setAvatarPreview(null);
-                      }}
-                      label="Profile photo"
-                      size={96}
-                    />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG, PNG, or WEBP. Max 5MB.</p>
-                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Name

@@ -1,4 +1,6 @@
 import Gallery from "../models/gallery.model.js";
+import { getFileUrl, deleteFile, getFilenameFromUrl } from '../middleware/multerConfig.js';
+import path from 'path';
 
 export const getGalleryItems = async (req, res) => {
   try {
@@ -19,12 +21,24 @@ export const getGalleryItems = async (req, res) => {
 
 export const uploadGalleryItem = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    const imageUrl = getFileUrl(req, req.file.filename, 'gallery');
+
     const galleryItem = new Gallery({
       ...req.body,
+      image: {
+        public_id: req.file.filename,
+        url: imageUrl
+      },
       uploadedBy: req.user._id,
     });
 
     const savedItem = await galleryItem.save();
+    await savedItem.populate("uploadedBy", "name email");
+    
     res.status(201).json(savedItem);
   } catch (error) {
     res.status(400).json({ message: "Failed to upload gallery item", error: error.message });

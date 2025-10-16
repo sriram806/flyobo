@@ -55,12 +55,8 @@ const packageSchema = new mongoose.Schema({
     default: false
   },
   images: {
-    public_id: {
-      type: String
-    },
-    url: {
-      type: String
-    }
+    type: String,
+    default: ""
   },
   tags: {
     type: String

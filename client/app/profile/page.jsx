@@ -14,6 +14,7 @@ import ProfileBookings from "../components/Profile/ProfileBookings";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import FavouriteBookings from "../components/Profile/FavouriteBookings";
+import ReferralProgram from "../components/Profile/ReferralProgram";
 
 const Page = () => {
   const router = useRouter();
@@ -23,8 +24,16 @@ const Page = () => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
+    // Clear storage first
+    localStorage.removeItem("auth_token");
+    
+    // Dispatch logout to clear Redux state
     dispatch(logout());
-    toast.success("Logged out");
+    
+    toast.success("Logged out successfully");
+    
+    // Redirect to home page
+    router.push("/");
   };
 
   return (
@@ -54,6 +63,8 @@ const Page = () => {
             {selected === "bookings" && <ProfileBookings />}
 
             {selected === "wishlist" && <FavouriteBookings />}
+
+            {selected === "referral" && <ReferralProgram />}
 
             {selected === "settings" && <ProfileSetting />}
           </section>

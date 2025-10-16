@@ -9,11 +9,12 @@ import {
   getAllPackages,
 } from '../controllers/package.controller.js';
 import isAuthenticated from '../middleware/isAuthenticated.js';
+import { uploadPackageImage } from '../middleware/multerConfig.js';
 
 const packageRouter = express.Router();
 
-packageRouter.post('/', isAuthenticated, uploadPackage); //✅ 1. CREATING A PACKAGE & WORKING
-packageRouter.put('/edit-package/:id', isAuthenticated, EditPackage); //✅ 2. UPDATE PACKAGE & WORKING
+packageRouter.post('/', isAuthenticated, uploadPackageImage, uploadPackage); //✅ 1. CREATING A PACKAGE & WORKING
+packageRouter.put('/edit-package/:id', isAuthenticated, uploadPackageImage, EditPackage); //✅ 2. UPDATE PACKAGE & WORKING
 packageRouter.get('/get-packages', getAllPackages);
 packageRouter.get('/get-package/:id', isAuthenticated, getPackagebyUser);
 packageRouter.post('/:id/reviews', isAuthenticated, addReview); //✅ 5. ADDING REVIEW TO PACKAGE & WORKING

@@ -66,7 +66,7 @@ export default function PackageDetailPage({ params }) {
 
   const title = pkg?.title || "Package";
   const image =
-    pkg?.images?.url ||
+    pkg?.images ||
     pkg?.image ||
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop";
   const destination = pkg?.destination || pkg?.location || "";

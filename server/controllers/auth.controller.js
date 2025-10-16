@@ -8,9 +8,8 @@ import { NODE_ENV } from "../config/env.js";
 // 1. Registration
 export const registration = async (req, res) => {
   let createdUser;
-
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, referralCode } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: "All fields are required." });
@@ -19,6 +18,15 @@ export const registration = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "Email is already registered." });
+    }
+
+    // Validate referral code if provided
+    let referrer = null;
+    if (referralCode && referralCode.trim()) {
+      referrer = await User.findOne({ 'referral.referralCode': referralCode.trim().toUpperCase() });
+      if (!referrer) {
+        return res.status(400).json({ success: false, message: "Invalid referral code." });
+      }
     }
 
     const otp = generateOTP();
@@ -34,6 +42,17 @@ export const registration = async (req, res) => {
       otpExpireAt
     });
 
+    // Apply referral code if provided
+    if (referrer) {
+      try {
+        const { applyReferralCode } = await import('./user.controller.js');
+        await applyReferralCode(referralCode.trim().toUpperCase(), createdUser._id);
+      } catch (referralError) {
+        console.error("Referral application error:", referralError);
+        // Continue with registration even if referral fails
+      }
+    }
+
     try {
       await sendMail({
         email: createdUser.email,
@@ -45,9 +64,12 @@ export const registration = async (req, res) => {
       console.error("Mail error:", mailError);
     }
 
-    return createSendToken(createdUser, 201, res, "Registration successful and OTP sent to your email");
+    const message = referrer 
+      ? "Registration successful! OTP sent to your email. You've earned ₹50 welcome bonus!"
+      : "Registration successful and OTP sent to your email";
+
+    return createSendToken(createdUser, 201, res, message);
   } catch (error) {
-    console.error('Registration error:', error);
     if (createdUser?._id) {
       try {
         await User.findByIdAndDelete(createdUser._id);
@@ -55,7 +77,6 @@ export const registration = async (req, res) => {
         console.error('Cleanup error:', cleanupErr);
       }
     }
-
     return res.status(500).json({ success: false, message: "Server error during registration.", error: error.message });
   }
 };
@@ -109,7 +130,7 @@ export const ResendOTP = async (req, res) => {
     }
 
     const newOtp = generateOTP();
-    const otpExpireAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otpExpireAt = new Date(Date.now() + 10 * 60 * 1000);
 
     user.otp = newOtp;
     user.otpExpireAt = otpExpireAt;
@@ -118,7 +139,7 @@ export const ResendOTP = async (req, res) => {
     try {
       await sendMail({
         email: user.email,
-        subject: "Verify Your Flyobo Account",
+        subject: "Resend OTP for Verify Your Flyobo Account",
         template: "activation",
         data: { otp: newOtp, name: user.name, email: user.email }
       });
@@ -187,10 +208,10 @@ export const forgotPassword = async (req, res) => {
     }
 
     const resetPasswordOtp = generateOTP();
-    const otpExpireAt = new Date(Date.now() + 10 * 60 * 1000);
+    const resetPasswordOtpExpireAt = new Date(Date.now() + 10 * 60 * 1000);
 
     user.resetPasswordOtp = resetPasswordOtp;
-    user.resetPasswordOtpExpireAt = otpExpireAt;
+    user.resetPasswordOtpExpireAt = resetPasswordOtpExpireAt;
     await user.save({ validateBeforeSave: false });
 
     try {
@@ -238,29 +259,3 @@ export const resetPassword = async (req, res) => {
   }
 }
 
-// 8. Change Password While Logged in
-export const changePassword = async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ success: false, message: "Please provide old and new password" });
-    }
-
-    const user = await User.findById(req.user._id).select("+password");
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ success: false, message: "Old password is incorrect" });
-    }
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save({ validateBeforeSave: false });
-
-    return res.status(200).json({ success: true, message: "Password changed successfully" });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: "Server error during password change" });
-  }
-}
