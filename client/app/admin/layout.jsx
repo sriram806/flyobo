@@ -16,6 +16,7 @@ import AdminGallery from "../components/Admin/AdminGallery";
 import AdminBookings from "../components/Admin/AdminBookings";
 import AdminProtected from "../hooks/adminProtected";
 import AdminSidebar from "../components/Admin/AdminSidebar";
+import AuthDebugger from "../components/Debug/AuthDebugger";
 
 export default function AdminLayout({ children }) {
   const [open, setOpen] = useState(false);
@@ -78,6 +79,7 @@ export default function AdminLayout({ children }) {
         </div>
       </main>
       <Footer />
+      <AuthDebugger />
     </AdminProtected>
   );
 }

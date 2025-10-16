@@ -27,7 +27,8 @@ import {
   Mail,
   Crown,
   Zap,
-  BarChart3
+  BarChart3,
+  Shield
 } from "lucide-react";
 
 const ReferralProgram = () => {
@@ -39,6 +40,7 @@ const ReferralProgram = () => {
   const [redeemLoading, setRedeemLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [serverError, setServerError] = useState(false);
+  const [authError, setAuthError] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [milestones, setMilestones] = useState([]);
   const [socialShareCounts, setSocialShareCounts] = useState({
@@ -94,11 +96,22 @@ const ReferralProgram = () => {
         return;
       }
 
+      if (!user) {
+        console.log("No user found, skipping referral data fetch");
+        return;
+      }
+
       const { data } = await axios.get(`${API_URL}/user/referral-info`, {
         withCredentials: true,
         timeout: 10000 // 10 second timeout
       });
-      setReferralData(data.data);
+      
+      if (data.success) {
+        setReferralData(data.data);
+        setServerError(false);
+      } else {
+        throw new Error(data.message || "Failed to fetch referral data");
+      }
     } catch (error) {
       console.error("Error fetching referral data:", error);
       setServerError(true);
@@ -106,7 +119,8 @@ const ReferralProgram = () => {
       if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
         toast.error("Unable to connect to server. Please check if the server is running.");
       } else if (error.response?.status === 401) {
-        toast.error("Please log in to view referral data");
+        setAuthError(true);
+        toast.error("Authentication required. Please log in again.");
       } else if (error.response?.status === 404) {
         toast.error("Referral service not available");
       } else {
@@ -125,9 +139,15 @@ const ReferralProgram = () => {
       }
       
       const { data } = await axios.get(`${API_URL}/user/referral-leaderboard`, {
+        withCredentials: true,
         timeout: 5000 // 5 second timeout
       });
-      setLeaderboard(data.data || []);
+      
+      if (data.success) {
+        setLeaderboard(data.data || []);
+      } else {
+        setLeaderboard([]);
+      }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       // Don't show error to user for leaderboard, just set empty array
@@ -202,6 +222,9 @@ const ReferralProgram = () => {
       
       if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
         toast.error("Unable to connect to server. Please try again.");
+      } else if (error.response?.status === 401) {
+        setAuthError(true);
+        toast.error("Authentication required. Please log in again.");
       } else {
         const msg = error?.response?.data?.message || "Failed to redeem rewards";
         toast.error(msg);
@@ -327,6 +350,40 @@ const ReferralProgram = () => {
     );
   }
 
+  if (authError && !loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <Shield className="h-16 w-16 text-yellow-400 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          Authentication Required
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          Your session has expired or you need to log in to access the referral program.
+        </p>
+        <div className="space-y-2">
+          <button 
+            onClick={() => {
+              setAuthError(false);
+              window.location.href = '/login';
+            }}
+            className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors mr-3"
+          >
+            Go to Login
+          </button>
+          <button 
+            onClick={() => {
+              setAuthError(false);
+              fetchReferralData();
+            }}
+            className="px-6 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (serverError && !loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -392,11 +449,24 @@ const ReferralProgram = () => {
 
   return (
     <section className="w-full space-y-6">
-      {!referralData && !loading && (
+      {!referralData && !loading && user && !authError && !serverError && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-          <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-            Unable to load referral data. Please refresh the page or try again later.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                Unable to load referral data. This might be a temporary issue.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setLoading(true);
+                fetchReferralData();
+              }}
+              className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       )}
 

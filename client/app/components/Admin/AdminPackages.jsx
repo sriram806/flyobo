@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import authRequest from "@/app/utils/authRequest";
 
 const DefaultPageSize = 10;
 
@@ -27,10 +28,9 @@ const AdminPackages = () => {
     if (!API_URL) return;
     try {
       setLoading(true);
-      const { data } = await axios.get(`${API_URL}/package/get-packages`, {
-        params: { q, page, limit: pageSize },
-        withCredentials: true,
-      });
+      
+      const data = await authRequest.get(`${API_URL}/package/get-packages`, { q, page, limit: pageSize });
+      
       const list = data?.packages || data?.data || [];
       if (Array.isArray(list) && list.length > 0) {
         // normalize status casing for UI
@@ -41,8 +41,7 @@ const AdminPackages = () => {
         setTotal(0);
       }
     } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || "Failed to load packages";
-      toast.error(msg);
+      // Error handling is done in authRequest utility
       setItems([]);
       setTotal(0);
     } finally {
@@ -96,13 +95,20 @@ const AdminPackages = () => {
   const removePkg = async (id) => {
     if (!API_URL) return;
     if (!confirm("Delete this package? This cannot be undone.")) return;
+    
     try {
-      await axios.delete(`${API_URL}/package/${id}`, { withCredentials: true });
-      toast.success("Package deleted");
-      if (items.length === 1 && page > 1) setPage((p) => p - 1); else load();
+      await authRequest.delete(`${API_URL}/package/${id}`);
+      toast.success("Package deleted successfully");
+      
+      // Refresh the list
+      if (items.length === 1 && page > 1) {
+        setPage((p) => p - 1);
+      } else {
+        await load();
+      }
     } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || "Failed to delete package";
-      toast.error(msg);
+      // Error handling is done in authRequest utility
+      console.error("Delete package error:", err);
     }
   };
 

@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import PackageImageUploader from "@/app/components/Packages/PackageImageUploader";
+import authRequest from "@/app/utils/authRequest";
 
 const emptyForm = {
   title: "",
@@ -54,27 +55,12 @@ export default function Page() {
         formData.append('image', image.file);
       }
 
-      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-      const headers = {
-        'Content-Type': 'multipart/form-data',
-      };
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
-      await axios.post(`${API_URL}/package/`, formData, {
-        withCredentials: true,
-        headers,
-      });
-
-      toast.success("Package created");
+      await authRequest.postForm(`${API_URL}/package/`, formData);
+      toast.success("Package created successfully");
       router.push("/admin/packages");
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to create package";
-      toast.error(msg);
+      // Error handling is done in authRequest utility
+      const msg = err?.response?.data?.message || err?.message || "Failed to create package";
       setError(msg);
     } finally {
       setSaving(false);
