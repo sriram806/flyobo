@@ -4,6 +4,8 @@ import ThemeProvider from "./utils/Theme-Provider";
 import ClientProvider from "./hoc/ClientProvider";
 import AuthLoader from "./components/Auth/AuthLoader";
 import { Toaster } from "react-hot-toast";
+import ThemeChecker from "./components/Debug/ThemeChecker";
+import CssTest from "./components/Debug/CssTest";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -13,7 +15,7 @@ const nunito = Nunito({
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${nunito.variable} antialiased min-h-screen  bg-white dark:bg-gray-900 duration-300 transition-colors`}>
+      <body className={`${nunito.variable} antialiased min-h-screen`}>
         <ClientProvider>
           <ThemeProvider >
             <AuthLoader>

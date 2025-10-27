@@ -86,10 +86,10 @@ const TopDestinations = () => {
     <section className="py-20 bg-black border-t border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight">
-          Featured Destinations
+          Popular Destinations
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300 mb-12 max-w-3xl">
-          Discover bold, handpicked places to inspire your next journey.
+          Discover the most sought-after places around the world, handpicked by our travel experts.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {(loading ? Array.from({ length: 6 }) : featuredSix).map((p, i) => (

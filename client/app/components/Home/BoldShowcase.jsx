@@ -15,8 +15,23 @@ const highlights = [
   },
   {
     heading: "24/7 Support",
-    sub: "We’re with you, anywhere",
+    sub: "We're with you, anywhere",
     icon: "🛟",
+  },
+  {
+    heading: "Price Match",
+    sub: "Best rates guaranteed",
+    icon: "💰",
+  },
+  {
+    heading: "Flexible Booking",
+    sub: "Easy changes and cancellations",
+    icon: "📅",
+  },
+  {
+    heading: "Local Experts",
+    sub: "Insider knowledge and tips",
+    icon: "🗺️",
   },
 ];
 
@@ -70,7 +85,7 @@ const BoldShowcase = () => {
         </div>
 
         {/* Highlights */}
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {highlights.map((h) => (
             <div key={h.heading} className="rounded-2xl bg-white/70 dark:bg-gray-900/60 ring-1 ring-gray-200/60 dark:ring-white/10 p-4 text-center">
               <div className="text-2xl mb-1">{h.icon}</div>

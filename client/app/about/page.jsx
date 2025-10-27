@@ -4,37 +4,45 @@ import { useState } from "react";
 import Heading from "../components/MetaData/Heading";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
+import SEO from "../components/MetaData/SEO";
+import { WebsiteStructuredData, OrganizationStructuredData } from "../components/MetaData/StructuredData";
 
 export default function AboutPage() {
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState("");
 
   const stats = [
-    { label: "Happy Travelers", value: "120k+" },
-    { label: "Destinations", value: "450+" },
-    { label: "Curated Packages", value: "2,000+" },
-    { label: "Avg. Rating", value: "4.8/5" },
+    { label: "Happy Travelers", value: "15k+" },
+    { label: "Destinations", value: "120+" },
+    { label: "Curated Packages", value: "350+" },
+    { label: "Avg. Rating", value: "4.9/5" },
   ];
 
   const values = [
     { title: "Traveler-first", desc: "We design experiences around people, not just places." },
     { title: "Trust & Safety", desc: "Verified partners, secure payments, and clear policies." },
-    { title: "Sustainable", desc: "We promote eco-friendly stays and responsible travel." },
+    { title: "Sustainable Travel", desc: "We promote eco-friendly stays and responsible travel." },
     { title: "Local Impact", desc: "We collaborate with local guides and businesses." },
   ];
 
   const timeline = [
-    { year: "2022", text: "Flyobo was founded with a mission to simplify travel discovery." },
-    { year: "2023", text: "Launched curated packages and smart recommendations." },
-    { year: "2024", text: "Scaled to 100k+ travelers and expanded to international routes." },
-    { year: "2025", text: "Introducing AI trip planners and dynamic pricing tools." },
+    { year: "2024", text: "Flyobo was founded with a mission to simplify travel discovery." },
+    { year: "2025", text: "Launched curated packages and smart recommendations." },
   ];
 
   return (
     <>
+      <SEO 
+        title="About Flyobo - Our Mission and Story"
+        description="Learn about Flyobo's mission to make travel planning joyful, our values, and the story of how we became a trusted travel companion since our founding in 2024."
+        keywords="About Flyobo, Travel Company, Travel Mission, Travel Story, Sustainable Travel, Local Impact"
+        url="https://www.flyobo.com/about"
+      />
+      <WebsiteStructuredData />
+      <OrganizationStructuredData />
       <Heading
         title="About Flyobo"
-        description="We build delightful travel experiences through curation, technology, and a traveler-first approach."
+        description="We've been building delightful travel experiences through curation, technology, and a traveler-first approach since 2024."
         keywords="About, Flyobo, Travel, Mission, Story"
       />
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
@@ -48,7 +56,7 @@ export default function AboutPage() {
                 Travel made <span className="text-sky-400">personal</span> & delightful
               </h1>
               <p className="mt-4 text-lg text-gray-700 dark:text-gray-300">
-                Discover curated trips with Flyobo — from scenic hills to vibrant cities. We obsess over details so you can just enjoy the journey.
+                Discover curated trips with Flyobo — from scenic hills to vibrant cities. Since our launch in 2024, we've been obsessing over details so you can just enjoy the journey.
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
                 <a
@@ -98,7 +106,7 @@ export default function AboutPage() {
         <div className="rounded-3xl border border-sky-200 dark:border-sky-700 bg-white dark:bg-gray-900 p-10 sm:p-14 shadow-lg">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Our Mission</h2>
           <p className="mt-4 text-gray-700 dark:text-gray-300 text-lg">
-            To make planning a trip as joyful as the journey itself. We combine curated recommendations with transparency and tech.
+            Since 2024, we've been making planning a trip as joyful as the journey itself. We combine curated recommendations with transparency and technology.
           </p>
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((v) => (

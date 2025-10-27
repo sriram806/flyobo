@@ -21,6 +21,7 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 
 
 const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
+    console.log('Header component rendering');
     const user = useSelector((state) => state?.auth?.user);
     const dispatch = useDispatch();
     const [openSidebar, setOpenSidebar] = useState(false);
@@ -104,7 +105,6 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                         </nav>
                         <div className="flex items-center gap-2">
                             <div className="flex">
-                                <ThemeSwitcher />
                             </div>
                             {/* Notifications */}
                             {user && (

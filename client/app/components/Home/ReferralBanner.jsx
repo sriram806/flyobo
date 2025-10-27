@@ -27,7 +27,7 @@ const ReferralBanner = () => {
             </div>
             
             <p className="text-blue-100 text-lg mb-4">
-              Invite friends to Flyobo and earn rewards for every successful referral!
+              Invite friends to Flyobo and earn amazing rewards for every successful referral!
             </p>
             
             {/* Benefits */}

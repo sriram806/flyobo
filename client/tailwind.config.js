@@ -23,12 +23,14 @@ module.exports = {
           950: '#082f49',
         },
         background: {
-          light: '#f8fafc',
-          dark: '#0f172a',
+          DEFAULT: 'var(--color-bg-primary)',
+          primary: 'var(--color-bg-primary)',
+          secondary: 'var(--color-bg-secondary)',
         },
         foreground: {
-          light: '#1e293b',
-          dark: '#f1f5f9',
+          DEFAULT: 'var(--color-text-primary)',
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
         },
       },
       backgroundColor: {

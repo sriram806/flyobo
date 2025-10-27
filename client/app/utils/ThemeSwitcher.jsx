@@ -4,12 +4,15 @@ import { useTheme } from "next-themes";
 import { BiMoon, BiSun } from "react-icons/bi";
 
 const ThemeSwitcher = () => {
-  const { theme, setTheme, resolvedTheme, systemTheme } = useTheme();
+  console.log('ThemeSwitcher component rendering');
+  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Log theme information for debugging
+    console.log('Theme:', theme);
+  }, [theme]);
 
   // Don't render anything until mounted to avoid hydration mismatch
   if (!mounted) {
@@ -20,11 +23,12 @@ const ThemeSwitcher = () => {
     );
   }
 
-  const currentTheme = theme === 'system' ? systemTheme : theme;
-  const isLight = currentTheme === 'light';
+  const isLight = theme === 'light';
 
   const toggleTheme = () => {
-    setTheme(isLight ? "dark" : "light");
+    const newTheme = isLight ? "dark" : "light";
+    console.log('Setting theme to:', newTheme);
+    setTheme(newTheme);
   };
 
   return (

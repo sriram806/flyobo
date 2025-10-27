@@ -7,6 +7,8 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import Heading from "../components/MetaData/Heading";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
+import SEO from "../components/MetaData/SEO";
+import { WebsiteStructuredData, OrganizationStructuredData } from "../components/MetaData/StructuredData";
 
 export default function Page() {
   const [openItem, setOpenItem] = useState(-1);
@@ -87,6 +89,14 @@ export default function Page() {
 
   return (
     <>
+      <SEO 
+        title="Frequently Asked Questions - Flyobo Travel"
+        description="Find quick answers to common travel booking questions. Learn about packages, customization, cancellations, and customer support."
+        keywords="FAQ, Travel FAQ, Booking Questions, Travel Support, Package Information, Cancellation Policy"
+        url="https://www.flyobo.com/faq"
+      />
+      <WebsiteStructuredData />
+      <OrganizationStructuredData />
       <Heading 
         title="FAQ | Flyobo" 
         description="Find quick answers to common travel booking questions. Learn about packages, customization, cancellations, and customer support." 

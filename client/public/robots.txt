@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.flyobo.com
+
+# Sitemaps
+Sitemap: https://www.flyobo.com/sitemap.xml
+Sitemap: https://www.flyobo.com/sitemap-packages.xml
+Sitemap: https://www.flyobo.com/sitemap-gallery.xml

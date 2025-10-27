@@ -36,7 +36,10 @@ const Heading = ({
       <meta name="twitter:description" content={safeDescription} />
       <meta name="twitter:image" content={ogImageUrl} />
 
-      <link rel="icon" href={`/images/icon.png`} />
+      <link rel="icon" href="/images/icon.png" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.png" />
+      <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png" />
+      <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png" />
     </>
   );
 };

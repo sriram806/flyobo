@@ -37,8 +37,8 @@ export default function Newsletter() {
     <section className="bg-[#0b1220] py-12 sm:py-16 mt-0">
       <div className="max-w-5xl mx-auto px-4 lg:px-8">
         <div className="text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">Subscribe to Our Newsletter</h2>
-          <p className="mt-2 text-gray-300">Stay updated with our latest travel deals, new destinations, and travel tips.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">Get Exclusive Travel Deals</h2>
+          <p className="mt-2 text-gray-300">Subscribe to our newsletter and be the first to know about special offers, new destinations, and travel tips.</p>
         </div>
         <form onSubmit={onSubmit} className="mt-5 flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
           <input

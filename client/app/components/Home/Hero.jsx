@@ -11,8 +11,8 @@ const Hero = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const user = useSelector((state) => state?.auth?.user);
     const stats = [
-        { number: '10K+', label: 'Happy Travelers' },
-        { number: '500+', label: 'Destinations' },
+        { number: '15K+', label: 'Happy Travelers' },
+        { number: '120+', label: 'Destinations' },
         { number: '50+', label: 'Countries' },
         { number: '24/7', label: 'Support' },
     ];
