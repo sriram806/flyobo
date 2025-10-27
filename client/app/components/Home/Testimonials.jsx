@@ -2,86 +2,99 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Star, MessageSquare } from "lucide-react";
+import { FiStar, FiMessageSquare } from "react-icons/fi";
 
-// 🌄 Telugu / South India-inspired testimonials
 const testimonials = [
   {
     id: 1,
-    name: "Sai Teja Reddy",
-    role: "Adventure Enthusiast",
-    content:
-      "My trip to Araku Valley was breathtaking! The scenic train route, tribal coffee experience, and nature trails made it truly memorable. Flyobo managed everything flawlessly.",
-    avatar:
-      "https://ui-avatars.com/api/?name=Sai+Teja+Reddy&background=2563EB&color=fff",
+    name: "Sarah Johnson",
+    role: "Adventure Traveler",
+    content: "Flyobo made our honeymoon to Bali absolutely perfect! The attention to detail and personalized service exceeded our expectations. We'll definitely be booking with them again.",
+    avatar: "https://ui-avatars.com/api/?name=Sarah+Johnson&background=0D8ABC&color=fff",
     rating: 5,
-    location: "Araku Valley, Andhra Pradesh",
+    location: "Bali, Indonesia"
   },
   {
     id: 2,
-    name: "Keerthana Duvvuri",
-    role: "Family Traveler",
-    content:
-      "We had a wonderful time at Lambasingi — waking up to misty mornings felt magical! The local homestay, food, and hospitality were beyond expectations. Thank you, Flyobo!",
-    avatar:
-      "https://ui-avatars.com/api/?name=Keerthana+Duvvuri&background=F97316&color=fff",
+    name: "Michael Chen",
+    role: "Business Traveler",
+    content: "As a frequent business traveler, I appreciate Flyobo's seamless booking process and reliable service. Their 24/7 support team has always been there when I needed them.",
+    avatar: "https://ui-avatars.com/api/?name=Michael+Chen&background=7879F1&color=fff",
     rating: 5,
-    location: "Lambasingi, Visakhapatnam District",
+    location: "Tokyo, Japan"
   },
   {
     id: 3,
-    name: "Harsha Vardhan G",
-    role: "Solo Explorer",
-    content:
-      "Exploring Gandikota was a dream come true! The canyon views and camping experience were thrilling. Flyobo’s guides were friendly and ensured a safe journey.",
-    avatar:
-      "https://ui-avatars.com/api/?name=Harsha+Vardhan&background=DC2626&color=fff",
+    name: "Emma Rodriguez",
+    role: "Family Vacationer",
+    content: "Traveling with three kids can be challenging, but Flyobo made it so easy! Their family-friendly packages and thoughtful recommendations made our trip to Europe unforgettable.",
+    avatar: "https://ui-avatars.com/api/?name=Emma+Rodriguez&background=F59E0B&color=fff",
     rating: 5,
-    location: "Gandikota, Kadapa District",
+    location: "Paris, France"
   },
+  {
+    id: 4,
+    name: "David Wilson",
+    role: "Solo Traveler",
+    content: "As a solo traveler, safety and local experiences are my top priorities. Flyobo delivered both with their carefully curated solo traveler packages and local guide connections.",
+    avatar: "https://ui-avatars.com/api/?name=David+Wilson&background=10B981&color=fff",
+    rating: 5,
+    location: "Cusco, Peru"
+  },
+  {
+    id: 5,
+    name: "Priya Sharma",
+    role: "Luxury Traveler",
+    content: "The luxury package to Maldives was beyond words. Every detail was perfect, from the private villa to the personalized dining experiences. Flyobo truly understands luxury travel.",
+    avatar: "https://ui-avatars.com/api/?name=Priya+Sharma&background=EF4444&color=fff",
+    rating: 5,
+    location: "Maldives"
+  },
+  {
+    id: 6,
+    name: "James Thompson",
+    role: "Budget Traveler",
+    content: "I was skeptical about budget travel until I tried Flyobo. They helped me plan an amazing two-week trip across Southeast Asia without breaking the bank. Incredible value!",
+    avatar: "https://ui-avatars.com/api/?name=James+Thompson&background=8B5CF6&color=fff",
+    rating: 5,
+    location: "Bangkok, Thailand"
+  }
 ];
 
 const TestimonialCard = ({ testimonial, isActive }) => {
   return (
     <motion.div
-      whileHover={{ y: -6, scale: 1.03 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`rounded-2xl p-6 bg-white/90 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 shadow-md backdrop-blur-sm transition-all ${
-        isActive ? "ring-2 ring-indigo-500/70" : ""
+      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 ${
+        isActive ? "ring-2 ring-blue-500" : ""
       }`}
+      whileHover={{ y: -5 }}
     >
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center mb-4">
         <img
           src={testimonial.avatar}
           alt={testimonial.name}
-          className="w-12 h-12 rounded-full object-cover shadow-sm border border-gray-300 dark:border-gray-700"
+          className="w-12 h-12 rounded-full object-cover"
         />
-        <div>
-          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
-            {testimonial.name}
-          </h4>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {testimonial.role}
-          </p>
+        <div className="ml-4">
+          <h4 className="font-bold text-gray-900 dark:text-white">{testimonial.name}</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{testimonial.role}</p>
+        </div>
+        <div className="ml-auto flex items-center text-amber-500">
+          {[...Array(testimonial.rating)].map((_, i) => (
+            <FiStar key={i} className="fill-current" />
+          ))}
         </div>
       </div>
-
+      
       <div className="relative">
-        <MessageSquare className="absolute left-0 top-0 text-indigo-300 dark:text-indigo-600 h-4 w-4" />
-        <p className="pl-5 text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
+        <FiMessageSquare className="absolute top-0 left-0 text-gray-300 dark:text-gray-600 text-2xl" />
+        <p className="text-gray-700 dark:text-gray-300 pl-6 mt-2">
           {testimonial.content}
         </p>
       </div>
-
-      <div className="mt-5 flex items-center justify-between">
-        <span className="text-xs text-gray-500 dark:text-gray-400 italic">
-          📍 {testimonial.location}
-        </span>
-        <div className="flex gap-1 text-amber-500">
-          {[...Array(testimonial.rating)].map((_, i) => (
-            <Star key={i} size={14} fill="currentColor" stroke="none" />
-          ))}
-        </div>
+      
+      <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
+        <span>{testimonial.location}</span>
       </div>
     </motion.div>
   );
@@ -91,42 +104,32 @@ const Testimonials = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section className="py-20 bg-gradient-to-b from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      <div className="max-w-6xl mx-auto px-6 text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: -10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3"
-        >
-          Traveler Stories from Andhra
-        </motion.h2>
-
-        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12 text-sm md:text-base">
-          Real journeys, heartfelt moments — shared by travelers who explored
-          the beauty of Andhra Pradesh and South India with Flyobo.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((t, i) => (
-            <TestimonialCard
-              key={t.id}
-              testimonial={t}
-              isActive={i === activeIndex}
+    <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What Our Travelers Say</h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Don't just take our word for it - hear from travelers who've experienced Flyobo
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <TestimonialCard 
+              key={testimonial.id} 
+              testimonial={testimonial} 
+              isActive={index === activeIndex}
             />
           ))}
         </div>
-
-        <div className="mt-12">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() =>
-              setActiveIndex((prev) => (prev + 1) % testimonials.length)
-            }
-            className="px-6 py-2.5 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-all duration-300 shadow-md hover:shadow-lg"
+        
+        <div className="mt-12 text-center">
+          <button 
+            onClick={() => setActiveIndex((prev) => (prev + 1) % testimonials.length)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
           >
-            Show Another Story
-          </motion.button>
+            Read More Reviews
+          </button>
         </div>
       </div>
     </section>
