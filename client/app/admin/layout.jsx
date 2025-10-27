@@ -79,7 +79,6 @@ export default function AdminLayout({ children }) {
         </div>
       </main>
       <Footer />
-      <AuthDebugger />
     </AdminProtected>
   );
 }

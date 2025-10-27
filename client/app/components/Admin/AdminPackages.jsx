@@ -19,6 +19,12 @@ const AdminPackages = () => {
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
   const [pageSize, setPageSize] = useState(DefaultPageSize);
+  
+  // Excel bulk upload state
+  const [excelFile, setExcelFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadResults, setUploadResults] = useState(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
@@ -112,12 +118,120 @@ const AdminPackages = () => {
     }
   };
 
+  const handleExcelUpload = async () => {
+    if (!excelFile) {
+      toast.error("Please select an Excel file");
+      return;
+    }
+    
+    try {
+      setUploading(true);
+      setUploadResults(null);
+      
+      const formData = new FormData();
+      formData.append('excelFile', excelFile);
+      
+      const response = await authRequest.postForm(`${API_URL}/package/bulk-upload`, formData);
+      
+      setUploadResults(response.results);
+      toast.success(response.message || "Bulk upload completed");
+      
+      // Refresh package list
+      await load();
+      setExcelFile(null);
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || "Bulk upload failed";
+      toast.error(msg);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {/* Excel Bulk Upload Section */}
+      {showUploadModal && (
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Bulk Upload Packages</h3>
+            <button
+              onClick={() => { setShowUploadModal(false); setUploadResults(null); }}
+              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Upload Excel File (.xlsx, .xls)
+              </label>
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={(e) => setExcelFile(e.target.files[0])}
+                disabled={uploading}
+                className="block w-full text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer bg-white dark:bg-gray-800 focus:outline-none disabled:opacity-50"
+              />
+              {excelFile && (
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                  Selected: {excelFile.name}
+                </p>
+              )}
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={handleExcelUpload}
+                disabled={!excelFile || uploading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploading ? "Uploading..." : "Upload"}
+              </button>
+              <a
+                href="/package-template.xlsx"
+                download
+                className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Download Template
+              </a>
+            </div>
+            
+            {uploadResults && (
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Upload Results</h4>
+                <div className="space-y-1 text-sm">
+                  <p className="text-gray-700 dark:text-gray-300">Total: {uploadResults.total}</p>
+                  <p className="text-green-600 dark:text-green-400">✓ Success: {uploadResults.success.length}</p>
+                  <p className="text-red-600 dark:text-red-400">✗ Failed: {uploadResults.failed.length}</p>
+                </div>
+                {uploadResults.failed.length > 0 && (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400">View failed rows</summary>
+                    <ul className="mt-2 space-y-1 text-xs text-red-600 dark:text-red-400">
+                      {uploadResults.failed.map((f, i) => (
+                        <li key={i}>Row {f.row}: {f.error}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex-1">Packages</h2>
           <div className="flex gap-2">
+            <button
+              onClick={() => setShowUploadModal(!showUploadModal)}
+              className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              📊 Bulk Upload
+            </button>
             <input
               type="text"
               placeholder="Search packages..."

@@ -21,18 +21,36 @@ export const getGalleryItems = async (req, res) => {
 
 export const uploadGalleryItem = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file provided" });
+    const { imageUrl: providedUrl, tags } = req.body;
+
+    // Accept either an uploaded file or an existing image URL
+    if (!req.file && !providedUrl) {
+      return res.status(400).json({ message: "Please provide an image file or an imageUrl" });
     }
 
-    const imageUrl = getFileUrl(req, req.file.filename, 'gallery');
+    // Get image URL (string, not object)
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = getFileUrl(req, req.file.filename, 'gallery');
+    } else if (providedUrl) {
+      imageUrl = providedUrl.trim();
+    }
+
+    // Parse tags from comma-separated string to array
+    let tagsArray = [];
+    if (tags) {
+      if (typeof tags === 'string') {
+        tagsArray = tags.split(',').map(t => t.trim()).filter(Boolean);
+      } else if (Array.isArray(tags)) {
+        tagsArray = tags;
+      }
+    }
 
     const galleryItem = new Gallery({
-      ...req.body,
-      image: {
-        public_id: req.file.filename,
-        url: imageUrl
-      },
+      title: req.body.title,
+      image: imageUrl,
+      category: req.body.category,
+      tags: tagsArray,
       uploadedBy: req.user._id,
     });
 

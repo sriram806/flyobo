@@ -50,9 +50,11 @@ export default function Page() {
       formData.append('destination', form.destination.trim());
       formData.append('status', form.status);
       
-      // Add image file
+      // Add image file or URL
       if (image && image.file) {
         formData.append('image', image.file);
+      } else if (image && image.url && image.isUrl) {
+        formData.append('imageUrl', image.url);
       }
 
       await authRequest.postForm(`${API_URL}/package/`, formData);

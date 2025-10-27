@@ -3,6 +3,8 @@ import { createPackage, getAllPackagesServices } from '../services/package.servi
 import { getFileUrl, deleteFile, getFilenameFromUrl } from '../middleware/multerConfig.js';
 import mongoose from 'mongoose';
 import path from 'path';
+import xlsx from 'xlsx';
+import fs from 'fs';
 
 // ✅ 1. CREATE A PACKAGE
 export const uploadPackage = async (req, res) => {
@@ -39,8 +41,11 @@ export const uploadPackage = async (req, res) => {
       data.featured = data.featured === 'true' || data.featured === true;
     }
 
+    // Handle image - either file upload OR imageUrl
     if (req.file) {
       data.images = getFileUrl(req, req.file.filename, 'packages');
+    } else if (data.imageUrl && data.imageUrl.trim()) {
+      data.images = data.imageUrl.trim();
     }
 
     createPackage(data, res, req);
@@ -85,7 +90,7 @@ export const EditPackage = async (req, res) => {
       data.featured = data.featured === 'true' || data.featured === true;
     }
 
-    // Handle image update
+    // Handle image update - either file upload OR imageUrl
     if (req.file) {
       // Get existing package to delete old image
       const existingPackage = await Package.findById(packageId);
@@ -99,6 +104,8 @@ export const EditPackage = async (req, res) => {
 
       // Upload new image
       data.images = getFileUrl(req, req.file.filename, 'packages');
+    } else if (data.imageUrl && data.imageUrl.trim()) {
+      data.images = data.imageUrl.trim();
     }
     const UpdatedPackage = await Package.findByIdAndUpdate(
       packageId,
@@ -242,4 +249,110 @@ export const deletePackage = async (req, res) => {
   }
 };
 
+// ✅ 9. BULK UPLOAD PACKAGES FROM EXCEL
+export const bulkUploadPackages = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No Excel file provided' });
+    }
 
+    const filePath = req.file.path;
+    
+    // Read Excel file
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    
+    // Convert to JSON
+    const data = xlsx.utils.sheet_to_json(sheet);
+    
+    if (!data || data.length === 0) {
+      // Clean up uploaded file
+      fs.unlinkSync(filePath);
+      return res.status(400).json({ message: 'Excel file is empty or invalid' });
+    }
+
+    const results = {
+      success: [],
+      failed: [],
+      total: data.length
+    };
+
+    // Process each row
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      
+      try {
+        // Map Excel columns to package fields (case-insensitive)
+        const packageData = {
+          title: row.title || row.Title || row.TITLE || '',
+          description: row.description || row.Description || row.DESCRIPTION || '',
+          price: Number(row.price || row.Price || row.PRICE || 0),
+          estimatedPrice: Number(row.estimatedPrice || row['Estimated Price'] || row.ESTIMATEDPRICE || 0),
+          duration: Number(row.duration || row.Duration || row.DURATION || 0),
+          destination: row.destination || row.Destination || row.DESTINATION || '',
+          status: (row.status || row.Status || row.STATUS || 'active').toLowerCase(),
+          featured: Boolean(row.featured || row.Featured || row.FEATURED),
+          images: row.imageUrl || row.imageurl || row['Image URL'] || row.IMAGEURL || '',
+        };
+
+        // Parse arrays if provided
+        if (row.tags || row.Tags) {
+          const tagsStr = String(row.tags || row.Tags || '');
+          packageData.tags = tagsStr.split(',').map(t => t.trim()).filter(Boolean).join(',');
+        }
+
+        if (row.included || row.Included) {
+          const incStr = String(row.included || row.Included || '');
+          packageData.included = incStr.split(',').map(t => t.trim()).filter(Boolean);
+        }
+
+        if (row.excluded || row.Excluded) {
+          const excStr = String(row.excluded || row.Excluded || '');
+          packageData.excluded = excStr.split(',').map(t => t.trim()).filter(Boolean);
+        }
+
+        // Validate required fields
+        if (!packageData.title || !packageData.price || !packageData.duration || !packageData.destination) {
+          results.failed.push({
+            row: i + 2, // Excel row (1-indexed + header)
+            data: row,
+            error: 'Missing required fields (title, price, duration, destination)'
+          });
+          continue;
+        }
+
+        // Create package
+        const newPackage = await Package.create(packageData);
+        results.success.push({
+          row: i + 2,
+          packageId: newPackage._id,
+          title: newPackage.title
+        });
+
+      } catch (error) {
+        results.failed.push({
+          row: i + 2,
+          data: row,
+          error: error.message
+        });
+      }
+    }
+
+    // Clean up uploaded file
+    fs.unlinkSync(filePath);
+
+    res.status(201).json({
+      success: true,
+      message: `Bulk upload completed. ${results.success.length} packages created, ${results.failed.length} failed.`,
+      results
+    });
+
+  } catch (error) {
+    // Clean up file if exists
+    if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ message: error.message });
+  }
+};

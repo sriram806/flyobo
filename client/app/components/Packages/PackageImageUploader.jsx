@@ -14,6 +14,7 @@ const PackageImageUploader = ({
   label = "Package Cover Image"
 }) => {
   const [dragActive, setDragActive] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
 
   // Handle file selection
   const handleFiles = useCallback((files) => {
@@ -33,6 +34,9 @@ const PackageImageUploader = ({
       return;
     }
 
+    // Clear URL if file is selected
+    setImageUrl("");
+
     // Create preview URL and update
     const imageData = {
       file,
@@ -41,6 +45,19 @@ const PackageImageUploader = ({
     };
 
     onImageChange(imageData);
+  }, [onImageChange]);
+
+  // Handle URL input
+  const handleUrlChange = useCallback((url) => {
+    setImageUrl(url);
+    if (url.trim()) {
+      const imageData = {
+        url: url.trim(),
+        isUrl: true,
+        isNew: true
+      };
+      onImageChange(imageData);
+    }
   }, [onImageChange]);
 
   // Handle drag events
@@ -79,6 +96,7 @@ const PackageImageUploader = ({
 
   // Remove image
   const removeImage = useCallback(() => {
+    setImageUrl("");
     onImageChange(null);
   }, [onImageChange]);
 
@@ -90,8 +108,7 @@ const PackageImageUploader = ({
     }
   };
 
-  const imageUrl = image?.preview || image?.url || image;
-  const hasImage = imageUrl && imageUrl !== "";
+  const hasImage = image?.preview || image?.url || image;
 
   return (
     <div className="space-y-4">
@@ -106,7 +123,7 @@ const PackageImageUploader = ({
         <div className="relative group">
           <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <img
-              src={imageUrl}
+              src={image?.preview || image?.url || image}
               alt="Package cover"
               className="w-full h-full object-cover"
             />
@@ -136,7 +153,7 @@ const PackageImageUploader = ({
           </div>
           
           {/* New image indicator */}
-          {image?.isNew && (
+          {(image?.isNew || image?.isUrl) && (
             <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
               New
             </div>
@@ -180,10 +197,26 @@ const PackageImageUploader = ({
         </div>
       )}
 
+      {/* Image URL Input */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Or paste image URL
+        </label>
+        <input
+          type="url"
+          value={imageUrl}
+          onChange={(e) => handleUrlChange(e.target.value)}
+          placeholder="https://example.com/image.jpg"
+          disabled={disabled || hasImage}
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+      </div>
+
       {/* Upload Tips */}
       <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
         <p>• Recommended image size: 1200x800 pixels or higher</p>
         <p>• This image will be used as the package cover on cards and listings</p>
+        <p>• You can either upload a file or provide an image URL</p>
       </div>
     </div>
   );

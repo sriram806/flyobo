@@ -193,9 +193,11 @@ export default function Page() {
       formData.append('included', JSON.stringify(form.included));
       formData.append('excluded', JSON.stringify(form.excluded));
       
-      // Add new image file if changed
+      // Add new image file or URL if changed
       if (image && image.isNew && image.file) {
         formData.append('image', image.file);
+      } else if (image && image.isNew && image.url && image.isUrl) {
+        formData.append('imageUrl', image.url);
       }
 
       const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;

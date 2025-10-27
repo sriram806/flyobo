@@ -19,7 +19,6 @@ function parseFlexibleDate(input) {
 }
 
 export const createPackage = async (data, res, req) => {
-  // Sanitize reviews: ensure date is a valid Date or let schema default handle it
   if (Array.isArray(data?.reviews)) {
     data.reviews = data.reviews.map((r) => {
       const copy = { ...r };
@@ -27,7 +26,6 @@ export const createPackage = async (data, res, req) => {
       if (parsed) {
         copy.date = parsed;
       } else {
-        // Remove invalid date to use schema default (Date.now)
         delete copy.date;
       }
       return copy;

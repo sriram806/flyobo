@@ -104,3 +104,25 @@ export const getFilenameFromUrl = (url) => {
   if (!url) return null;
   return url.split('/').pop();
 };
+
+// File filter for Excel files
+const excelFilter = (req, file, cb) => {
+  const allowedTypes = /xlsx|xls/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = /spreadsheet|excel/.test(file.mimetype);
+
+  if (mimetype || extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Only Excel files are allowed (.xlsx, .xls)'), false);
+  }
+};
+
+// Configure multer for Excel uploads
+export const uploadExcelFile = multer({
+  storage: createStorage('excel'),
+  fileFilter: excelFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+}).single('excelFile');

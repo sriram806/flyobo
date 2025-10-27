@@ -91,6 +91,15 @@ const ProfileInfo = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
+              {user?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  aria-label="Admin dashboard"
+                >
+                  Admin
+                </Link>
+              )}
               <button
                 className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 focus:ring-2 focus:ring-sky-400"
                 aria-label="Notifications"

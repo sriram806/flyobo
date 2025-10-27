@@ -29,6 +29,7 @@ export default function AdminGallery() {
   const [title, setTitle] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState("");
   const [editId, setEditId] = useState(null);
@@ -45,6 +46,7 @@ export default function AdminGallery() {
     setTitle("");
     setImageFile(null);
     setImagePreview("");
+    setImageUrl("");
     setCategory("");
     setTags("");
   };
@@ -79,6 +81,7 @@ export default function AdminGallery() {
     setEditId(item._id);
     setTitle(item.title);
     setImageFile(null);
+    setImageUrl("");
     setImagePreview(item.image); // Show existing image as preview
     setCategory(item.category);
     setTags(Array.isArray(item.tags) ? item.tags.join(", ") : "");
@@ -114,8 +117,8 @@ export default function AdminGallery() {
       return;
     }
 
-    if (!editId && !imageFile) {
-      setError("Please select an image to upload");
+    if (!editId && !imageFile && !imageUrl.trim()) {
+      setError("Please provide an image file or a valid image URL");
       return;
     }
 
@@ -130,6 +133,8 @@ export default function AdminGallery() {
       
       if (imageFile) {
         formData.append('image', imageFile);
+      } else if (imageUrl.trim()) {
+        formData.append('imageUrl', imageUrl.trim());
       }
 
       if (editId) {
@@ -218,7 +223,21 @@ export default function AdminGallery() {
             accept="image/*"
             onChange={handleFileChange}
             disabled={loading}
-            className="md:col-span-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-gray-900 dark:text-white disabled:opacity-60"
+            className="md:col-span-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-gray-900 dark:text-white disabled:opacity-60"
+          />
+
+          <input
+            value={imageUrl}
+            onChange={(e) => {
+              setImageUrl(e.target.value);
+              if (e.target.value) {
+                setImagePreview(e.target.value);
+                setImageFile(null);
+              }
+            }}
+            placeholder="Or paste image URL"
+            disabled={loading}
+            className="md:col-span-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-gray-900 dark:text-white disabled:opacity-60"
           />
 
           <select

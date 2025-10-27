@@ -1,29 +1,63 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { store } from '@/redux/store';
+import { logout } from '@/redux/authSlice';
 
-// Create an axios instance with default configuration
+// Helper: get token from storage safely
+const getToken = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+  } catch {
+    return null;
+  }
+};
+
+// Helper: clear all auth state and storage
+const forceLogout = () => {
+  try {
+    // Clear Redux auth state
+    store.dispatch(logout());
+
+    // Clear storages
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+      sessionStorage.clear();
+      // Clear cookies
+      document.cookie?.split(';').forEach((c) => {
+        const eqPos = c.indexOf('=');
+        const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+      });
+    }
+  } catch {}
+};
+
+// Create an axios request config with Authorization header
 const createAuthenticatedRequest = () => {
+  const token = getToken();
   const config = {
     withCredentials: true,
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     }
   };
-
   return config;
 };
 
 // Create multipart form data request config
 const createAuthenticatedFormRequest = () => {
+  const token = getToken();
   const config = {
     withCredentials: true,
     timeout: 15000,
     headers: {
       'Content-Type': 'multipart/form-data',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     }
   };
-
   return config;
 };
 
@@ -31,30 +65,33 @@ const createAuthenticatedFormRequest = () => {
 const handleApiError = (error, customMessage = null) => {
   console.error('API Error:', error);
   
-  let message = customMessage || "An error occurred";
-  
-  if (error.response?.status === 401) {
-    message = "Authentication required. Please log in again.";
+  let message = customMessage || 'An error occurred';
+  const status = error?.response?.status;
+  const serverMsg = error?.response?.data?.message || '';
+
+  if (status === 401) {
+    // Token invalid or expired — force logout and redirect
+    message = serverMsg || 'Session expired. Please log in again.';
     toast.error(message);
-    // Redirect to login after a delay
+    forceLogout();
     setTimeout(() => {
-      window.location.href = '/login';
-    }, 2000);
+      if (typeof window !== 'undefined') window.location.href = '/login';
+    }, 500);
     return { isAuthError: true, message };
-  } else if (error.response?.status === 403) {
+  } else if (status === 403) {
     message = "You don't have permission to perform this action.";
     toast.error(message);
   } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
-    message = "Unable to connect to server. Please check your connection.";
+    message = 'Unable to connect to server. Please check your connection.';
     toast.error(message);
-  } else if (error.response?.status === 404) {
-    message = error?.response?.data?.message || "Resource not found.";
+  } else if (status === 404) {
+    message = serverMsg || 'Resource not found.';
     toast.error(message);
-  } else if (error.response?.status >= 500) {
-    message = "Server error. Please try again later.";
+  } else if (status >= 500) {
+    message = 'Server error. Please try again later.';
     toast.error(message);
   } else {
-    message = error?.response?.data?.message || error?.message || customMessage || "An error occurred";
+    message = serverMsg || error?.message || customMessage || 'An error occurred';
     toast.error(message);
   }
   
@@ -65,19 +102,16 @@ const handleApiError = (error, customMessage = null) => {
 export const authenticatedGet = async (url, params = {}) => {
   try {
     const config = createAuthenticatedRequest();
-    if (Object.keys(params).length > 0) {
+    if (params && Object.keys(params).length > 0) {
       config.params = params;
     }
-    
     const response = await axios.get(url, config);
-    
-    if (response.data.success === false) {
-      throw new Error(response.data.message || "Request failed");
+    if (response.data?.success === false) {
+      throw new Error(response.data.message || 'Request failed');
     }
-    
     return response.data;
   } catch (error) {
-    const errorInfo = handleApiError(error);
+    handleApiError(error);
     throw error;
   }
 };
@@ -87,14 +121,27 @@ export const authenticatedPost = async (url, data = {}) => {
   try {
     const config = createAuthenticatedRequest();
     const response = await axios.post(url, data, config);
-    
-    if (response.data.success === false) {
-      throw new Error(response.data.message || "Request failed");
+    if (response.data?.success === false) {
+      throw new Error(response.data.message || 'Request failed');
     }
-    
     return response.data;
   } catch (error) {
-    const errorInfo = handleApiError(error);
+    handleApiError(error);
+    throw error;
+  }
+};
+
+// Wrapper for authenticated multipart/form POST requests
+export const authenticatedFormPost = async (url, formData) => {
+  try {
+    const config = createAuthenticatedFormRequest();
+    const response = await axios.post(url, formData, config);
+    if (response.data?.success === false) {
+      throw new Error(response.data.message || 'Request failed');
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
     throw error;
   }
 };
