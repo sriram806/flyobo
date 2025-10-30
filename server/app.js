@@ -54,48 +54,6 @@ if (ORIGIN && !allowedOrigins.includes(ORIGIN)) {
   allowedOrigins.push(ORIGIN);
 }
 
-// ✅ Centralized CORS Middleware
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // Allow tools like Postman, curl
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn("❌ CORS blocked origin:", origin);
-        callback(new Error(`Origin ${origin} not allowed by CORS policy.`));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Accept",
-      "Origin",
-    ],
-  })
-);
-
-// ✅ Proper Preflight Response
-app.options("*", (req, res) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(204);
-});
-
 // ✅ Root Route
 app.get("/", (req, res) => {
   res.send(`
