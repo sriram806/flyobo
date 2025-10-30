@@ -38,24 +38,6 @@ const Home = () => {
       <WebsiteStructuredData />
       <OrganizationStructuredData />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        <ThemeTest />
-        <div className="fixed top-20 right-4 z-50 bg-white dark:bg-gray-800 p-2 rounded shadow-lg">
-          <div className="text-sm mb-1">Current: {theme}</div>
-          <div className="flex gap-1">
-            <button 
-              onClick={() => setTheme("light")}
-              className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs rounded"
-            >
-              Light
-            </button>
-            <button 
-              onClick={() => setTheme("dark")}
-              className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs rounded"
-            >
-              Dark
-            </button>
-          </div>
-        </div>
         <Heading
           title="Flyobo"
           description="Discover travel tips, destination guides, and vacation inspiration for your next adventure. Explore the world's amazing places with expert advice, top itineraries, and travel deals tailored for every kind of explorer."
