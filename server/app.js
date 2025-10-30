@@ -6,7 +6,6 @@ import http from 'http';
 import { Server } from 'socket.io';
 import connecttoDatabase from './database/mongodb.js';
 import { CLOUD_API_KEY, CLOUD_NAME, CLOUD_SECRET_KEY, PORT, FRONTEND_URL, ORIGIN } from './config/env.js';
-
 import { v2 as cloudinary } from 'cloudinary';
 
 // Routes
@@ -25,7 +24,7 @@ const app = express();
 connecttoDatabase();
 
 // Middleware
-app.use(express.json({ limit: "50mb" }));
+app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
 app.set('trust proxy', 1);
 
@@ -33,48 +32,57 @@ app.set('trust proxy', 1);
 cloudinary.config({
   cloud_name: CLOUD_NAME,
   api_key: CLOUD_API_KEY,
-  api_secret: CLOUD_SECRET_KEY
+  api_secret: CLOUD_SECRET_KEY,
 });
 
-// CORS Configuration
+// ✅ Allowed Origins (frontend + backups)
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:3001',
   'https://flyobo.onrender.com',
   'https://flyobo.vercel.app',
+  'https://flyobo.com',
   'https://www.flyobo.com',
-  'https://flyobo.com'
 ];
 
-// Add env-provided origins if present
+// Include env-based origins if set
 for (const extra of [FRONTEND_URL, ORIGIN]) {
   if (extra && !allowedOrigins.includes(extra)) {
     allowedOrigins.push(extra);
   }
 }
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn('❌ CORS blocked origin:', origin);
-      callback(new Error(`Origin ${origin} not allowed by CORS policy`));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With',
-    'Accept',
-    'Origin'
-  ],
-  credentials: true,
-  optionsSuccessStatus: 200 // Support legacy browsers
-}));
-app.options('*', cors());
+// ✅ Updated CORS Middleware
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn('❌ CORS blocked origin:', origin);
+        callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
+
+// ✅ Handle Preflight Requests (important for HTTPS)
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  return res.sendStatus(204);
+});
 
 // Root Route
 app.get('/', (req, res) => {
@@ -159,7 +167,7 @@ app.use('/api/v1/notification', notificationRoute);
 app.use('/api/v1/upload', uploadRouter);
 app.use('/api/v1/referal', referalRoute);
 
-// Serve static files from uploads directory
+// Serve static files
 app.use('/uploads', express.static('uploads'));
 
 // Create HTTP server & attach Socket.IO
@@ -167,15 +175,14 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
   },
 });
 
-// Make io globally available
+// Socket.IO
 app.locals.io = io;
 
-// Socket Events
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
@@ -186,10 +193,5 @@ io.on('connection', (socket) => {
 
 // Start Server
 server.listen(PORT, () => {
-  try {
-    console.log(`Server running at http://localhost:${PORT}`);
-  } catch (error) {
-    console.error('Error starting server: ', error);
-    process.exit(1);
-  }
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });
