@@ -40,7 +40,28 @@ export const createPackage = async (data, res, req) => {
   });
 };
 
-export const getAllPackagesServices = async () => {
-    const packages = await Package.find().sort({ createdAt: -1 });
+export const getAllPackagesServices = async (filters = {}) => {
+    let query = {};
+    
+    // Apply filters
+    if (filters.status) {
+        query.Status = filters.status;
+    }
+    
+    if (filters.featured !== undefined) {
+        query.featured = filters.featured === 'true' || filters.featured === true;
+    }
+    
+    let packagesQuery = Package.find(query).sort({ createdAt: -1 });
+    
+    // Apply limit if specified
+    if (filters.limit) {
+        const limit = parseInt(filters.limit);
+        if (!isNaN(limit) && limit > 0) {
+            packagesQuery = packagesQuery.limit(limit);
+        }
+    }
+    
+    const packages = await packagesQuery;
     return packages;
 };

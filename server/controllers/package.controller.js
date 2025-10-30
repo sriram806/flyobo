@@ -151,7 +151,8 @@ export const getSinglePackage = async (req, res) => {
 
 export const getAllPackages = async (req, res) => {
   try {
-      const packages = await getAllPackagesServices();
+      // Pass query parameters to the service
+      const packages = await getAllPackagesServices(req.query);
       res.status(200).json({
           success: true,
           packages

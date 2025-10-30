@@ -54,7 +54,7 @@ if (ORIGIN && !allowedOrigins.includes(ORIGIN)) {
   allowedOrigins.push(ORIGIN);
 }
 
-{/*// ✅ Centralized CORS Middleware
+// ✅ Centralized CORS Middleware
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -76,9 +76,9 @@ app.use(
       "Origin",
     ],
   })
-);*/}
+);
 
-{/*// ✅ Proper Preflight Response
+// ✅ Proper Preflight Response
 app.options("*", (req, res) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -94,8 +94,7 @@ app.options("*", (req, res) => {
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.sendStatus(204);
-});*/
-}
+});
 
 // ✅ Root Route
 app.get("/", (req, res) => {

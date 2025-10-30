@@ -82,8 +82,11 @@ const FeaturedPackages = () => {
           return;
         }
         
+        // Ensure we don't have trailing slashes
         const base = API_URL.replace(/\/$/, "");
         const url = `${base}/package/get-packages`;
+        
+        console.log("Fetching packages from:", url);
         
         const { data } = await axios.get(url, {
           params: { 
@@ -94,14 +97,21 @@ const FeaturedPackages = () => {
           withCredentials: true,
         });
         
+        console.log("Packages response:", data);
+        
+        // Handle different response structures
         const serverPackages = Array.isArray(data?.packages) 
           ? data.packages 
-          : data?.data?.packages || [];
+          : Array.isArray(data?.data?.packages)
+          ? data.data.packages
+          : Array.isArray(data?.data)
+          ? data.data
+          : [];
           
         setPackages(serverPackages.slice(0, 6));
       } catch (err) {
-        setError("Failed to load featured packages");
         console.error("Error fetching packages:", err);
+        setError("Failed to load featured packages");
       } finally {
         setLoading(false);
       }
