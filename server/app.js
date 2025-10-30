@@ -1,80 +1,103 @@
-import express from 'express';
-import cors from 'cors';
-import 'dotenv/config';
-import cookieParser from 'cookie-parser';
-import http from 'http';
-import { Server } from 'socket.io';
-import connecttoDatabase from './database/mongodb.js';
-import { CLOUD_API_KEY, CLOUD_NAME, CLOUD_SECRET_KEY, PORT, ORIGIN } from './config/env.js';
-import { v2 as cloudinary } from 'cloudinary';
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import cookieParser from "cookie-parser";
+import http from "http";
+import { Server } from "socket.io";
+import connecttoDatabase from "./database/mongodb.js";
+import {
+  CLOUD_API_KEY,
+  CLOUD_NAME,
+  CLOUD_SECRET_KEY,
+  PORT,
+  ORIGIN,
+} from "./config/env.js";
+import { v2 as cloudinary } from "cloudinary";
 
 // Routes
-import authRouter from './routes/auth.route.js';
-import userRoute from './routes/user.route.js';
-import analyticsRoute from './routes/analytics.route.js';
-import packageRouter from './routes/package.route.js';
-import layoutRoute from './routes/layout.route.js';
-import galleryRoute from './routes/gallery.route.js';
-import notificationRoute from './routes/notification.route.js';
-import bookingsRouter from './routes/bookings.route.js';
-import uploadRouter from './routes/upload.route.js';
-import referalRoute from './routes/referal.route.js';
+import authRouter from "./routes/auth.route.js";
+import userRoute from "./routes/user.route.js";
+import analyticsRoute from "./routes/analytics.route.js";
+import packageRouter from "./routes/package.route.js";
+import layoutRoute from "./routes/layout.route.js";
+import galleryRoute from "./routes/gallery.route.js";
+import notificationRoute from "./routes/notification.route.js";
+import bookingsRouter from "./routes/bookings.route.js";
+import uploadRouter from "./routes/upload.route.js";
+import referalRoute from "./routes/referal.route.js";
 
 const app = express();
 connecttoDatabase();
 
 // Middleware
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
-// Cloudinary config
+// ✅ Cloudinary Config
 cloudinary.config({
   cloud_name: CLOUD_NAME,
   api_key: CLOUD_API_KEY,
   api_secret: CLOUD_SECRET_KEY,
 });
 
-// ✅ Allowed Origins (frontend + backups)
+// ✅ Allowed Origins
 const allowedOrigins = [
   "https://flyobo.com",
   "https://www.flyobo.com",
-  "https://www.flyobo.com/"
+  "http://localhost:5173",
+  "http://localhost:3000",
 ];
 
-// ✅ Updated CORS Middleware
+// ✅ Add any environment origin dynamically
+if (ORIGIN && !allowedOrigins.includes(ORIGIN)) {
+  allowedOrigins.push(ORIGIN);
+}
+
+// ✅ Centralized CORS Middleware
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) return callback(null, true); // Allow tools like Postman, curl
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.warn('❌ CORS blocked origin:', origin);
-        callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+        console.warn("❌ CORS blocked origin:", origin);
+        callback(new Error(`Origin ${origin} not allowed by CORS policy.`));
       }
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     credentials: true,
-    optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+    ],
   })
 );
 
-// ✅ Handle Preflight Requests (important for HTTPS)
-app.options('*', (req, res) => {
+// ✅ Proper Preflight Response
+app.options("*", (req, res) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
+    res.setHeader("Access-Control-Allow-Origin", origin);
   }
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  return res.sendStatus(204);
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(204);
 });
 
-// Root Route
-app.get('/', (req, res) => {
+// ✅ Root Route
+app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -144,43 +167,42 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Routes
-app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/user', userRoute);
-app.use('/api/v1/package', packageRouter);
-app.use('/api/v1/analytics', analyticsRoute);
-app.use('/api/v1/layout', layoutRoute);
-app.use('/api/v1/gallery', galleryRoute);
-app.use('/api/v1/bookings', bookingsRouter);
-app.use('/api/v1/notification', notificationRoute);
-app.use('/api/v1/upload', uploadRouter);
-app.use('/api/v1/referal', referalRoute);
+// ✅ Routes
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/user", userRoute);
+app.use("/api/v1/package", packageRouter);
+app.use("/api/v1/analytics", analyticsRoute);
+app.use("/api/v1/layout", layoutRoute);
+app.use("/api/v1/gallery", galleryRoute);
+app.use("/api/v1/bookings", bookingsRouter);
+app.use("/api/v1/notification", notificationRoute);
+app.use("/api/v1/upload", uploadRouter);
+app.use("/api/v1/referal", referalRoute);
 
-// Serve static files
-app.use('/uploads', express.static('uploads'));
+// ✅ Serve static files
+app.use("/uploads", express.static("uploads"));
 
-// Create HTTP server & attach Socket.IO
+// ✅ HTTP + Socket.IO setup
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   },
 });
 
-// Socket.IO
 app.locals.io = io;
 
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
   });
 });
 
-// Start Server
+// ✅ Start Server
 server.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
