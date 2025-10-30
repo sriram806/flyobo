@@ -27,6 +27,7 @@ export const updateProfile = async (req, res) => {
     if (name) user.name = name;
     if (phone) user.phone = phone;
     if (bio) user.bio = bio;
+    if (role) user.role = role;
 
     await user.save();
 
