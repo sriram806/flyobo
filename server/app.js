@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import http from 'http';
 import { Server } from 'socket.io';
 import connecttoDatabase from './database/mongodb.js';
-import { CLOUD_API_KEY, CLOUD_NAME, CLOUD_SECRET_KEY, PORT, FRONTEND_URL, ORIGIN } from './config/env.js';
+import { CLOUD_API_KEY, CLOUD_NAME, CLOUD_SECRET_KEY, PORT, ORIGIN } from './config/env.js';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Routes
@@ -37,21 +37,9 @@ cloudinary.config({
 
 // ✅ Allowed Origins (frontend + backups)
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://flyobo.onrender.com',
-  'https://flyobo.vercel.app',
-  'https://flyobo.com',
-  'https://www.flyobo.com',
+  "https://flyobo.com",
+  "https://www.flyobo.com"
 ];
-
-// Include env-based origins if set
-for (const extra of [FRONTEND_URL, ORIGIN]) {
-  if (extra && !allowedOrigins.includes(extra)) {
-    allowedOrigins.push(extra);
-  }
-}
 
 // ✅ Updated CORS Middleware
 app.use(

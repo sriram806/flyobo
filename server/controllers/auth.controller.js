@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import sendMail from "../config/nodemailer.js";
 import { generateOTP } from "../services/otp.services.js";
 import { createSendToken } from "../services/auth.services.js";
-import { NODE_ENV } from "../config/env.js";
+import { NODE_ENV, FRONTEND_URL } from "../config/env.js";
 
 // 1. Registration
 export const registration = async (req, res) => {
@@ -181,13 +181,19 @@ export const login = async (req, res) => {
 // 5. Logout
 export const logout = async (req, res) => {
   try {
-    res.cookie("token", "", {
+    const cookieOptions = {
       expires: new Date(0),
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: NODE_ENV === "production" ? "none" : "lax",
       path: '/'
-    });
+    };
+    // Ensure the cookie domain is cleared the same way it was set
+    if (NODE_ENV === 'production' && FRONTEND_URL && FRONTEND_URL.includes('flyobo.com')) {
+      cookieOptions.domain = '.flyobo.com';
+    }
+
+    res.cookie("token", "", cookieOptions);
     res.status(200).json({ success: true, message: "Logout successful" });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Logout failed" });
