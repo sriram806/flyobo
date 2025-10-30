@@ -38,7 +38,8 @@ cloudinary.config({
 // ✅ Allowed Origins (frontend + backups)
 const allowedOrigins = [
   "https://flyobo.com",
-  "https://www.flyobo.com"
+  "https://www.flyobo.com",
+  "https://www.flyobo.com/"
 ];
 
 // ✅ Updated CORS Middleware
