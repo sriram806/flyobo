@@ -9,7 +9,7 @@ import { NODE_ENV, FRONTEND_URL } from "../config/env.js";
 export const registration = async (req, res) => {
   let createdUser;
   try {
-    const { name, email, password, referralCode } = req.body;
+    const { name, email, password, referralCode, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: "All fields are required." });
@@ -38,6 +38,7 @@ export const registration = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role: role || 'user', 
       otp,
       otpExpireAt
     });
@@ -188,10 +189,6 @@ export const logout = async (req, res) => {
       sameSite: NODE_ENV === "production" ? "none" : "lax",
       path: '/'
     };
-    // Ensure the cookie domain is cleared the same way it was set
-    if (NODE_ENV === 'production' && FRONTEND_URL && FRONTEND_URL.includes('flyobo.com')) {
-      cookieOptions.domain = '.flyobo.com';
-    }
 
     res.cookie("token", "", cookieOptions);
     res.status(200).json({ success: true, message: "Logout successful" });

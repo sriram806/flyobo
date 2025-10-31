@@ -18,7 +18,6 @@ import TravelBlog from './components/Home/TravelBlog';
 import TravelStats from './components/Home/TravelStats';
 import SpecialOffers from './components/Home/SpecialOffers';
 import WhyChooseUs from './components/Home/WhyChooseUs';
-import ThemeTest from './components/Debug/ThemeTest';
 import { useTheme } from 'next-themes';
 
 const Home = () => {

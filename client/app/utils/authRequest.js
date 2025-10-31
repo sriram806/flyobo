@@ -197,11 +197,29 @@ export const authenticatedDelete = async (url) => {
   }
 };
 
+// Logout API call
+export const logoutUser = async () => {
+  try {
+    const baseURL = process.env.NEXT_PUBLIC_SERVER_URI;
+    const config = createAuthenticatedRequest();
+    const response = await axios.post(`${baseURL}/auth/logout`, {}, config);
+    
+    forceLogout();
+    
+    return response.data;
+  } catch (error) {
+    console.error('Logout error:', error);
+    forceLogout();
+    throw error;
+  }
+};
+
 export default {
   get: authenticatedGet,
   post: authenticatedPost,
   postForm: authenticatedPostForm,
   put: authenticatedPut,
   delete: authenticatedDelete,
-  handleApiError
+  handleApiError,
+  logoutUser
 };

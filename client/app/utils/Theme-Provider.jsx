@@ -7,10 +7,7 @@ const ThemeProvider = ({ children, ...props }) => {
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    console.log('ThemeProvider mounting');
     setMounted(true);
-    // Log theme provider initialization
-    console.log('ThemeProvider mounted');
   }, []);
 
   if (!mounted) {
@@ -26,7 +23,7 @@ const ThemeProvider = ({ children, ...props }) => {
   return (
     <NextThemesProvider 
       attribute="class" 
-      defaultTheme="light" 
+      defaultTheme="dark" 
       enableSystem={false}
       storageKey="flyobo-theme"
       {...props}

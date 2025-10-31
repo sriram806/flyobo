@@ -12,6 +12,7 @@ import Verification from "../../utils/Models/Auth/Verification";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
+import { logoutUser } from "../../utils/authRequest";
 import ForgetPassword from "../../utils/Models/User/ForgetPassword";
 import ResetPassword from "../../utils/Models/User/ResetPassword";
 import Navitems from "../Navbar/Navitems";
@@ -86,6 +87,20 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
         }
     }, [openNotif]);
 
+    const handleLogout = async () => {
+        try {
+            // Call backend logout API to clear server-side session/cookie
+            await logoutUser();
+            toast.success("Logged out successfully");
+            setOpenSidebar(false);
+        } catch (error) {
+            // Even if API call fails, user is logged out locally by logoutUser
+            console.error('Logout error:', error);
+            toast.success("Logged out successfully");
+            setOpenSidebar(false);
+        }
+    };
+
     const handleClose = (e) => {
         if (e.target.id === "screen") {
             setOpenSidebar(false);
@@ -158,10 +173,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                             {user ? (
                                 <UserMenu
                                     user={user}
-                                    onLogout={() => {
-                                        dispatch(logout());
-                                        toast.success("Logged out");
-                                    }}
+                                    onLogout={handleLogout}
                                     variant="desktop"
                                 />
                             ) : (
@@ -195,10 +207,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                             {user ? (
                                 <UserMenu
                                     user={user}
-                                    onLogout={() => {
-                                        dispatch(logout());
-                                        toast.success("Logged out");
-                                    }}
+                                    onLogout={handleLogout}
                                     variant="mobile"
                                 />
                             ) : (
@@ -264,11 +273,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                                         </div>
                                         <button
                                             className="px-4 py-1.5 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-sm"
-                                            onClick={() => {
-                                                dispatch(logout());
-                                                setOpenSidebar(false);
-                                                toast.success("Logged out");
-                                            }}
+                                            onClick={handleLogout}
                                         >
                                             Logout
                                         </button>

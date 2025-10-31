@@ -26,6 +26,7 @@ import bookingsRouter from "./routes/bookings.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import referalRoute from "./routes/referal.route.js";
 
+// Initialize Express app
 const app = express();
 connecttoDatabase();
 
@@ -53,6 +54,21 @@ const allowedOrigins = [
 if (ORIGIN && !allowedOrigins.includes(ORIGIN)) {
   allowedOrigins.push(ORIGIN);
 }
+
+// ✅ Apply CORS Middleware
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+};
+
+app.use(cors(corsOptions));
 
 // ✅ Root Route
 app.get("/", (req, res) => {
@@ -125,7 +141,7 @@ app.get("/", (req, res) => {
   `);
 });
 
-// ✅ Routes
+// ✅ API Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/package", packageRouter);
@@ -137,9 +153,10 @@ app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/upload", uploadRouter);
 app.use("/api/v1/referal", referalRoute);
 
-// ✅ Serve static files
+// ✅ Serve static files (e.g., uploaded images)
 app.use("/uploads", express.static("uploads"));
 
+// ✅ Create HTTP Server & Socket.io Setup
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -152,10 +169,10 @@ const io = new Server(server, {
 app.locals.io = io;
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  console.log("🟢 User connected:", socket.id);
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    console.log("🔴 User disconnected:", socket.id);
   });
 });
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
+import { logoutUser } from "../utils/authRequest";
 import Heading from "../components/MetaData/Heading";
 import ProfileSetting from "../components/Profile/ProfileSetting";
 import AdminDashboard from "../components/Admin/AdminDashboard";
@@ -40,9 +41,21 @@ export default function AdminLayout({ children }) {
     "referrals-payouts": "/admin/referrals/payouts",
     "referrals-settings": "/admin/referrals/settings"
   };
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success("Logged out");
+  const handleLogout = async () => {
+    try {
+      // Call backend logout API to clear server-side session/cookie
+      await logoutUser();
+      
+      toast.success("Logged out successfully");
+      
+      // Redirect to home page
+      router.push("/");
+    } catch (error) {
+      // Even if API call fails, user is logged out locally by logoutUser
+      console.error('Logout error:', error);
+      toast.success("Logged out successfully");
+      router.push("/");
+    }
   };
 
   return (

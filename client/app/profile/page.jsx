@@ -15,6 +15,7 @@ import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import FavouriteBookings from "../components/Profile/FavouriteBookings";
 import ReferralProgram from "../components/Profile/ReferralProgram";
+import { logoutUser } from "../utils/authRequest";
 
 const Page = () => {
   const router = useRouter();
@@ -23,17 +24,21 @@ const Page = () => {
   const [selected, setSelected] = useState("overview");
   const dispatch = useDispatch();
 
-  const handleLogout = () => {
-    // Clear storage first
-    localStorage.removeItem("auth_token");
-    
-    // Dispatch logout to clear Redux state
-    dispatch(logout());
-    
-    toast.success("Logged out successfully");
-    
-    // Redirect to home page
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      // Call backend logout API to clear server-side session/cookie
+      await logoutUser();
+      
+      toast.success("Logged out successfully");
+      
+      // Redirect to home page
+      router.push("/");
+    } catch (error) {
+      // Even if API call fails, user is logged out locally by logoutUser
+      console.error('Logout error:', error);
+      toast.success("Logged out successfully");
+      router.push("/");
+    }
   };
 
   return (
