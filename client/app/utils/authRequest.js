@@ -1,7 +1,13 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { store } from '@/redux/store';
-import { logout } from '@/redux/authSlice';
+import { NEXT_PUBLIC_BACKEND_URL } from '@/app/config/env';
+
+// Lazy-load Redux to avoid circular dependency
+const getRedux = () => {
+  const { store } = require('@/redux/store');
+  const { logout } = require('@/redux/authSlice');
+  return { store, logout };
+};
 
 // Helper: get token from storage safely
 const getToken = () => {
@@ -17,6 +23,7 @@ const getToken = () => {
 const forceLogout = () => {
   try {
     // Clear Redux auth state
+    const { store, logout } = getRedux();
     store.dispatch(logout());
 
     // Clear storages
@@ -69,14 +76,22 @@ const handleApiError = (error, customMessage = null) => {
   const status = error?.response?.status;
   const serverMsg = error?.response?.data?.message || '';
 
-  if (status === 401) {
-    // Token invalid or expired — force logout and redirect
+    if (status === 401) {
+    // Token invalid or expired — force logout and open auth modal instead of full redirect
     message = serverMsg || 'Session expired. Please log in again.';
     toast.error(message);
     forceLogout();
-    setTimeout(() => {
-      if (typeof window !== 'undefined') window.location.href = '/login';
-    }, 500);
+    try {
+      if (typeof window !== 'undefined') {
+        // Use CustomEvent to request opening the auth modal
+        window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { route: 'Login' } }));
+      }
+    } catch (e) {
+      // fallback to redirect
+      setTimeout(() => {
+        if (typeof window !== 'undefined') window.location.href = '/login';
+      }, 500);
+    }
     return { isAuthError: true, message };
   } else if (status === 403) {
     message = "You don't have permission to perform this action.";
@@ -200,9 +215,12 @@ export const authenticatedDelete = async (url) => {
 // Logout API call
 export const logoutUser = async () => {
   try {
-    const baseURL = process.env.NEXT_PUBLIC_SERVER_URI;
+    const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!API_URL) {
+      throw new Error('API base URL is not configured');
+    }
     const config = createAuthenticatedRequest();
-    const response = await axios.post(`${baseURL}/auth/logout`, {}, config);
+    const response = await axios.post(`${API_URL}/auth/logout`, {}, config);
     
     forceLogout();
     

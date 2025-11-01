@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import UserProtected from "../hooks/userProtected";
 import Heading from "../components/MetaData/Heading";
 import { useDispatch } from "react-redux";
-import { logout } from "@/redux/authSlice";
+import { performLogout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
 import SideBarProfile from "../components/Profile/SideBarProfile";
 import ProfileInfo from "../components/Profile/ProfileInfo";
@@ -15,7 +15,6 @@ import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import FavouriteBookings from "../components/Profile/FavouriteBookings";
 import ReferralProgram from "../components/Profile/ReferralProgram";
-import { logoutUser } from "../utils/authRequest";
 
 const Page = () => {
   const router = useRouter();
@@ -26,15 +25,10 @@ const Page = () => {
 
   const handleLogout = async () => {
     try {
-      // Call backend logout API to clear server-side session/cookie
-      await logoutUser();
-      
+      await dispatch(performLogout());
       toast.success("Logged out successfully");
-      
-      // Redirect to home page
       router.push("/");
     } catch (error) {
-      // Even if API call fails, user is logged out locally by logoutUser
       console.error('Logout error:', error);
       toast.success("Logged out successfully");
       router.push("/");

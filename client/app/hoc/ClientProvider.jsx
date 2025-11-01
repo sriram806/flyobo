@@ -27,7 +27,13 @@ const ClientProvider = ({ children }) => {
                             });
                             // Avoid redirect loop if already on /login
                             if (!window.location.pathname.startsWith('/login')) {
-                                window.location.href = '/login';
+                                // Dispatch a global event to open the auth modal instead of navigating
+                                try {
+                                    window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { route: 'Login' } }));
+                                } catch (e) {
+                                    // fallback to redirect if CustomEvent fails
+                                    window.location.href = '/login';
+                                }
                             }
                         }
                     } catch {}

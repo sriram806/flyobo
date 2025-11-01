@@ -10,9 +10,9 @@ import Login from "../../utils/Models/Auth/Login";
 import SignUp from "../../utils/Models/Auth/SignUp";
 import Verification from "../../utils/Models/Auth/Verification";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "@/redux/authSlice";
+import { performLogout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
-import { logoutUser } from "../../utils/authRequest";
+// logout handled via redux performLogout thunk
 import ForgetPassword from "../../utils/Models/User/ForgetPassword";
 import ResetPassword from "../../utils/Models/User/ResetPassword";
 import Navitems from "../Navbar/Navitems";
@@ -40,6 +40,21 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    // Listen for global auth modal open events (dispatched by other modules)
+    useEffect(() => {
+        const handleOpenAuthModal = (e) => {
+            try {
+                const routeName = e?.detail?.route || 'Login';
+                if (setRoute) setRoute(routeName);
+                if (setOpen) setOpen(true);
+            } catch (err) {
+                console.warn('Failed to open auth modal from event', err);
+            }
+        };
+        window.addEventListener('open-auth-modal', handleOpenAuthModal);
+        return () => window.removeEventListener('open-auth-modal', handleOpenAuthModal);
+    }, [setOpen, setRoute]);
 
     const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -89,12 +104,11 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
 
     const handleLogout = async () => {
         try {
-            // Call backend logout API to clear server-side session/cookie
-            await logoutUser();
+            // Dispatch the logout thunk which calls server logout and clears client state
+            await dispatch(performLogout());
             toast.success("Logged out successfully");
             setOpenSidebar(false);
         } catch (error) {
-            // Even if API call fails, user is logged out locally by logoutUser
             console.error('Logout error:', error);
             toast.success("Logged out successfully");
             setOpenSidebar(false);

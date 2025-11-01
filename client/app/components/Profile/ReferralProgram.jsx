@@ -361,10 +361,15 @@ const ReferralProgram = () => {
           Your session has expired or you need to log in to access the referral program.
         </p>
         <div className="space-y-2">
-          <button 
+            <button 
             onClick={() => {
               setAuthError(false);
-              window.location.href = '/login';
+              // open auth modal via global event
+              try {
+                window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { route: 'Login' } }));
+              } catch (e) {
+                window.location.href = '/login';
+              }
             }}
             className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors mr-3"
           >

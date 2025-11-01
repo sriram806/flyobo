@@ -1,4 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { logoutUser as apiLogoutUser } from '@/app/utils/authRequest';
 
 const initialState = {
   user: null,
@@ -65,6 +66,51 @@ const authSlice = createSlice({
     },
   },
 });
+
+// Async thunk to call server logout and clear client state
+export const performLogout = createAsyncThunk(
+  'auth/performLogout',
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      // Call server logout endpoint which clears cookie/session
+      await apiLogoutUser();
+      // Clear client storage and cookies
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+          sessionStorage.removeItem('auth_token');
+          localStorage.clear();
+          sessionStorage.clear();
+          document.cookie?.split(';').forEach((c) => {
+            const eqPos = c.indexOf('=');
+            const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+          });
+        }
+      } catch (e) {}
+      // Update redux state
+      dispatch(logout());
+      return true;
+    } catch (err) {
+      // Still perform client-side cleanup even if server call fails
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+          sessionStorage.removeItem('auth_token');
+          localStorage.clear();
+          sessionStorage.clear();
+          document.cookie?.split(';').forEach((c) => {
+            const eqPos = c.indexOf('=');
+            const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+          });
+        }
+      } catch (e) {}
+      dispatch(logout());
+      return rejectWithValue(err?.message || 'Logout failed');
+    }
+  }
+);
 
 export const {
   setAuthUser,

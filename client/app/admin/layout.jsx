@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { logout } from "@/redux/authSlice";
+import { performLogout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
-import { logoutUser } from "../utils/authRequest";
+// logout handled via redux performLogout thunk
 import Heading from "../components/MetaData/Heading";
 import ProfileSetting from "../components/Profile/ProfileSetting";
 import AdminDashboard from "../components/Admin/AdminDashboard";
@@ -43,15 +43,10 @@ export default function AdminLayout({ children }) {
   };
   const handleLogout = async () => {
     try {
-      // Call backend logout API to clear server-side session/cookie
-      await logoutUser();
-      
+      await dispatch(performLogout());
       toast.success("Logged out successfully");
-      
-      // Redirect to home page
       router.push("/");
     } catch (error) {
-      // Even if API call fails, user is logged out locally by logoutUser
       console.error('Logout error:', error);
       toast.success("Logged out successfully");
       router.push("/");
