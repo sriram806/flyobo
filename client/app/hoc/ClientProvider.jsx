@@ -31,7 +31,6 @@ const ClientProvider = ({ children }) => {
                                 try {
                                     window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { route: 'Login' } }));
                                 } catch (e) {
-                                    // fallback to redirect if CustomEvent fails
                                     window.location.href = '/login';
                                 }
                             }
