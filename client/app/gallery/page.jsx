@@ -147,7 +147,7 @@ export default function GalleryPage() {
           <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center">
             <div className="flex items-center justify-center gap-3">
               <svg className="h-8 w-8 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4.172a2 2 0 0 1 1.414.586l1.828 1.828H19a2 2 0 0 1 2 2v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7z" /></svg>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">Saiteja Kojjja Memories</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">Customer Memories</h1>
             </div>
             <p className="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Latest photos shared by our community.</p>
             <div className="mt-4 flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
