@@ -59,7 +59,7 @@ export default function Page() {
 
       await authRequest.postForm(`${API_URL}/package/`, formData);
       toast.success("Package created successfully");
-      router.push("/admin/packages");
+      router.push("/admin?tab=package");
     } catch (err) {
       // Error handling is done in authRequest utility
       const msg = err?.response?.data?.message || err?.message || "Failed to create package";
@@ -200,7 +200,7 @@ export default function Page() {
             <div className="sm:col-span-2 flex items-center gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => router.push("/admin/packages")}
+                onClick={() => router.push("/admin?tab=package")}
                 className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel

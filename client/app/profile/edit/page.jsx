@@ -46,7 +46,7 @@ export default function EditProfilePage() {
       const updatedUser = data?.user || data?.data?.user || { ...user, name, email, phone };
       dispatch(setAuthUser(updatedUser));
       toast.success(data?.message || "Profile updated successfully");
-      router.push("/profile");
+      router.push("/profile?tab=overview");
     } catch (err) {
       console.error(err);
       const msg = err?.response?.data?.message || err?.message || "Failed to update profile";
@@ -121,7 +121,7 @@ export default function EditProfilePage() {
                   <div className="flex items-center gap-3 pt-2">
                     <button
                       type="button"
-                      onClick={() => router.push("/profile")}
+                      onClick={() => router.push("/profile?tab=settings")}
                       className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Cancel

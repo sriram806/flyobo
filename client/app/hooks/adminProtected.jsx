@@ -15,7 +15,7 @@ export default function AdminProtected({ children }) {
       return;
     }
     if (user && user.role !== "admin") {
-      router.replace("/profile");
+      router.replace("/profile?tab=overview");
     }
   }, [user, router]);
 

@@ -6,7 +6,6 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/redux/store";
 import { logout } from "@/redux/authSlice";
-import Loading from "@/app/components/LoadingScreen/Loading";
 
 const ClientProvider = ({ children }) => {
     useEffect(() => {
@@ -47,7 +46,7 @@ const ClientProvider = ({ children }) => {
 
     return (
         <Provider store={store}>
-            <PersistGate loading={<Loading />} persistor={persistor}>
+            <PersistGate persistor={persistor}>
                 {children}
             </PersistGate>
         </Provider>

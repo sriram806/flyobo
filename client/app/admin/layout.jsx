@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { performLogout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
@@ -19,12 +19,21 @@ import AdminProtected from "../hooks/adminProtected";
 import AdminSidebar from "../components/Admin/AdminSidebar";
 import AuthDebugger from "../components/Debug/AuthDebugger";
 
-export default function AdminLayout({ children }) {
+function AdminLayoutContent({ children }) {
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState("");
   const [selected, setSelected] = useState("dashboard");
   const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Sync selected tab with URL query parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setSelected(tab);
+    }
+  }, [searchParams]);
 
   const routeMap = {
     dashboard: "/admin",
@@ -64,8 +73,7 @@ export default function AdminLayout({ children }) {
               selected={selected}
               onSelect={(key) => {
                 setSelected(key);
-                const path = routeMap[key];
-                if (path) router.push(path);
+                router.push(`/admin?tab=${key}`);
               }}
               onLogout={handleLogout}
             />
@@ -88,5 +96,13 @@ export default function AdminLayout({ children }) {
       </main>
       <Footer />
     </AdminProtected>
+  );
+}
+
+export default function AdminLayout({ children }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </Suspense>
   );
 }

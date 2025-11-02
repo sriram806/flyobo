@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import UserProtected from "../hooks/userProtected";
 import Heading from "../components/MetaData/Heading";
 import { useDispatch } from "react-redux";
@@ -16,12 +16,21 @@ import Footer from "../components/Layout/Footer";
 import FavouriteBookings from "../components/Profile/FavouriteBookings";
 import ReferralProgram from "../components/Profile/ReferralProgram";
 
-const Page = () => {
+const ProfileContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState("");
   const [selected, setSelected] = useState("overview");
   const dispatch = useDispatch();
+
+  // Sync selected tab with URL query parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setSelected(tab);
+    }
+  }, [searchParams]);
 
   const handleLogout = async () => {
     try {
@@ -50,7 +59,10 @@ const Page = () => {
           <aside className="lg:col-span-1">
             <SideBarProfile
               selected={selected}
-              onSelect={(key) => setSelected(key)}
+              onSelect={(key) => {
+                setSelected(key);
+                router.push(`/profile?tab=${key}`);
+              }}
               onLogout={handleLogout}
             />
           </aside>
@@ -71,6 +83,14 @@ const Page = () => {
       </main>
       <Footer />
     </UserProtected>
+  );
+};
+
+const Page = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProfileContent />
+    </Suspense>
   );
 };
 

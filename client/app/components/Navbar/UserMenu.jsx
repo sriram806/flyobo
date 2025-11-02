@@ -92,7 +92,7 @@ export default function UserMenu({ user, onLogout, variant = "desktop" }) {
               role="menuitem"
               onClick={() => {
                 setOpen(false);
-                router.push("/profile");
+                router.push("/profile?tab=overview");
               }}
             >
               Profile

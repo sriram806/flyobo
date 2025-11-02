@@ -293,7 +293,7 @@ const AdminDashboard = () => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Packages</h2>
             <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Recently added or updated (latest 5)</p>
           </div>
-          <Link href="/admin/packages" className="text-sm text-sky-600 hover:underline">View all</Link>
+          <Link href="/admin?tab=package" className="text-sm text-sky-600 hover:underline">View all</Link>
         </div>
         {recentPackages.length === 0 ? (
           <p className="text-sm text-gray-600 dark:text-gray-400">No packages available.</p>

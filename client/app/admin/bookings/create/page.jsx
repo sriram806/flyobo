@@ -38,7 +38,7 @@ export default function AdminCreateBookingPage() {
         setUserId("");
         setPackageId("");
         setPaymentStatus("");
-        router.push("/admin/bookings");
+        router.push("/admin?tab=bookings");
       } else {
         toast.error(data?.message || "Failed to create booking");
       }
@@ -54,7 +54,7 @@ export default function AdminCreateBookingPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Create Booking</h1>
-        <Link href="/admin/bookings" className="text-sm text-rose-600 hover:underline">
+        <Link href="/admin?tab=bookings" className="text-sm text-rose-600 hover:underline">
           Back to Bookings
         </Link>
       </div>

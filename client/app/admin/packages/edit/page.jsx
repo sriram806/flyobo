@@ -146,7 +146,7 @@ export default function Page() {
 
   const handleCancel = () => {
     if (isDirty && !confirm("Discard unsaved changes?")) return;
-    router.push("/admin/packages");
+    router.push("/admin?tab=package");
   };
 
   const addItinerary = () => {
@@ -213,7 +213,7 @@ export default function Page() {
         headers,
       });
       toast.success("Package updated");
-      router.push("/admin/packages");
+      router.push("/admin?tab=package");
     } catch (err) {
       toast.error(err?.response?.data?.message || err?.message || "Failed to update package");
     } finally {
