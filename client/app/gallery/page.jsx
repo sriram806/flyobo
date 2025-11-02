@@ -4,6 +4,7 @@ import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import { Camera, Images, MapPin, Search, Calendar, X, ChevronLeft, ChevronRight, Play, Pause, Loader2 } from "lucide-react";
 
 const yearsFromItems = (items) => {
   const ys = new Set(
@@ -14,6 +15,153 @@ const yearsFromItems = (items) => {
   return [null, ...Array.from(ys).sort((a, b) => b - a)];
 };
 
+// Gallery Hero Component
+const GalleryHero = ({ stats }) => (
+  <div className="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-gradient-to-br from-sky-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-indigo-950">
+    <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07]">
+      <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+    </div>
+    <div className="absolute top-10 left-10 w-20 h-20 bg-sky-400/10 rounded-full blur-2xl" />
+    <div className="absolute bottom-10 right-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-2xl" />
+    <div className="relative z-10 p-12 sm:p-16 text-center">
+      <div className="inline-flex items-center justify-center mb-6">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-2xl blur-xl opacity-50 animate-pulse" />
+          <div className="relative p-4 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 shadow-2xl">
+            <Camera className="w-10 h-10 text-white" strokeWidth={2} />
+          </div>
+        </div>
+      </div>
+      <h1 className="text-4xl sm:text-6xl font-extrabold mb-4">
+        <span className="bg-gradient-to-r from-gray-900 via-sky-800 to-indigo-900 dark:from-white dark:via-sky-200 dark:to-indigo-200 bg-clip-text text-transparent">
+          Travel Gallery
+        </span>
+      </h1>
+      <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+        Explore breathtaking moments captured by our travel community
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+        <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600">
+              <Images className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Total Photos</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">{stats.photos}</p>
+            </div>
+          </div>
+        </div>
+        <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600">
+              <MapPin className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Destinations</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">50+</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Gallery Filters Component
+const GalleryFilters = ({ search, setSearch, year, setYear, years, category, setCategory, categories }) => (
+  <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-lg">
+    <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search photos by title..."
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/60 focus:border-transparent transition-all"
+        />
+      </div>
+      <div className="relative w-full lg:w-48">
+        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+        <select
+          value={year || ""}
+          onChange={(e) => setYear(e.target.value ? Number(e.target.value) : null)}
+          className="appearance-none w-full pl-10 pr-10 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition-all"
+        >
+          <option value="">All Years</option>
+          {years.filter(Boolean).map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+        <ChevronRight className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 rotate-90" />
+      </div>
+    </div>
+    <div className="flex flex-wrap gap-2 mt-4">
+      <button
+        onClick={() => setCategory(null)}
+        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+          !category
+            ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-lg shadow-sky-500/30 scale-105'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+        }`}
+      >
+        All Categories
+      </button>
+      {categories.filter(Boolean).map((c) => (
+        <button
+          key={c}
+          onClick={() => setCategory(c)}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+            category === c
+              ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-lg shadow-sky-500/30 scale-105'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+          }`}
+        >
+          {c}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+// Gallery Card Component
+const GalleryCard = ({ item, index, onOpen }) => (
+  <div className="group mb-4 break-inside-avoid-column">
+    <button
+      onClick={onOpen}
+      className="relative block w-full overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 shadow-md hover:shadow-2xl transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={item.image}
+        alt={item.title || `Photo ${index + 1}`}
+        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-x-0 bottom-0 p-5 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+        {item.title && (
+          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 drop-shadow-lg">
+            {item.title}
+          </h3>
+        )}
+        <div className="flex items-center gap-2 text-sm text-white/90">
+          <Calendar className="h-4 w-4" />
+          {new Date(item.createdAt || item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+        </div>
+      </div>
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
+        <div className="rounded-full bg-white/20 backdrop-blur-md p-2.5 border border-white/40 shadow-xl">
+          <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+      </div>
+    </button>
+  </div>
+);
+
+// Lightbox Component
 const Lightbox = ({ items, index, onClose, onPrev, onNext, autoplay, setAutoplay, onGoTo }) => {
   const item = items[index];
   useEffect(() => {
@@ -26,38 +174,56 @@ const Lightbox = ({ items, index, onClose, onPrev, onNext, autoplay, setAutoplay
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext]);
 
-  // autoplay
   useEffect(() => {
     if (!autoplay) return;
-    const t = setInterval(() => onNext(), 2500);
+    const t = setInterval(() => onNext(), 3000);
     return () => clearInterval(t);
   }, [autoplay, onNext]);
 
   if (!item) return null;
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <button aria-label="Close" className="absolute top-4 right-4 text-white/90 hover:text-white text-2xl" onClick={onClose}>×</button>
-      <button aria-label="Previous" className="absolute left-4 md:left-8 text-white/90 hover:text-white text-2xl" onClick={onPrev}>‹</button>
-      <button aria-label="Next" className="absolute right-4 md:right-8 text-white/90 hover:text-white text-2xl" onClick={onNext}>›</button>
-      <div className="max-w-6xl w-full">
-        {/* use img to avoid next/image domain config issues */}
+    <div className="fixed inset-0 z-[9999] bg-black/98 backdrop-blur-lg flex items-center justify-center p-4">
+      <button aria-label="Close" className="absolute top-4 right-4 z-10 flex items-center justify-center w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:rotate-90 group" onClick={onClose}>
+        <X className="w-6 h-6 group-hover:scale-110 transition-transform" />
+      </button>
+      <button aria-label="Previous" className="absolute left-4 md:left-8 z-10 flex items-center justify-center w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-110" onClick={onPrev}>
+        <ChevronLeft className="w-7 h-7" />
+      </button>
+      <button aria-label="Next" className="absolute right-4 md:right-8 z-10 flex items-center justify-center w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-110" onClick={onNext}>
+        <ChevronRight className="w-7 h-7" />
+      </button>
+      <div className="max-w-7xl w-full">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.image} alt={item.title || "Gallery image"} className="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl" />
-        {(item.title) && (
-          <div className="mt-3 text-center text-white/90">
-            <div className="text-base font-semibold">{item.title}</div>
-            <div className="text-sm">{new Date(item.createdAt || item.date).toLocaleDateString()}</div>
+        <img src={item.image} alt={item.title || "Gallery image"} className="w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl" />
+        {item.title && (
+          <div className="mt-6 text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">{item.title}</h2>
+            <p className="text-sm text-white/70">{new Date(item.createdAt || item.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
         )}
-        <div className="mt-3 flex items-center justify-center gap-4">
-          <button onClick={() => setAutoplay((v) => !v)} className="px-3 py-1.5 rounded-lg text-sm bg-white/10 hover:bg-white/20 text-white">
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <button
+            onClick={() => setAutoplay((v) => !v)}
+            className="px-5 py-3 rounded-full text-sm font-medium bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all duration-200 flex items-center gap-2 hover:scale-105"
+          >
+            {autoplay ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             {autoplay ? 'Pause' : 'Autoplay'}
           </button>
+          <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-sm font-medium text-white/90">
+            {index + 1} / {items.length}
+          </div>
         </div>
-        {/* Thumbnails */}
-        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="mt-6 flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {items.map((it, i) => (
-            <button key={(it._id || it.image || i) + i} onClick={() => onGoTo(i)} className={`h-14 w-20 flex-shrink-0 rounded-md overflow-hidden border ${i === index ? 'border-white' : 'border-white/30'}`}>
+            <button
+              key={(it._id || it.image || i) + i}
+              onClick={() => onGoTo(i)}
+              className={`h-16 w-24 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                i === index
+                  ? 'border-white scale-110 shadow-xl'
+                  : 'border-white/30 hover:border-white/60 hover:scale-105'
+              }`}
+            >
               <img src={it.image} alt={it.title || 'thumb'} className="h-full w-full object-cover" />
             </button>
           ))}
@@ -142,122 +308,61 @@ export default function GalleryPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
 
-        <section className="max-w-7xl mx-auto px-4 lg:px-8 py-6 sm:py-10 space-y-6">
+        <section className="max-w-7xl mx-auto px-4 lg:px-8 py-8 sm:py-12 space-y-8">
           {/* Hero */}
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center">
-            <div className="flex items-center justify-center gap-3">
-              <svg className="h-8 w-8 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4.172a2 2 0 0 1 1.414.586l1.828 1.828H19a2 2 0 0 1 2 2v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7z" /></svg>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">Customer Memories</h1>
-            </div>
-            <p className="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Latest photos shared by our community.</p>
-            <div className="mt-4 flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <span className="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800">Photos: <strong className="ml-1 text-gray-900 dark:text-white">{stats.photos}</strong></span>
-            </div>
-          </div>
+          <GalleryHero stats={stats} />
 
-          {/* Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by title or location..."
-              className="w-full sm:w-80 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/60"
-            />
-            <div className="relative w-full sm:w-48">
-              <select
-                value={year || ""}
-                onChange={(e) => setYear(e.target.value ? Number(e.target.value) : null)}
-                className="appearance-none w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/60"
-              >
-                <option value="">All</option>
-                {years.filter(Boolean).map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 9l-7 7-7-7" /></svg>
-            </div>
-            {/* Category chips */}
-            <div className="flex flex-wrap gap-2">
-              <button onClick={() => setCategory(null)} className={`px-3 py-1.5 rounded-full text-xs border ${!category ? 'bg-sky-600 text-white border-sky-600' : 'border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
-                All
-              </button>
-              {categories.filter(Boolean).map((c) => (
-                <button key={c} onClick={() => setCategory(c)} className={`px-3 py-1.5 rounded-full text-xs border ${category === c ? 'bg-sky-600 text-white border-sky-600' : 'border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Filters */}
+          <GalleryFilters
+            search={search}
+            setSearch={setSearch}
+            year={year}
+            setYear={setYear}
+            years={years}
+            category={category}
+            setCategory={setCategory}
+            categories={categories}
+          />
 
           {/* Masonry Gallery */}
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex flex-col items-center gap-3">
-                <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 dark:border-gray-700 border-t-sky-600" />
-                <p className="text-sm text-gray-600 dark:text-gray-400">Loading gallery...</p>
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-full blur-xl opacity-50 animate-pulse" />
+                  <Loader2 className="relative w-12 h-12 text-sky-600 dark:text-sky-400 animate-spin" />
+                </div>
+                <p className="text-base font-medium text-gray-600 dark:text-gray-400">Loading amazing photos...</p>
               </div>
             </div>
           ) : error ? (
-            <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-4">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <div className="rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                  <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
             </div>
           ) : items.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-12 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">No images match your filters.</p>
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-16 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+                <Images className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Photos Found</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Try adjusting your filters to see more results.</p>
             </div>
           ) : (
-            <div className="columns-2 lg:columns-3 gap-4 [column-fill:_balance]">
+            <div className="columns-2 lg:columns-3 xl:columns-4 gap-4 [column-fill:_balance]">
               {items.map((it, idx) => (
-                <div key={(it._id || it.image || idx) + idx} className="mb-4 break-inside-avoid-column">
-                  <button
-                    onClick={() => openAt(idx)}
-                    className="group relative block w-full overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 shadow-sm hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
-                  >
-                    {/* Image */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={it.image}
-                      alt={it.title || `Photo ${idx + 1}`}
-                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-
-                    {/* Content Overlay */}
-                    <div className="absolute inset-x-0 bottom-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-
-
-                      {/* Meta Info */}
-                      <div className="flex items-center gap-3 text-xs text-white/90">
-                        <span className="flex items-center gap-1">
-                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {new Date(it.createdAt || it.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                          {it.title && (
-                            <h3 className="text-base font-semibold text-white mb-1.5 line-clamp-2 drop-shadow-lg">
-                              {it.title}
-                            </h3>
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* View Icon - Appears on Hover */}
-                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="rounded-full bg-white/20 backdrop-blur-md p-2 border border-white/30">
-                        <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                </div>
+                <GalleryCard
+                  key={(it._id || it.image || idx) + idx}
+                  item={it}
+                  index={idx}
+                  onOpen={() => openAt(idx)}
+                />
               ))}
             </div>
           )}

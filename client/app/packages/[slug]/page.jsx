@@ -13,6 +13,7 @@ import {
   FaCopy,
   FaShareAlt,
 } from "react-icons/fa";
+import { MapPin, Calendar, Users, Star, Share2, ArrowLeft, Image as ImageIcon, Clock } from "lucide-react";
 import Header from "@/app/components/Layout/Header";
 import Footer from "@/app/components/Layout/Footer";
 
@@ -169,53 +170,64 @@ export default function PackageDetailPage({ params }) {
         ) : (
           <div className="space-y-6">
             {/* Hero */}
-            <section className="relative overflow-hidden rounded-3xl">
+            <section className="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={image}
                 alt={title}
-                className="w-full h-[280px] sm:h-[360px] object-cover"
+                className="w-full h-[320px] sm:h-[420px] object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              <div className="absolute top-4 left-4 flex items-center gap-2">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              
+              {/* Top Actions */}
+              <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
                 <Link
                   href="/packages"
-                  className="inline-flex items-center rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-xs text-gray-900 hover:bg-white"
+                  className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md border border-white/40 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-white shadow-lg transition-all duration-200 hover:scale-105"
                 >
-                  ← Back to Packages
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
                 </Link>
-              </div>
-              <div className="absolute top-4 right-4 flex items-center gap-2">
                 <button
                   onClick={() => handleShare("native")}
-                  className="inline-flex items-center rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-xs text-gray-900 hover:bg-white"
+                  className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md border border-white/40 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-white shadow-lg transition-all duration-200 hover:scale-105"
                 >
-                  <FaShareAlt className="mr-1" /> Share
+                  <Share2 className="w-4 h-4" />
+                  Share
                 </button>
               </div>
-              <div className="absolute bottom-5 left-5 right-5">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-white/90">
+              
+              {/* Bottom Content */}
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="flex flex-wrap items-center gap-2 mb-4">
                   {destination && (
-                    <span className="inline-flex items-center rounded-full bg-black/40 px-2 py-1">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1.5 text-sm font-medium text-white">
+                      <MapPin className="w-4 h-4" />
                       {destination}
-                    </span>
+                    </div>
                   )}
                   {duration ? (
-                    <span className="inline-flex items-center rounded-full bg-black/40 px-2 py-1">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1.5 text-sm font-medium text-white">
+                      <Calendar className="w-4 h-4" />
                       {duration} Days
-                    </span>
+                    </div>
                   ) : null}
-                  <span className="inline-flex items-center rounded-full bg-black/40 px-2 py-1">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1.5 text-sm font-medium text-white">
+                    <Star className="w-4 h-4 fill-current text-amber-400" />
+                    {pkg?.rating || '4.5'}
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1.5 text-sm font-medium text-white">
+                    <Users className="w-4 h-4" />
                     {(pkg?.reviews?.length || 0)} reviews
-                  </span>
+                  </div>
                 </div>
-                <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white drop-shadow">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-lg">
                   {title}
                 </h1>
                 {pkg?.subtitle && (
-                  <div className="mt-1 text-sm text-white/90 line-clamp-1">
+                  <p className="mt-2 text-base sm:text-lg text-white/90 line-clamp-2">
                     {pkg.subtitle}
-                  </div>
+                  </p>
                 )}
               </div>
             </section>
@@ -225,16 +237,16 @@ export default function PackageDetailPage({ params }) {
               {/* Left content with tabs */}
               <div className="lg:col-span-2">
                 {/* Tabs */}
-                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-                  <div className="flex flex-wrap gap-1 px-3 pt-3">
+                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md">
+                  <div className="flex flex-wrap gap-2 p-4 border-b border-gray-200 dark:border-gray-800">
                     {["Overview", "Gallery", "Inclusions", "Itinerary", "Policies"].map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-3 py-2 text-sm rounded-lg ${
+                        className={`px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                           activeTab === tab
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
-                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                            ? "bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-lg shadow-sky-500/30"
+                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                         }`}
                       >
                         {tab}
@@ -261,7 +273,7 @@ export default function PackageDetailPage({ params }) {
                             <div className="text-base font-semibold text-gray-900 dark:text-white">Ready to Experience This Journey?</div>
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Contact our travel experts to customize this package and get the best deals.</p>
                           </div>
-                          <a href={`https://wa.me/919291237399?text=${encodeURIComponent('Hi, I am interested in ' + title + ' package.')}`} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm">Contact Expert</a>
+                          <a href={`https://wa.me/919291237999?text=${encodeURIComponent('Hi, I am interested in ' + title + ' package.')}`} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm">Contact Expert</a>
                         </div>
 
                         {pkg?.tags && (
@@ -374,7 +386,7 @@ export default function PackageDetailPage({ params }) {
                   <div className="text-xs text-gray-500">Final Price <span className="font-medium text-gray-700 dark:text-gray-300">per person</span></div>
 
                   <div className="mt-4 space-y-2">
-                    <a href={`https://wa.me/916300146756?text=${encodeURIComponent('I want to book ' + title + ' package. Link: ' + url)}`} target="_blank" rel="noreferrer" className="w-full inline-flex items-center justify-center rounded-lg bg-emerald-600 text-white px-3 py-2 text-sm hover:bg-emerald-700">📞 Book on WhatsApp</a>
+                    <a href={`https://wa.me/919291237999?text=${encodeURIComponent('I want to book ' + title + ' package. Link: ' + url)}`} target="_blank" rel="noreferrer" className="w-full inline-flex items-center justify-center rounded-lg bg-emerald-600 text-white px-3 py-2 text-sm hover:bg-emerald-700">📞 Book on WhatsApp</a>
                     <Link href={`/packages/checkout?slug=${encodeURIComponent(slug || '')}`} className="block text-center rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800">Proceed to Checkout</Link>
                   </div>
 

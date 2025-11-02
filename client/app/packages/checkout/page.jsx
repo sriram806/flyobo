@@ -68,7 +68,7 @@ export default function CheckoutPage() {
       `Total: ₹${total.toLocaleString('en-IN')}%0A` +
       `Name: ${name}%0AEmail: ${email}%0APhone: ${phone}%0A` +
       (notes ? `Notes: ${encodeURIComponent(notes)}` : "");
-    const url = `https://wa.me/919291237399?text=${msg}`;
+    const url = `https://wa.me/919291237999?text=${msg}`;
     window.open(url, "_blank");
   };
 

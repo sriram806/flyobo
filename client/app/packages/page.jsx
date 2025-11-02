@@ -12,6 +12,7 @@ import ResultsToolbar from "../components/Packages/ResultsToolbar";
 import EmptyState from "../components/Packages/EmptyState";
 import PackageCard from "../components/Packages/PackageCard";
 import Footer from "../components/Layout/Footer";
+import { MapPin, Compass, Sparkles, TrendingUp } from "lucide-react";
 
 
 export default function Page() {
@@ -145,34 +146,114 @@ export default function Page() {
       />
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
 
-      <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="mt-6 rounded-3xl bg-gradient-to-r from-sky-100 to-blue-100 dark:from-sky-900/30 dark:to-blue-900/30 p-8 sm:p-12 text-center">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">Discover Your Perfect Journey</h1>
-            <p className="mt-2 text-gray-700 dark:text-gray-300">Explore our handpicked selection of travel packages across India.<br />From serene beaches to majestic mountains, find your dream destination.</p>
+      <section className="relative overflow-hidden bg-gray-50 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8 py-12 sm:py-16">
+          <div className="relative rounded-3xl border border-gray-200 dark:border-gray-800 bg-gradient-to-br from-sky-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-indigo-950 overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07]">
+              <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+            </div>
+            
+            {/* Floating Elements */}
+            <div className="absolute top-10 left-10 w-24 h-24 bg-sky-400/10 rounded-full blur-2xl" />
+            <div className="absolute bottom-10 right-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-2xl" />
+            
+            <div className="relative z-10 p-8 sm:p-16 text-center">
+              {/* Icon Badge */}
+              <div className="inline-flex items-center justify-center mb-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-2xl blur-xl opacity-50 animate-pulse" />
+                  <div className="relative p-4 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 shadow-2xl">
+                    <Compass className="w-10 h-10 text-white" strokeWidth={2} />
+                  </div>
+                </div>
+              </div>
+              
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
+                <span className="bg-gradient-to-r from-gray-900 via-sky-800 to-indigo-900 dark:from-white dark:via-sky-200 dark:to-indigo-200 bg-clip-text text-transparent">
+                  Discover Your Perfect Journey
+                </span>
+              </h1>
+              
+              <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
+                Explore our handpicked selection of travel packages across India. From serene beaches to majestic mountains, find your dream destination.
+              </p>
+              
+              {/* Stats */}
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+                <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600">
+                      <MapPin className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Destinations</p>
+                      <p className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">100+</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Packages</p>
+                      <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{items.length}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600">
+                      <TrendingUp className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Rating</p>
+                      <p className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">4.8★</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-      <main className="max-w-7xl mx-auto px-4 lg:px-8 py-6 sm:py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-          <div className="relative flex-1">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search destination or package..."
-              className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent px-4 py-3 outline-none focus:ring-2  focus:ring-sky-500/60"
-            />
+      <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8 sm:py-12 bg-gray-50 dark:bg-gray-900">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-lg mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div className="relative flex-1">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search destination or package..."
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/60 focus:border-transparent transition-all"
+              />
+            </div>
+            <div className="relative w-full lg:w-56">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="appearance-none w-full pl-10 pr-10 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition-all"
+              >
+                <option value="popular">Most Popular</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+              </select>
+              <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-900 px-3 py-3 outline-none focus:ring-2  focus:ring-sky-500/60"
-          >
-            <option value="popular">Most popular</option>
-            <option value="price_low">Price: Low to High</option>
-            <option value="price_high">Price: High to Low</option>
-            <option value="rating">Top rated</option>
-          </select>
         </div>
 
         {error && (
@@ -206,7 +287,7 @@ export default function Page() {
             {!loading && filtered.length === 0 ? (
               <EmptyState title="No packages found" message="Try changing your filters or search query." onReset={resetFilters} />
             ) : view === 'grid' ? (
-              <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {(loading ? Array.from({ length: pageSize }) : pageItems).map((p, idx) => (
                   <PackageCard key={p?._id || p?.id || idx} pkg={p} loading={loading} />
                 ))}
