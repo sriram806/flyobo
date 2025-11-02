@@ -1,66 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import AdminProtected from "../../hooks/adminProtected";
-import BookingAnalytics from "../../components/Admin/BookingAnalytics";
-import { BarChart3, Heart, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Wrench } from "lucide-react";
 
 export default function AdminAnalyticsPage() {
-  const [activeTab, setActiveTab] = useState('bookings');
-
-  const tabs = [
-    {
-      id: 'bookings',
-      name: 'Booking Analytics',
-      icon: BarChart3,
-      component: BookingAnalytics
-    }
-  ];
-
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || BookingAnalytics;
+  const router = useRouter();
 
   return (
     <AdminProtected>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <TrendingUp className="mr-3 h-8 w-8 text-blue-600" />
-                  Advanced Analytics
-                </h1>
-                <p className="text-gray-600 mt-2">
-                  Comprehensive insights into your business performance
-                </p>
-              </div>
-            </div>
-
-            {/* Tab Navigation */}
-            <div className="mt-6 border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <tab.icon className="h-4 w-4 mr-2" />
-                    {tab.name}
-                  </button>
-                ))}
-              </nav>
-            </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 transition-colors duration-300">
+        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-10 flex flex-col items-center justify-center space-y-5 max-w-lg w-full border border-gray-200 dark:border-gray-700 text-center">
+          {/* Icon */}
+          <div className="bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 p-4 rounded-full">
+            <Wrench size={40} />
           </div>
 
-          {/* Analytics Content */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <ActiveComponent />
+          {/* Title & Text */}
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+            Analytics — Under Maintenance
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            This section is temporarily unavailable while we perform updates.  
+            Please check back soon.
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 pt-4">
+            <button
+              onClick={() => router.push("/admin")}
+              className="px-5 py-2 rounded-xl bg-gray-800 text-white hover:bg-gray-700 transition duration-300"
+            >
+              Back to Dashboard
+            </button>
+
+            <button
+              onClick={() => window.location.reload()}
+              className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
+            >
+              Refresh
+            </button>
           </div>
         </div>
       </div>

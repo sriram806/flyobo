@@ -182,12 +182,25 @@ export const login = async (req, res) => {
 // 5. Logout
 export const logout = async (req, res) => {
   try {
+    // Mirror domain logic from createSendToken so the cookie cleared matches the domain it was set on
+    let cookieDomain;
+    try {
+      const raw = process.env.COOKIE_DOMAIN || FRONTEND_URL;
+      if (raw) {
+        const host = raw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
+        cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+      }
+    } catch (e) {
+      cookieDomain = undefined;
+    }
+
     const cookieOptions = {
       expires: new Date(0),
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: NODE_ENV === "production" ? "none" : "lax",
-      path: '/'
+      path: '/',
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
 
     res.cookie("token", "", cookieOptions);

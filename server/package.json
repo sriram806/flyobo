@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "maintenance:enable": "node scripts/maintenance.js enable",
+    "maintenance:disable": "node scripts/maintenance.js disable",
+    "maintenance:status": "node scripts/maintenance.js status"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

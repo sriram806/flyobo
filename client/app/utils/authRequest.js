@@ -215,15 +215,23 @@ export const authenticatedDelete = async (url) => {
 // Logout API call
 export const logoutUser = async () => {
   try {
-    const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+    // Prefer the named exported backend url, fall back to process env variations
+    const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_SERVER_URI;
     if (!API_URL) {
-      throw new Error('API base URL is not configured');
+      console.error('Logout error: API base URL is not configured (tried NEXT_PUBLIC_BACKEND_URL and NEXT_PUBLIC_SERVER_URI)');
+      // Still attempt to call a relative path as a last resort
+      const config = createAuthenticatedRequest();
+      const responseRelative = await axios.post(`/api/v1/auth/logout`, {}, config).catch((e) => { throw e; });
+      forceLogout();
+      return responseRelative.data;
     }
+
     const config = createAuthenticatedRequest();
-    const response = await axios.post(`${API_URL}/auth/logout`, {}, config);
-    
+    const logoutUrl = `${API_URL.replace(/\/$/, '')}/auth/logout`;
+    const response = await axios.post(logoutUrl, {}, config);
+
     forceLogout();
-    
+
     return response.data;
   } catch (error) {
     console.error('Logout error:', error);

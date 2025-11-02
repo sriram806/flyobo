@@ -11,7 +11,9 @@ authRoute.post('/register', registration);
 authRoute.post('/verify-otp', isAuthenticated, VerifyOTP);
 authRoute.post('/resend-otp', isAuthenticated, ResendOTP);
 authRoute.post('/login', login);
-authRoute.post('/logout', isAuthenticated, logout);
+// Allow logout to be called even when the client doesn't have a valid session/token
+// so the server can clear any cookies. Do not require authentication middleware here.
+authRoute.post('/logout', logout);
 authRoute.post('/forgot-password', forgotPassword);
 authRoute.post('/reset-password', resetPassword);
 

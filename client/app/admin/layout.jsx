@@ -42,6 +42,10 @@ function AdminLayoutContent({ children }) {
     bookings: "/admin/bookings",
     reports: "/admin/reports",
     gallery: "/admin/gallery",
+    analytics: "/admin/analytics",
+    "analytics-users": "/admin/analytics/users",
+    "analytics-packages": "/admin/analytics/packages",
+    "analytics-bookings": "/admin/analytics/bookings",
     "referrals-overview": "/admin/referrals",
     "referrals-users": "/admin/referrals/users",
     "referrals-analytics": "/admin/referrals/analytics",
@@ -73,24 +77,15 @@ function AdminLayoutContent({ children }) {
               selected={selected}
               onSelect={(key) => {
                 setSelected(key);
-                router.push(`/admin?tab=${key}`);
+                // Navigate to a concrete admin route when available, otherwise fall back to query param
+                const path = routeMap[key] || `/admin?tab=${key}`;
+                router.push(path);
               }}
               onLogout={handleLogout}
             />
           </aside>
           <section className="lg:col-span-3">
-            {children ? (
-              children
-            ) : (
-              <>
-                {selected === "dashboard" && <AdminDashboard />}
-                {selected === "users" && (<AdminUsers />)}
-                {selected === "package" && (<AdminPackages />)}
-                {selected === "bookings" && (<AdminBookings />)}
-                {selected === "reports" && <ProfileSetting />}
-                {selected === "gallery" && <AdminGallery />}
-              </>
-            )}
+            {children}
           </section>
         </div>
       </main>

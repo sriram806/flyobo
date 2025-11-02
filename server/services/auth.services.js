@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { JWT_SECRET, JWT_EXPIRES_IN, NODE_ENV } from "../config/env.js";
+import { JWT_SECRET, JWT_EXPIRES_IN, NODE_ENV, FRONTEND_URL } from "../config/env.js";
 
 export const parseExpiryToMs = (expiresIn) => {
     const match = expiresIn.match(/^(\d+)([smhd])$/);
@@ -25,12 +25,27 @@ export const signToken = (id) => {
 
 export const createSendToken = (user, statusCode, res, message) => {
     const token = signToken(user._id);
-        const cookieOptions = {
+    // Derive a cookie domain when frontend is deployed on a sibling host (e.g. www.flyobo.com)
+    let cookieDomain;
+    try {
+        const raw = process.env.COOKIE_DOMAIN || FRONTEND_URL;
+        if (raw) {
+            // strip protocol and path
+            const host = raw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
+            // ensure cookie is set for root domain (example: .flyobo.com)
+            cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+        }
+    } catch (e) {
+        cookieDomain = undefined;
+    }
+
+    const cookieOptions = {
         httpOnly: true,
         secure: NODE_ENV === "production",
         sameSite: NODE_ENV === "production" ? "none" : "lax",
         maxAge: parseExpiryToMs(JWT_EXPIRES_IN),
         path: '/',
+        ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
     res.cookie("token", token, cookieOptions);
     const safeUser = {

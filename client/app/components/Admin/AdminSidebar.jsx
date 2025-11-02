@@ -35,7 +35,6 @@ const items = [
       { key: "package", label: "Packages", icon: HiOutlineBookmark },
       { key: "bookings", label: "Bookings", icon: HiOutlineCog },
       { key: "analytics", label: "Advanced Analytics", icon: HiOutlineBell },
-      { key: "reports", label: "Reports", icon: HiOutlineSearch },
       { key: "gallery", label: "Gallery", icon: HiOutlineCamera },
     ],
   },
@@ -139,8 +138,6 @@ const AdminSidebar = ({ selected = "overview", onSelect, onLogout }) => {
                 const Icon = it.icon;
                 const dynamicBadge = it.key === "bookings"
                   ? bookingsCount
-                  : it.key === "reports"
-                  ? notificationsCount
                   : it.badge;
                 return (
                   <button

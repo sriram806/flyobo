@@ -12,7 +12,9 @@ import {
   PORT,
   ORIGIN,
 } from "./config/env.js";
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";    
+
+// Maintenance middleware
 
 // Routes
 import authRouter from "./routes/auth.route.js";
@@ -29,6 +31,7 @@ import referalRoute from "./routes/referal.route.js";
 // Initialize Express app
 const app = express();
 connecttoDatabase();
+
 
 // Middleware
 app.use(express.json({ limit: "50mb" }));
