@@ -11,6 +11,7 @@ import {
   HiOutlineSearch,
   HiOutlineCamera,
   HiOutlineCog,
+  HiCollection,
 } from "react-icons/hi";
 import {
   Gift,
@@ -35,6 +36,7 @@ const items = [
       { key: "package", label: "Packages", icon: HiOutlineBookmark },
       { key: "bookings", label: "Bookings", icon: HiOutlineCog },
       { key: "analytics", label: "Advanced Analytics", icon: HiOutlineBell },
+      { key: "contacts", label: "Contact", icon: HiCollection},
       { key: "gallery", label: "Gallery", icon: HiOutlineCamera },
     ],
   },

@@ -30,6 +30,8 @@ import bookingsRouter from "./routes/bookings.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import referalRoute from "./routes/referal.route.js";
 import referralAdminRoute from "./routes/referral.admin.route.js";
+import contactRoute from "./routes/contact.route.js";
+import contactAdminRoute from "./routes/contact.admin.route.js";
 
 // Initialize Express app
 const app = express();
@@ -162,6 +164,8 @@ app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/upload", uploadRouter);
 app.use("/api/v1/referal", referalRoute);
 app.use("/api/v1/referral-admin", referralAdminRoute);
+app.use("/api/v1/contact", contactRoute);
+app.use("/api/v1/contact-admin", contactAdminRoute);
 
 // ✅ Serve static files (e.g., uploaded images)
 app.use("/uploads", express.static("uploads"));

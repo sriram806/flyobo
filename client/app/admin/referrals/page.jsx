@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import ReferralOverview from './ReferralOverview'
 import ReferralLeaderboard from './ReferralLeaderboard'
-import ReferralRewardManagement from './ReferralRewardManagement'
+import ReferralRewardsManagement from './ReferralRewardsManagement'
 
 export default function ReferralPage() {
   const [activeTab, setActiveTab] = useState('overview') // 'overview', 'leaderboard', or 'rewards'
@@ -48,7 +48,7 @@ export default function ReferralPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           {activeTab === 'overview' && <ReferralOverview />}
           {activeTab === 'leaderboard' && <ReferralLeaderboard />}
-          {activeTab === 'rewards' && <ReferralRewardManagement />}
+          {activeTab === 'rewards' && <ReferralRewardsManagement />}
         </div>
       </div>
     </div>

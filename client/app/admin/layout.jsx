@@ -43,6 +43,7 @@ function AdminLayoutContent({ children }) {
     reports: "/admin/reports",
     gallery: "/admin/gallery",
     analytics: "/admin/analytics",
+    contact: "/admin/conatcts",
     "analytics-users": "/admin/analytics/users",
     "analytics-packages": "/admin/analytics/packages",
     "analytics-bookings": "/admin/analytics/bookings",

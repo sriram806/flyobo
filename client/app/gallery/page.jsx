@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState, useCallback, useEffect } from "react";
+import React, { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import axios from "axios";
@@ -23,7 +23,7 @@ const GalleryHero = ({ stats }) => (
     </div>
     <div className="absolute top-10 left-10 w-20 h-20 bg-sky-400/10 rounded-full blur-2xl" />
     <div className="absolute bottom-10 right-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-2xl" />
-    <div className="relative z-10 p-12 sm:p-16 text-center">
+      <div className="relative z-10 p-8 sm:p-12 lg:p-16 text-center">
       <div className="inline-flex items-center justify-center mb-6">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-2xl blur-xl opacity-50 animate-pulse" />
@@ -32,14 +32,20 @@ const GalleryHero = ({ stats }) => (
           </div>
         </div>
       </div>
-      <h1 className="text-4xl sm:text-6xl font-extrabold mb-4">
+      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold mb-3">
         <span className="bg-gradient-to-r from-gray-900 via-sky-800 to-indigo-900 dark:from-white dark:via-sky-200 dark:to-indigo-200 bg-clip-text text-transparent">
           Travel Gallery
         </span>
       </h1>
-      <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
-        Explore breathtaking moments captured by our travel community
+      <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
+        Explore breathtaking moments captured by our travel community. Share yours to inspire fellow travellers.
       </p>
+
+      <div className="flex items-center justify-center gap-3 mb-6">
+        <a href="/contact" className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full shadow-lg text-sm">Share your photo</a>
+        <a href="/gallery" className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-sm rounded-full">Browse all</a>
+      </div>
+
       <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
         <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
           <div className="flex items-center gap-3">
@@ -241,6 +247,7 @@ export default function GalleryPage() {
   const [category, setCategory] = useState(null);
   const [autoplay, setAutoplay] = useState(false);
   const [open, setOpen] = useState(false);
+  const mainRef = useRef(null);
   const [route, setRoute] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -276,6 +283,46 @@ export default function GalleryPage() {
   useEffect(() => {
     setLightboxIndex(-1);
   }, [search, year, category]);
+
+  // Scroll to the gallery main section after 2s using GSAP if available (fallback to native smooth scroll)
+  useEffect(() => {
+    let mounted = true;
+    const timer = setTimeout(async () => {
+      if (!mounted) return;
+      try {
+        const gsapModule = await import('gsap');
+        const gsap = gsapModule.gsap || gsapModule.default || gsapModule;
+        // Try to load ScrollToPlugin if available
+        try {
+          const plugin = await import('gsap/ScrollToPlugin');
+          const ScrollToPlugin = plugin.default || plugin;
+          if (ScrollToPlugin && gsap && gsap.registerPlugin) gsap.registerPlugin(ScrollToPlugin);
+        } catch (e) {
+          // plugin not available, we'll use basic gsap.to with window if possible
+        }
+
+        const targetY = (mainRef.current && mainRef.current.offsetTop) || 0;
+        if (gsap && gsap.to && gsap.plugins && gsap.plugins.ScrollTo) {
+          gsap.to(window, { duration: 1, scrollTo: { y: targetY - 20 } });
+        } else if (gsap && gsap.to) {
+          // fallback: animate window.scrollTop via gsap tweening
+          gsap.to(window, { duration: 1, scrollTo: targetY - 20 });
+        } else {
+          // final fallback: native smooth scroll
+          window.scrollTo({ top: Math.max(0, targetY - 20), behavior: 'smooth' });
+        }
+      } catch (err) {
+        // GSAP not installed or failed to load – fallback to native smooth scroll
+        const targetY = (mainRef.current && mainRef.current.offsetTop) || 0;
+        window.scrollTo({ top: Math.max(0, targetY - 20), behavior: 'smooth' });
+      }
+    }, 2000);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Fetch from backend
   useEffect(() => {

@@ -26,8 +26,13 @@ export const createLayout = async (req, res) => {
             });
         }
 
-        if (type === "FAQ") {
-            const { faq } = req.body;
+    if (type === "FAQ") {
+      // Only admin users are allowed to create FAQ layouts
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      }
+
+      const { faq } = req.body;
             if (!faq || !Array.isArray(faq) || faq.length === 0) {
                 return res.status(400).json({ success: false, message: "FAQ items are required" });
             }
@@ -149,11 +154,16 @@ export const editLayout = async (req, res) => {
             );
         }
 
-        if (type === "FAQ") {
-            const { faq } = req.body;
-            if (!faq || !Array.isArray(faq)) {
-                return res.status(400).json({ success: false, message: "FAQ items are required" });
-            }
+    if (type === "FAQ") {
+      // Only admin users are allowed to edit FAQ layouts
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      }
+
+      const { faq } = req.body;
+      if (!faq || !Array.isArray(faq)) {
+        return res.status(400).json({ success: false, message: "FAQ items are required" });
+      }
 
             const faqData = faq
                 .map(({ question, answer }) => (question && answer ? { question, answer } : null))
@@ -235,6 +245,11 @@ export const deleteLayout = async (req, res) => {
 
     // FAQ deletion (delete full FAQ or single item if id provided)
     if (type === "FAQ") {
+      // Only admin users are allowed to delete FAQs
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      }
+
       if (id) {
         const filteredFaq = layout.faq.filter((item) => item._id.toString() !== id);
         layout.faq = filteredFaq;

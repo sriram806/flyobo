@@ -132,12 +132,36 @@ export default function Page() {
     return list;
   }, [items, search, sortBy, minPrice, maxPrice, minRating, minDays, maxDays, categories]);
 
+  const uniqueCategories = useMemo(() => {
+    try {
+      const set = new Set();
+      (items || []).forEach((p) => {
+        const raw = p?.category ?? p?.categoryName ?? p?.tags ?? "";
+        if (Array.isArray(raw)) {
+          raw.forEach((r) => {
+            if (r) set.add(String(r).trim());
+          });
+        } else if (typeof raw === "string") {
+          raw.split(",").forEach((r) => {
+            if (r && r.trim()) set.add(r.trim());
+          });
+        } else if (raw != null) {
+          set.add(String(raw));
+        }
+      });
+      return Array.from(set).filter(Boolean).sort();
+    } catch (e) {
+      console.error("Failed to compute uniqueCategories", e);
+      return [];
+    }
+  }, [items]);
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Heading
         title="Packages | Flyobo"
         description="Explore top travel packages, tours, and holiday deals with Flyobo. Compare prices, discover unique destinations, and plan your perfect adventure today."
@@ -158,7 +182,7 @@ export default function Page() {
             <div className="absolute top-10 left-10 w-24 h-24 bg-sky-400/10 rounded-full blur-2xl" />
             <div className="absolute bottom-10 right-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-2xl" />
             
-            <div className="relative z-10 p-8 sm:p-16 text-center">
+            <div className="relative z-10 p-8 sm:p-12 lg:p-16 text-center">
               {/* Icon Badge */}
               <div className="inline-flex items-center justify-center mb-6">
                 <div className="relative">
@@ -169,17 +193,30 @@ export default function Page() {
                 </div>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
+                <div className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                  <nav className="inline-flex items-center gap-2 text-xs text-gray-500">
+                    <a href="/" className="hover:underline">Home</a>
+                    <span>/</span>
+                    <span className="font-semibold">Packages</span>
+                  </nav>
+                </div>
+
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold mb-3">
                 <span className="bg-gradient-to-r from-gray-900 via-sky-800 to-indigo-900 dark:from-white dark:via-sky-200 dark:to-indigo-200 bg-clip-text text-transparent">
                   Discover Your Perfect Journey
                 </span>
               </h1>
               
-              <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-6">
                 Explore our handpicked selection of travel packages across India. From serene beaches to majestic mountains, find your dream destination.
               </p>
               
-              {/* Stats */}
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <a href="/contact" className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-sm text-sm">Plan a custom trip</a>
+                  <a href="/packages" className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-sm rounded-full">View all packages</a>
+                </div>
+
+                {/* Stats */}
               <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
                 <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-3">
@@ -274,6 +311,7 @@ export default function Page() {
             setMaxDays={setMaxDays}
             categories={categories}
             setCategories={setCategories}
+            uniqueCategories={uniqueCategories}
             onReset={resetFilters}
           />
           <div className="lg:col-span-3">
@@ -287,7 +325,7 @@ export default function Page() {
             {!loading && filtered.length === 0 ? (
               <EmptyState title="No packages found" message="Try changing your filters or search query." onReset={resetFilters} />
             ) : view === 'grid' ? (
-              <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {(loading ? Array.from({ length: pageSize }) : pageItems).map((p, idx) => (
                   <PackageCard key={p?._id || p?.id || idx} pkg={p} loading={loading} />
                 ))}
@@ -311,6 +349,6 @@ export default function Page() {
         </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

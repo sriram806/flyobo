@@ -26,6 +26,7 @@ import AdminBookings from "../components/Admin/AdminBookings";
 import AdminGallery from "../components/Admin/AdminGallery";
 import AdminProtected from "../hooks/adminProtected";
 import { Loader2 } from "lucide-react";
+import AdminContacts from "../components/Admin/AdminContacts";
 
 // Advanced Analytics Component
 function AdminAnalytics() {
@@ -46,80 +47,6 @@ function AdminAnalytics() {
     { value: '180', label: '6 Months' },
     { value: '365', label: '1 Year' },
   ];
-
-  const processDataByPeriod = (items, days) => {
-    if (!items || items.length === 0) return { data: [], labels: [] };
-    
-    const now = new Date();
-    const counts = [];
-    const labels = [];
-    
-    if (days === '1') {
-      // 24 hours - hourly
-      for (let i = 23; i >= 0; i--) {
-        const hour = new Date(now.getTime() - i * 3600000);
-        labels.push(hour.getHours() + ':00');
-        const count = items.filter(item => {
-          const itemDate = new Date(item.createdAt || item.created_at);
-          return itemDate.getHours() === hour.getHours() && 
-                 itemDate.getDate() === hour.getDate();
-        }).length;
-        counts.push(count);
-      }
-    } else if (days === '7') {
-      // 7 days - daily
-      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(now.getTime() - i * 86400000);
-        labels.push(dayNames[date.getDay()]);
-        const count = items.filter(item => {
-          const itemDate = new Date(item.createdAt || item.created_at);
-          return itemDate.toDateString() === date.toDateString();
-        }).length;
-        counts.push(count);
-      }
-    } else if (days === '30') {
-      // 30 days - weekly
-      for (let i = 3; i >= 0; i--) {
-        labels.push(`Week ${4-i}`);
-        const weekStart = new Date(now.getTime() - (i * 7 + 7) * 86400000);
-        const weekEnd = new Date(now.getTime() - i * 7 * 86400000);
-        const count = items.filter(item => {
-          const itemDate = new Date(item.createdAt || item.created_at);
-          return itemDate >= weekStart && itemDate < weekEnd;
-        }).length;
-        counts.push(count);
-      }
-    } else if (days === '180') {
-      // 6 months - monthly
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      for (let i = 5; i >= 0; i--) {
-        const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        labels.push(monthNames[month.getMonth()]);
-        const count = items.filter(item => {
-          const itemDate = new Date(item.createdAt || item.created_at);
-          return itemDate.getMonth() === month.getMonth() && 
-                 itemDate.getFullYear() === month.getFullYear();
-        }).length;
-        counts.push(count);
-      }
-    } else {
-      // 1 year - monthly
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      for (let i = 11; i >= 0; i--) {
-        const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        labels.push(monthNames[month.getMonth()]);
-        const count = items.filter(item => {
-          const itemDate = new Date(item.createdAt || item.created_at);
-          return itemDate.getMonth() === month.getMonth() && 
-                 itemDate.getFullYear() === month.getFullYear();
-        }).length;
-        counts.push(count);
-      }
-    }
-    
-    return { data: counts, labels };
-  };
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -174,64 +101,6 @@ function AdminAnalytics() {
       </div>
     );
   }
-
-  const renderChart = (title, data, labels, color) => {
-    if (!data || data.length === 0) return null;
-    const maxValue = Math.max(...data, 1);
-    
-    return (
-      <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border border-gray-200 dark:border-gray-800">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
-        
-        {/* Bar Chart */}
-        <div className="mb-6">
-          <div className="h-48 flex items-end justify-between gap-2 px-2">
-            {data.map((value, i) => {
-              const height = (value / maxValue) * 100;
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="relative w-full group">
-                    <div 
-                      className={`w-full bg-${color}-500 hover:bg-${color}-600 rounded-t transition-all cursor-pointer`}
-                      style={{ height: `${Math.max(height * 1.6, 8)}px` }}
-                    />
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      {value}
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate w-full text-center">
-                    {labels[i]}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">
-              {data.reduce((a, b) => a + b, 0)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Average</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">
-              {Math.round(data.reduce((a, b) => a + b, 0) / data.length)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Peak</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">
-              {Math.max(...data)}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
 
   return (
@@ -350,6 +219,7 @@ function AdminPageContent() {
       {tab === "bookings" && <AdminBookings />}
       {tab === "gallery" && <AdminGallery />}
       {tab === "analytics" && <AdminAnalytics />}
+      {tab === "contacts" && <AdminContacts />}
     </AdminProtected>
   );
 }

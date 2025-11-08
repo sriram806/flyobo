@@ -108,7 +108,7 @@ const FavouriteBookings = () => {
     return (
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-12 text-center">
         <div className="max-w-md mx-auto">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-sky-100 to-sky-300 dark:from-sky-900/30 dark:to-pink-900/30 mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-sky-100 to-sky-300 dark:from-sky-900/30 dark:to-sky-900/30 mb-6">
             <Heart className="w-10 h-10 text-sky-500 dark:text-sky-400" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
@@ -119,7 +119,7 @@ const FavouriteBookings = () => {
           </p>
           <Link
             href="/packages"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-sky-800 hover:from-sky-700 hover:to-pink-700 text-white font-semibold shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-sky-800 hover:from-sky-700 hover:to-sky-700 text-white font-semibold shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105"
           >
             <Package className="w-5 h-5" />
             Explore Packages
@@ -130,13 +130,13 @@ const FavouriteBookings = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-md transition-all">
       {/* Header */}
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-sky-500 to-pink-600">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-sky-500 to-sky-600">
                 <Heart className="w-6 h-6 text-white fill-current" />
               </div>
               My Wishlist

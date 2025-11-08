@@ -10,6 +10,7 @@ import Booking from '../models/bookings.model.js';
 import { getAllUsersServices } from '../services/user.services.js';
 import bcrypt from 'bcryptjs';
 import { sendRewardRedemptionNotification } from "../services/notification.services.js";
+import ReferralSettings from '../models/referralSettings.model.js';
 
 // 1. Get User Profile
 export const getProfile = async (req, res) => {
@@ -327,31 +328,36 @@ export const applyReferralCode = async (referralCode, newUserId) => {
     // Set referrer for new user
     newUser.referral.referredBy = referrer._id;
 
+    // Load referral settings (use defaults if not set)
+    const settings = await ReferralSettings.findOne({}) || {};
+    const referralBonus = typeof settings.referralBonus === 'number' ? settings.referralBonus : 100;
+    const signupBonus = typeof settings.signupBonus === 'number' ? settings.signupBonus : 50;
+
     // Add new user to referrer's referred users
     referrer.referral.referredUsers.push({
       user: newUserId,
       joinedAt: new Date(),
-      rewardAmount: 100, // ₹100 referral bonus
+      rewardAmount: referralBonus,
     });
 
     referrer.referral.totalReferrals += 1;
-    referrer.referral.availableRewards += 100;
-    referrer.referral.totalRewards += 100;
+    referrer.referral.availableRewards += referralBonus;
+    referrer.referral.totalRewards += referralBonus;
 
     // Add reward to referrer's history
     referrer.referral.rewardHistory.push({
       type: 'referral_bonus',
-      amount: 100,
+      amount: referralBonus,
       description: `Referral bonus for inviting ${newUser.name}`,
       status: 'credited'
     });
 
     // Give signup bonus to new user
-    newUser.referral.availableRewards += 50; // ₹50 signup bonus
-    newUser.referral.totalRewards += 50;
+    newUser.referral.availableRewards += signupBonus;
+    newUser.referral.totalRewards += signupBonus;
     newUser.referral.rewardHistory.push({
       type: 'signup_bonus',
-      amount: 50,
+      amount: signupBonus,
       description: 'Welcome bonus for joining via referral',
       status: 'credited'
     });
@@ -384,8 +390,16 @@ export const redeemRewards = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Insufficient rewards balance' });
     }
 
-    if (amount < 50) {
-      return res.status(400).json({ success: false, message: 'Minimum redemption amount is ₹50' });
+    // Check min redeem amount from settings
+    const settings = await ReferralSettings.findOne({}) || {};
+    const minRedeem = typeof settings.minRedeemAmount === 'number' ? settings.minRedeemAmount : 50;
+    const maxRedeem = typeof settings.maxRedeemAmount === 'number' ? settings.maxRedeemAmount : 10000;
+
+    if (amount < minRedeem) {
+      return res.status(400).json({ success: false, message: `Minimum redemption amount is ₹${minRedeem}` });
+    }
+    if (amount > maxRedeem) {
+      return res.status(400).json({ success: false, message: `Maximum redemption amount is ₹${maxRedeem}` });
     }
 
     // Check if user has bank details
@@ -405,27 +419,125 @@ export const redeemRewards = async (req, res) => {
       });
     }
 
+    // Deduct available rewards and create a pending redemption request
     user.referral.availableRewards -= amount;
 
-    // Add to reward history
-    user.referral.rewardHistory.push({
-      type: 'booking_bonus',
-      amount: -amount,
-      description: `Redeemed ₹${amount} rewards`,
-      status: 'used'
-    });
+    const historyEntry = {
+      type: 'redeem',
+      amount: amount,
+      description: `Redeem request for ₹${amount}`,
+      status: 'pending',
+      requestedAt: new Date()
+    };
+
+    user.referral.rewardHistory.push(historyEntry);
 
     await user.save();
 
+    // Notify admins or user (implement sendRewardRedemptionNotification to inform admins if desired)
     await sendRewardRedemptionNotification(user._id, amount);
 
     res.status(200).json({
       success: true,
-      message: `Successfully redeemed ₹${amount}`,
-      availableRewards: user.referral.availableRewards
+      message: `Redeem request submitted for ₹${amount}. Awaiting admin approval.`,
+      availableRewards: user.referral.availableRewards,
+      request: historyEntry
     });
   } catch (error) {
     console.error('Redeem rewards error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Admin: list pending redeem requests across users
+export const getRedeemRequests = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+    }
+
+    // Find users that have pending redeem entries
+    const users = await User.find({ 'referral.rewardHistory.status': 'pending' })
+      .select('name email referral')
+      .lean();
+
+    const requests = [];
+    users.forEach((u) => {
+      const pending = (u.referral?.rewardHistory || []).filter((h) => h.status === 'pending');
+      pending.forEach((h) => {
+        requests.push({
+          userId: u._id,
+          name: u.name,
+          email: u.email,
+          amount: h.amount,
+          description: h.description,
+          requestedAt: h.requestedAt || h.createdAt || null,
+          historyId: h._id,
+        });
+      });
+    });
+
+    res.status(200).json({ success: true, data: requests });
+  } catch (error) {
+    console.error('Get redeem requests error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Admin: process a redeem request (approve or reject)
+export const processRedeemRequest = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+    }
+
+    const { userId, historyId, action, depositReference, adminNote } = req.body;
+    if (!userId || !historyId || !action) {
+      return res.status(400).json({ success: false, message: 'userId, historyId and action are required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const entry = user.referral?.rewardHistory?.id(historyId);
+    if (!entry) return res.status(404).json({ success: false, message: 'Redeem request not found' });
+    if (entry.status !== 'pending') return res.status(400).json({ success: false, message: 'Request already processed' });
+
+    if (action === 'approve') {
+      entry.status = 'paid';
+      entry.processedAt = new Date();
+      entry.processedBy = req.user._id;
+      entry.depositReference = depositReference || null;
+      entry.adminNote = adminNote || null;
+
+      await user.save();
+
+      // Optionally notify user about payment
+      // await sendPaymentProcessedNotification(user._id, entry.amount);
+
+      return res.status(200).json({ success: true, message: 'Redeem request approved and marked as paid', entry });
+    }
+
+    if (action === 'reject') {
+      entry.status = 'rejected';
+      entry.processedAt = new Date();
+      entry.processedBy = req.user._id;
+      entry.adminNote = adminNote || null;
+
+      // Return amount back to user's availableRewards
+      user.referral.availableRewards = (user.referral.availableRewards || 0) + (entry.amount || 0);
+
+      await user.save();
+
+      // Optionally notify user about rejection
+      // await sendPaymentRejectedNotification(user._id, entry.amount);
+
+      return res.status(200).json({ success: true, message: 'Redeem request rejected and amount returned to user', entry, availableRewards: user.referral.availableRewards });
+    }
+
+    return res.status(400).json({ success: false, message: 'Invalid action' });
+  } catch (error) {
+    console.error('Process redeem request error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
