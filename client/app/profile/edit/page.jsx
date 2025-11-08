@@ -32,9 +32,6 @@ export default function EditProfilePage() {
     try {
       setLoading(true);
       const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-      if (!API_URL) {
-        toast.error("API base URL is Missing.");
-      }
       const endpoint = `${API_URL}/user/profile`;
 
       const { data } = await axios.put(
@@ -42,9 +39,17 @@ export default function EditProfilePage() {
         { name, phone, bio },
         { withCredentials: true }
       );
+      let updatedUser = data?.user || data?.data?.user || null;
+      if (!updatedUser) {
+        try {
+          const profileResp = await axios.get(`${API_URL}/user/profile`, { withCredentials: true });
+          updatedUser = profileResp?.data?.user || profileResp?.data?.data?.user || null;
+        } catch (fetchErr) {
+          updatedUser = { ...user, name, phone, bio };
+        }
+      }
 
-      const updatedUser = data?.user || data?.data?.user || { ...user, name, email, phone };
-      dispatch(setAuthUser(updatedUser));
+      if (updatedUser) dispatch(setAuthUser(updatedUser));
       toast.success(data?.message || "Profile updated successfully");
       router.push("/profile?tab=overview");
     } catch (err) {
@@ -69,7 +74,7 @@ export default function EditProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <aside className="lg:col-span-1">
-            <SideBarProfile selected="settings" onSelect={() => {}} onLogout={() => {}} />
+            <SideBarProfile selected="settings" onSelect={() => { }} onLogout={() => { }} />
           </aside>
 
           {/* Edit Form */}

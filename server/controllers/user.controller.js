@@ -1,7 +1,15 @@
-import User from '../models/user.model.js';
+import User from "../models/user.model.js";
+import { 
+  trackSocialShare, 
+  getUserReferralAnalytics, 
+  generateCustomReferralUrl,
+  getReferralLeaderboard as getReferralLeaderboardService
+} from "../services/referral.services.js";
+
 import Booking from '../models/bookings.model.js';
 import { getAllUsersServices } from '../services/user.services.js';
 import bcrypt from 'bcryptjs';
+import { sendRewardRedemptionNotification } from "../services/notification.services.js";
 
 // 1. Get User Profile
 export const getProfile = async (req, res) => {
@@ -289,7 +297,7 @@ export const getReferralInfo = async (req, res) => {
       availableRewards: user.referral.availableRewards,
       referredUsers: user.referral.referredUsers,
       rewardHistory: user.referral.rewardHistory,
-      referralLink: `${process.env.CLIENT_URL}/register?ref=${user.referral.referralCode}`
+      referralLink: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/register?ref=${user.referral.referralCode}`
     };
 
     res.status(200).json({
@@ -380,7 +388,23 @@ export const redeemRewards = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Minimum redemption amount is ₹50' });
     }
 
-    // Deduct from available rewards
+    // Check if user has bank details
+    if (!user.bankDetails || !user.bankDetails.accountNumber) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please update your bank details before redeeming rewards',
+        requiresBankDetails: true
+      });
+    }
+
+    if (!user.isAccountVerified) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'You need to verify your account before redeeming rewards',
+        requiresBankVerification: true
+      });
+    }
+
     user.referral.availableRewards -= amount;
 
     // Add to reward history
@@ -392,6 +416,8 @@ export const redeemRewards = async (req, res) => {
     });
 
     await user.save();
+
+    await sendRewardRedemptionNotification(user._id, amount);
 
     res.status(200).json({
       success: true,
@@ -407,25 +433,14 @@ export const redeemRewards = async (req, res) => {
 // Get referral leaderboard
 export const getReferralLeaderboard = async (req, res) => {
   try {
-    const leaderboard = await User.find({})
-      .select('name referral.totalReferrals referral.totalRewards avatar')
-      .sort({ 'referral.totalReferrals': -1 })
-      .limit(10);
+    const { limit = 10 } = req.query;
+    const result = await getReferralLeaderboardService(parseInt(limit));
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
 
-    const formattedLeaderboard = leaderboard
-      .filter(user => user.referral.totalReferrals > 0)
-      .map((user, index) => ({
-        rank: index + 1,
-        name: user.name,
-        avatar: user.avatar?.url || null,
-        totalReferrals: user.referral.totalReferrals,
-        totalRewards: user.referral.totalRewards
-      }));
-
-    res.status(200).json({
-      success: true,
-      data: formattedLeaderboard
-    });
+    res.status(200).json(result);
   } catch (error) {
     console.error('Get leaderboard error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
@@ -475,7 +490,8 @@ export const getAdminReferralStats = async (req, res) => {
         totalReferrals,
         activeReferrers,
         totalRewards,
-        conversionRate: parseFloat(conversionRate)
+        conversionRate: parseFloat(conversionRate),
+        totalUsers
       }
     });
   } catch (error) {
@@ -484,42 +500,45 @@ export const getAdminReferralStats = async (req, res) => {
   }
 };
 
+// Get admin recent referrals activity
 export const getAdminRecentReferrals = async (req, res) => {
   try {
     const { limit = 10 } = req.query;
-    
-    const users = await User.find({
-      'referral.referredUsers': { $exists: true, $not: { $size: 0 } }
+    // Find users who have referred users recently
+    const recentReferrals = await User.find({
+      'referral.referredUsers': { $exists: true, $ne: [] }
     })
-    .populate('referral.referredUsers.user', 'name email createdAt')
-    .sort({ 'referral.referredUsers.joinedAt': -1 })
-    .limit(parseInt(limit));
+      .select('name email referral')
+      // populate the referred user info to get referee name/email when available
+      .populate({ path: 'referral.referredUsers.user', select: 'name email' })
+      .limit(parseInt(limit) * 3); // fetch more to allow for sorting across users
 
-    const recentReferrals = [];
-    
-    users.forEach(user => {
-      user.referral.referredUsers.forEach(referral => {
-        recentReferrals.push({
+    // Extract and format referral activities from referredUsers subdocs
+    const referralActivities = [];
+
+    recentReferrals.forEach(user => {
+      const referred = user.referral?.referredUsers || [];
+      referred.forEach(activity => {
+        referralActivities.push({
           referrerName: user.name,
           referrerEmail: user.email,
-          refereeName: referral.user?.name,
-          refereeEmail: referral.user?.email,
-          status: referral.conversionStatus || 'pending',
-          reward: referral.rewardAmount,
-          date: referral.joinedAt
+          refereeName: activity.user?.name || activity.refereeName || 'Pending',
+          refereeEmail: activity.user?.email || activity.refereeEmail || 'Not registered',
+          status: activity.conversionStatus || 'pending',
+          reward: activity.rewardAmount || 0,
+          date: activity.joinedAt || activity.firstBookingDate || new Date(),
+          activityId: activity._id
         });
       });
     });
 
-    // Sort by date and limit
-    recentReferrals.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    res.status(200).json({
-      success: true,
-      data: recentReferrals.slice(0, parseInt(limit))
-    });
+    // Sort by date (most recent first) and limit
+    referralActivities.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const limitedActivities = referralActivities.slice(0, parseInt(limit));
+
+    res.status(200).json({ success: true, data: limitedActivities });
   } catch (error) {
-    console.error('Get recent referrals error:', error);
+    console.error('Get admin recent referrals error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
@@ -722,3 +741,156 @@ export const adminReferralUserAction = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
+
+// Track social sharing for referral link
+export const trackShare = async (req, res) => {
+  try {
+    const { platform } = req.body;
+    
+    if (!platform) {
+      return res.status(400).json({
+        success: false,
+        message: 'Platform is required'
+      });
+    }
+
+    const result = await trackSocialShare(req.user._id, platform);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Track share error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Get detailed referral analytics
+export const getReferralAnalytics = async (req, res) => {
+  try {
+    const result = await getUserReferralAnalytics(req.user._id);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Get referral analytics error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Generate custom referral URL
+export const generateCustomReferralUrlController = async (req, res) => {
+  try {
+    const { customUrl } = req.body;
+    
+    if (!customUrl) {
+      return res.status(400).json({
+        success: false,
+        message: 'Custom URL is required'
+      });
+    }
+
+    const result = await generateCustomReferralUrl(req.user._id, customUrl);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Generate custom referral URL error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+
+// Bank details sairam!
+// Update user bank details
+export const updateBankDetails = async (req, res) => {
+  try {
+    const { accountHolderName, accountNumber, bankName, ifscCode } = req.body;
+    
+    if (!accountHolderName || !accountNumber || !bankName || !ifscCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'All bank details are required'
+      });
+    }
+    
+    if (!/^\d+$/.test(accountNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account number should contain only digits'
+      });
+    }
+    
+    if (!/^[A-Z0-9]{11}$/.test(ifscCode.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        message: 'IFSC code should be 11 characters alphanumeric'
+      });
+    }
+    
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    user.bankDetails = {
+      accountHolderName,
+      accountNumber,
+      bankName,
+      ifscCode: ifscCode.toUpperCase()
+    };
+    
+    await user.save();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Bank details updated successfully',
+      data: user.bankDetails
+    });
+  } catch (error) {
+    console.error('Update bank details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Get user bank details
+export const getBankDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('bankDetails');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: user.bankDetails
+    });
+  } catch (error) {
+    console.error('Get bank details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+

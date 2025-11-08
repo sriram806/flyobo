@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Referral Reward Earned - Flyobo Travel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #007bff, #00d4ff);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    .content {
+      padding: 30px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .content p {
+      margin: 15px 0;
+    }
+    .reward-box {
+      background: #e8f4ff;
+      border-left: 4px solid #007bff;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .reward-amount {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 12px 25px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .footer {
+      background: #f8f9fa;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      border-top: 1px solid #eee;
+    }
+    .referral-code {
+      background: #f0f8ff;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 18px;
+      text-align: center;
+      margin: 15px 0;
+      border: 1px dashed #007bff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Referral Reward Earned!</h1>
+      <p>Congratulations on your successful referral</p>
+    </div>
+
+    <div class="content">
+      <p>Dear <strong><%= name %></strong>,</p>
+
+      <p>Great news! Your referred friend <strong><%= referredUserName %></strong> has completed their first booking with us.</p>
+
+      <div class="reward-box">
+        <p>You've earned a referral reward of</p>
+        <p class="reward-amount">₹<%= rewardAmount %></p>
+        <p>from their booking worth ₹<%= bookingAmount %></p>
+      </div>
+
+      <p>Your reward has been added to your referral wallet. You can use these rewards for future bookings or redeem them as cash.</p>
+
+      <p>Your current referral code is:</p>
+      <div class="referral-code"><%= referralCode %></div>
+
+      <p>Your available rewards balance: <strong>₹<%= availableRewards %></strong></p>
+
+      <center>
+        <a href="<%= process.env.CLIENT_URL || 'https://flyobo.com' %>/profile#referral" class="btn">View Referral Dashboard</a>
+      </center>
+
+      <p>Keep sharing Flyobo with your friends and family to earn more rewards!</p>
+    </div>
+
+    <div class="footer">
+      <p>Thank you for being a valued member of the Flyobo community.</p>
+      <p>© <%= new Date().getFullYear() %> Flyobo Travel. All rights reserved.</p>
+      <p><%= process.env.CLIENT_URL || 'https://flyobo.com' %></p>
+    </div>
+  </div>
+</body>
+</html>

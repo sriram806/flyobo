@@ -73,8 +73,8 @@ const FavouriteBookings = () => {
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-12">
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full blur-xl opacity-50 animate-pulse" />
-            <Loader2 className="relative w-12 h-12 text-rose-600 dark:text-rose-400 animate-spin" />
+            <div className="absolute inset-0 bg-gradient-to-br from-sky-500 to-sky-700 rounded-full blur-xl opacity-50 animate-pulse" />
+            <Loader2 className="relative w-12 h-12 text-sky-600 dark:text-sky-400 animate-spin" />
           </div>
           <p className="text-base font-medium text-gray-600 dark:text-gray-400">Loading your wishlist...</p>
         </div>
@@ -84,17 +84,17 @@ const FavouriteBookings = () => {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-8">
+      <div className="rounded-2xl border border-sky-200 dark:border-sky-900 bg-sky-50 dark:bg-sky-950/30 p-8">
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-lg bg-red-100 dark:bg-red-900/30">
-            <HeartOff className="w-6 h-6 text-red-600 dark:text-red-400" />
+          <div className="p-3 rounded-lg bg-sky-100 dark:bg-sky-900/30">
+            <HeartOff className="w-6 h-6 text-sky-600 dark:text-sky-400" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">Unable to Load Wishlist</h3>
-            <p className="text-sm text-red-700 dark:text-red-400 mb-4">{error}</p>
+            <h3 className="text-lg font-semibold text-sky-900 dark:text-sky-300 mb-2">Unable to Load Wishlist</h3>
+            <p className="text-sm text-sky-700 dark:text-sky-400 mb-4">{error}</p>
             <button
               onClick={fetchFavourites}
-              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium transition-colors"
             >
               Try Again
             </button>
@@ -108,8 +108,8 @@ const FavouriteBookings = () => {
     return (
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-12 text-center">
         <div className="max-w-md mx-auto">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 mb-6">
-            <Heart className="w-10 h-10 text-rose-500 dark:text-rose-400" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-sky-100 to-sky-300 dark:from-sky-900/30 dark:to-pink-900/30 mb-6">
+            <Heart className="w-10 h-10 text-sky-500 dark:text-sky-400" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             Your Wishlist is Empty
@@ -119,7 +119,7 @@ const FavouriteBookings = () => {
           </p>
           <Link
             href="/packages"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-semibold shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-sky-800 hover:from-sky-700 hover:to-pink-700 text-white font-semibold shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105"
           >
             <Package className="w-5 h-5" />
             Explore Packages
@@ -136,7 +136,7 @@ const FavouriteBookings = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-sky-500 to-pink-600">
                 <Heart className="w-6 h-6 text-white fill-current" />
               </div>
               My Wishlist
@@ -145,15 +145,6 @@ const FavouriteBookings = () => {
               You have {favoritePkgs.length} {favoritePkgs.length === 1 ? 'package' : 'packages'} saved
             </p>
           </div>
-          <button
-            onClick={fetchFavourites}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium transition-colors flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
-          </button>
         </div>
       </div>
 

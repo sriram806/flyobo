@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { User, Bookmark, Heart, Settings, LogOut, Bell, Search, Gift } from "lucide-react";
+
+import { User, Bookmark, Heart, Settings, LogOut, Bell, Search, Gift, Trophy, Wallet, CreditCard } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const items = [
@@ -16,10 +17,11 @@ const items = [
     ],
   },
   {
-    section: "App",
+    section: "Account",
     links: [
-      { key: "settings", label: "Settings", icon: Settings },
+      { key: "bank-details", label: "Bank Details", icon: CreditCard },
       { key: "notifications", label: "Notifications", icon: Bell, badge: 5 },
+      { key: "settings", label: "Settings", icon: Settings },
     ],
   },
 ];
@@ -32,6 +34,16 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
     "U";
   const [search, setSearch] = useState("");
   const pathname = usePathname();
+
+  // Dynamic badge counts (safe fallbacks)
+  const bookingsCount = user?.bookings?.length ?? user?.bookingsCount ?? 0;
+  const wishlistCount = user?.wishlist?.length ?? user?.wishlistCount ?? 0;
+  // Prefer an explicit unread count if available on the user object; otherwise try notifications array
+  const notificationsCount =
+    user?.unreadNotificationsCount ??
+    (Array.isArray(user?.notifications)
+      ? user.notifications.filter((n) => !n.read).length
+      : 0);
 
   return (
     <aside
@@ -81,6 +93,17 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
               .map((it) => {
                 const active = selected === it.key || pathname.includes(it.key);
                 const Icon = it.icon;
+
+                // Compute badge value per link key, falling back to the static value if present
+                const displayedBadge =
+                  it.key === "bookings"
+                    ? bookingsCount
+                    : it.key === "wishlist"
+                    ? wishlistCount
+                    : it.key === "notifications"
+                    ? notificationsCount
+                    : it.badge;
+
                 return (
                   <button
                     key={it.key}
@@ -94,9 +117,9 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     <span className="truncate">{it.label}</span>
-                    {it.badge && (
+                    {displayedBadge > 0 && (
                       <span className="absolute right-3 bg-sky-500 text-white text-xs px-2 py-0.5 rounded-full">
-                        {it.badge}
+                        {displayedBadge}
                       </span>
                     )}
                   </button>

@@ -75,6 +75,15 @@ export const performLogout = createAsyncThunk(
       // Call server logout endpoint which clears cookie/session
       await apiLogoutUser();
       // Clear client storage and cookies
+        // Also purge redux-persist storage if available (dynamic import to avoid circular deps)
+        try {
+          const storeModule = await import("@/redux/store");
+          if (storeModule?.persistor && typeof storeModule.persistor.purge === "function") {
+            await storeModule.persistor.purge();
+          }
+        } catch (purgeErr) {
+          // ignore - non-fatal
+        }
       try {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth_token');

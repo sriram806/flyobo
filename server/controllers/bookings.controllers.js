@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import sendMail from "../config/nodemailer.js";
 import Package from "../models/package.model.js";
-import { getAllBookingsServices, newBooking } from "../services/booking.services.js";
+import { getAllBookingsServices, newBooking, processReferralReward } from "../services/booking.services.js";
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 
 // Helper: compute total amount with add-ons and discounts
@@ -684,3 +684,93 @@ export const getCustomerSegments = catchAsyncErrors(async (req, res) => {
         });
     }
 });
+
+// Update booking status (Admin only)
+export const updateBookingStatus = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const { status, paymentStatus } = req.body;
+        
+        // Validate booking ID
+        if (!bookingId) {
+            return res.status(400).json({
+                success: false,
+                message: "Booking ID is required"
+            });
+        }
+        
+        // Find the booking
+        const booking = await Booking.findById(bookingId).populate('userId');
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Booking not found"
+            });
+        }
+        
+        // Store previous status for comparison
+        const previousStatus = booking.status;
+        const previousPaymentStatus = booking.payment_info.status;
+        
+        // Update booking status if provided
+        if (status) {
+            // Validate status
+            const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed', 'refunded'];
+            if (!validStatuses.includes(status)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid booking status"
+                });
+            }
+            booking.status = status;
+        }
+        
+        // Update payment status if provided
+        if (paymentStatus) {
+            // Validate payment status
+            const validPaymentStatuses = ['pending', 'completed', 'failed', 'refunded'];
+            if (!validPaymentStatuses.includes(paymentStatus)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid payment status"
+                });
+            }
+            booking.payment_info.status = paymentStatus;
+        }
+        
+        // Save updated booking
+        await booking.save();
+        
+        // If booking status changed to completed and payment is confirmed, process referral rewards
+        if ((booking.status === 'completed' && previousStatus !== 'completed') || 
+            (booking.payment_info.status === 'completed' && previousPaymentStatus !== 'completed')) {
+            
+            if (booking.status === 'completed' && booking.payment_info.status === 'completed') {
+                const rewardResult = await processReferralReward(bookingId);
+                if (!rewardResult.success) {
+                    console.error('Referral reward processing failed:', rewardResult.message);
+                }
+            }
+        }
+        
+        // Send notification to user
+        await Notification.create({
+            user: booking.userId._id,
+            title: "Booking Status Updated",
+            message: `Your booking status has been updated to ${booking.status}`
+        });
+        
+        res.status(200).json({
+            success: true,
+            message: "Booking status updated successfully",
+            booking
+        });
+    } catch (error) {
+        console.error("Update booking status error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update booking status",
+            error: error.message
+        });
+    }
+};

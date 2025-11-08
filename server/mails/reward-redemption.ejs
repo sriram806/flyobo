@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reward Redeemed - Flyobo Travel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #6f42c1, #d63384);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    .content {
+      padding: 30px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .content p {
+      margin: 15px 0;
+    }
+    .redemption-box {
+      background: #f0e6ff;
+      border-left: 4px solid #6f42c1;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .amount {
+      font-size: 24px;
+      font-weight: bold;
+      color: #6f42c1;
+    }
+    .btn {
+      display: inline-block;
+      background: #6f42c1;
+      color: white;
+      padding: 12px 25px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .footer {
+      background: #f8f9fa;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      border-top: 1px solid #eee;
+    }
+    .referral-code {
+      background: #f8f0ff;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 18px;
+      text-align: center;
+      margin: 15px 0;
+      border: 1px dashed #6f42c1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💰 Reward Redeemed!</h1>
+      <p>Thank you for your redemption</p>
+    </div>
+
+    <div class="content">
+      <p>Dear <strong><%= name %></strong>,</p>
+
+      <p>You've successfully redeemed <strong class="amount">₹<%= amount %></strong> from your referral rewards.</p>
+
+      <div class="redemption-box">
+        <p>Your redemption has been processed successfully.</p>
+        <p>Amount redeemed: <span class="amount">₹<%= amount %></span></p>
+      </div>
+
+      <p>Your updated referral code:</p>
+      <div class="referral-code"><%= referralCode %></div>
+
+      <p>Your remaining rewards balance: <strong>₹<%= availableRewards %></strong></p>
+
+      <center>
+        <a href="<%= process.env.CLIENT_URL || 'https://flyobo.com' %>/profile#referral" class="btn">View Referral Dashboard</a>
+      </center>
+
+      <p>Continue referring friends to earn more rewards that you can redeem for discounts on future bookings!</p>
+    </div>
+
+    <div class="footer">
+      <p>Thank you for being a valued member of the Flyobo community.</p>
+      <p>© <%= new Date().getFullYear() %> Flyobo Travel. All rights reserved.</p>
+      <p><%= process.env.CLIENT_URL || 'https://flyobo.com' %></p>
+    </div>
+  </div>
+</body>
+</html>

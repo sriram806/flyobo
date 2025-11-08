@@ -34,6 +34,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  profile: {
+    birthDate: {
+      type: Date,
+      default: null
+    }
+  },
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -93,6 +99,25 @@ const userSchema = new mongoose.Schema({
     favoriteDestinations: {
       type: [String],
       default: []
+    }
+  },
+  // Bank details for reward redemption
+  bankDetails: {
+    accountHolderName: {
+      type: String,
+      default: null
+    },
+    accountNumber: {
+      type: String,
+      default: null
+    },
+    bankName: {
+      type: String,
+      default: null
+    },
+    ifscCode: {
+      type: String,
+      default: null
     }
   },
   referral: {
@@ -258,7 +283,7 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Generate unique referral code
-userSchema.methods.generateReferralCode = function() {
+userSchema.methods.generateReferralCode = function () {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = 'FLY';
   for (let i = 0; i < 6; i++) {
@@ -268,11 +293,11 @@ userSchema.methods.generateReferralCode = function() {
 };
 
 // Pre-save hook to generate referral code
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (this.isNew && !this.referral.referralCode) {
     let referralCode;
     let isUnique = false;
-    
+
     while (!isUnique) {
       referralCode = this.generateReferralCode();
       const existingUser = await this.constructor.findOne({ 'referral.referralCode': referralCode });
@@ -280,11 +305,72 @@ userSchema.pre('save', async function(next) {
         isUnique = true;
       }
     }
-    
+
     this.referral.referralCode = referralCode;
   }
   next();
 });
+
+// Method to check if user has achieved a milestone
+userSchema.methods.checkMilestones = function () {
+  const totalReferrals = this.referral.totalReferrals;
+  const milestones = this.referral.milestones;
+
+  // Define milestone rewards
+  const milestoneRewards = {
+    'first_referral': { target: 1, reward: 50 },
+    '5_referrals': { target: 5, reward: 100 },
+    '10_referrals': { target: 10, reward: 250 },
+    '25_referrals': { target: 25, reward: 500 },
+    '50_referrals': { target: 50, reward: 1000 },
+    '100_referrals': { target: 100, reward: 2500 }
+  };
+
+  // Check each milestone
+  Object.keys(milestoneRewards).forEach(milestoneKey => {
+    const milestoneData = milestoneRewards[milestoneKey];
+    const milestone = milestones.find(m => m.milestone === milestoneKey);
+
+    if (milestone && !milestone.achieved && totalReferrals >= milestoneData.target) {
+      milestone.achieved = true;
+      milestone.achievedAt = new Date();
+      milestone.reward = milestoneData.reward;
+
+      // Add reward to user
+      this.referral.availableRewards += milestoneData.reward;
+      this.referral.totalRewards += milestoneData.reward;
+
+      // Add to reward history
+      this.referral.rewardHistory.push({
+        type: 'milestone_bonus',
+        amount: milestoneData.reward,
+        description: `Milestone bonus for ${milestoneKey}`,
+        status: 'credited'
+      });
+    }
+  });
+
+  return this;
+};
+
+// Method to update referral tier based on total referrals
+userSchema.methods.updateReferralTier = function () {
+  const totalReferrals = this.referral.totalReferrals;
+
+  if (totalReferrals >= 100) {
+    this.referral.referralTier = 'diamond';
+  } else if (totalReferrals >= 50) {
+    this.referral.referralTier = 'platinum';
+  } else if (totalReferrals >= 25) {
+    this.referral.referralTier = 'gold';
+  } else if (totalReferrals >= 10) {
+    this.referral.referralTier = 'silver';
+  } else if (totalReferrals >= 1) {
+    this.referral.referralTier = 'bronze';
+  }
+
+  return this;
+};
 
 const User = mongoose.model('User', userSchema);
 export default User;

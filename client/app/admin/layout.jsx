@@ -46,13 +46,7 @@ function AdminLayoutContent({ children }) {
     "analytics-users": "/admin/analytics/users",
     "analytics-packages": "/admin/analytics/packages",
     "analytics-bookings": "/admin/analytics/bookings",
-    "referrals-overview": "/admin/referrals",
-    "referrals-users": "/admin/referrals/users",
-    "referrals-analytics": "/admin/referrals/analytics",
-    "referrals-rewards": "/admin/referrals/rewards",
-    "referrals-leaderboard": "/admin/referrals/leaderboard",
-    "referrals-payouts": "/admin/referrals/payouts",
-    "referrals-settings": "/admin/referrals/settings"
+    "referrals-overview": "/admin/referrals"
   };
   const handleLogout = async () => {
     try {

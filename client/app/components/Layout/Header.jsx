@@ -58,19 +58,61 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
 
     const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    const unreadCount = notifications?.filter((n) => n?.status !== 'read')?.length || 0;
+    // Add new state for unread count and pagination
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
-    const fetchNotifications = async () => {
+    // Fetch unread notifications count
+    const fetchUnreadCount = async () => {
+        if (!API_URL) return;
+        try {
+            const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+            const { data } = await axios.get(`${API_URL}/notification/unread-count`, {
+                withCredentials: true,
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+            if (data?.success) {
+                setUnreadCount(data.count);
+            }
+        } catch (err) {
+            console.error('Failed to fetch unread count:', err);
+        }
+    };
+
+    // Mark all notifications as read
+    const markAllAsRead = async () => {
+        if (!API_URL) return;
+        try {
+            const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+            const { data } = await axios.post(`${API_URL}/notification/mark-all-read`, {}, {
+                withCredentials: true,
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+            if (data?.success) {
+                setNotifications(data.notifications);
+                setUnreadCount(0);
+                toast.success('All notifications marked as read');
+            }
+        } catch (err) {
+            toast.error(err?.response?.data?.message || 'Failed to mark notifications as read');
+        }
+    };
+
+    // Fetch notifications with pagination
+    const fetchNotifications = async (page = 1) => {
         if (!API_URL) return;
         try {
             setLoadingNotif(true);
             const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-            const { data } = await axios.get(`${API_URL}/notification`, {
+            const { data } = await axios.get(`${API_URL}/notification?page=${page}&limit=5`, {
                 withCredentials: true,
                 headers: token ? { Authorization: `Bearer ${token}` } : undefined,
             });
-            if (data?.success && Array.isArray(data.notifications)) {
+            if (data?.success) {
                 setNotifications(data.notifications);
+                setCurrentPage(data.pagination.currentPage);
+                setTotalPages(data.pagination.totalPages);
             }
         } catch (err) {
             // show toast only if dropdown is open to avoid noise
@@ -151,35 +193,72 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                                         )}
                                     </button>
                                     {openNotif && (
-                                        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl z-[1200]">
-                                            <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                                                <span className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</span>
-                                                {loadingNotif && <span className="text-xs text-gray-500">Loading...</span>}
-                                            </div>
-                                            <ul className="divide-y divide-gray-200 dark:divide-gray-800">
-                                                {notifications?.length === 0 && (
-                                                    <li className="p-4 text-sm text-gray-600 dark:text-gray-400">No notifications</li>
+                                        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 z-50">
+                                            <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                                                <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                                                {unreadCount > 0 && (
+                                                    <button 
+                                                        onClick={markAllAsRead}
+                                                        className="text-sm text-sky-600 hover:text-sky-800 dark:text-sky-400 dark:hover:text-sky-300"
+                                                    >
+                                                        Mark all as read
+                                                    </button>
                                                 )}
-                                                {notifications?.map((n) => (
-                                                    <li key={n?._id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                            </div>
+                                            
+                                            <div className="max-h-96 overflow-y-auto">
+                                                {loadingNotif && <div className="p-4 text-center text-gray-500 dark:text-gray-400">Loading...</div>}
+                                                
+                                                {!loadingNotif && notifications?.length === 0 && (
+                                                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">No notifications</div>
+                                                )}
+                                                
+                                                {!loadingNotif && notifications?.map((n) => (
+                                                    <div 
+                                                        key={n?._id} 
+                                                        className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-b border-gray-100 dark:border-gray-800 ${
+                                                            n?.status === 'unread' ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                                        }`}
+                                                        onClick={() => markAsRead(n?._id)}
+                                                    >
                                                         <div className="flex items-start gap-3">
                                                             <div className={`mt-1 w-2 h-2 rounded-full ${n?.status === 'read' ? 'bg-gray-300 dark:bg-gray-600' : 'bg-emerald-500'}`}></div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={n?.title}>{n?.title}</div>
-                                                                <div className="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2" title={n?.message}>{n?.message}</div>
-                                                                {n?.status !== 'read' && (
-                                                                    <button
-                                                                        onClick={() => markAsRead(n?._id)}
-                                                                        className="mt-2 text-xs text-sky-600 hover:text-sky-700 dark:text-sky-400"
-                                                                    >
-                                                                        Mark as read
-                                                                    </button>
-                                                                )}
+                                                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">{n?.message}</div>
+                                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                    {new Date(n?.createdAt).toLocaleDateString()}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </li>
+                                                    </div>
                                                 ))}
-                                            </ul>
+                                            </div>
+                                            
+                                            {/* Pagination */}
+                                            {!loadingNotif && notifications?.length > 0 && totalPages > 1 && (
+                                                <div className="p-3 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                                                    <button
+                                                        onClick={() => fetchNotifications(currentPage - 1)}
+                                                        disabled={currentPage === 1}
+                                                        className="px-3 py-1 text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                    >
+                                                        Previous
+                                                    </button>
+                                                    
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                        Page {currentPage} of {totalPages}
+                                                    </span>
+                                                    
+                                                    <button
+                                                        onClick={() => fetchNotifications(currentPage + 1)}
+                                                        disabled={currentPage === totalPages}
+                                                        className="px-3 py-1 text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                    >
+                                                        Next
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

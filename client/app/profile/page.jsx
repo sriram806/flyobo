@@ -15,6 +15,8 @@ import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import FavouriteBookings from "../components/Profile/FavouriteBookings";
 import ReferralProgram from "../components/Profile/ReferralProgram";
+import BankDetails from "../components/Profile/BankDetails";
+import BNotifications from "../components/Profile/BNotifications";
 
 const ProfileContent = () => {
   const router = useRouter();
@@ -24,7 +26,6 @@ const ProfileContent = () => {
   const [selected, setSelected] = useState("overview");
   const dispatch = useDispatch();
 
-  // Sync selected tab with URL query parameter
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab) {
@@ -70,13 +71,11 @@ const ProfileContent = () => {
           {/* Content */}
           <section className="lg:col-span-3">
             {selected === "overview" && <ProfileInfo />}
-
             {selected === "bookings" && <ProfileBookings />}
-
             {selected === "wishlist" && <FavouriteBookings />}
-
             {selected === "referral" && <ReferralProgram />}
-
+            {selected === "bank-details" && <BankDetails />}
+            {selected === "notifications" && <BNotifications />}
             {selected === "settings" && <ProfileSetting />}
           </section>
         </div>

@@ -1,6 +1,11 @@
 import { config } from "dotenv";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Robust .env loading with sensible fallbacks
 const NODE = process.env.NODE_ENV || "development";
@@ -11,11 +16,22 @@ const candidates = [
   `.env`,
 ];
 
+// Load the environment variables
+let loaded = false;
 for (const file of candidates) {
   const full = path.resolve(process.cwd(), file);
   if (fs.existsSync(full)) {
     config({ path: full });
+    loaded = true;
     break;
+  }
+}
+
+// If no .env file was found, try to load from the server directory specifically
+if (!loaded) {
+  const serverEnvPath = path.resolve(__dirname, '../.env');
+  if (fs.existsSync(serverEnvPath)) {
+    config({ path: serverEnvPath });
   }
 }
 

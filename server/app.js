@@ -4,7 +4,6 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { Server } from "socket.io";
-import connecttoDatabase from "./database/mongodb.js";
 import {
   CLOUD_API_KEY,
   CLOUD_NAME,
@@ -15,6 +14,9 @@ import {
 import { v2 as cloudinary } from "cloudinary";    
 
 // Maintenance middleware
+
+// Import scheduled notifications service
+import "./services/scheduled.notifications.service.js";
 
 // Routes
 import authRouter from "./routes/auth.route.js";
@@ -27,11 +29,14 @@ import notificationRoute from "./routes/notification.route.js";
 import bookingsRouter from "./routes/bookings.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import referalRoute from "./routes/referal.route.js";
+import referralAdminRoute from "./routes/referral.admin.route.js";
 
 // Initialize Express app
 const app = express();
-connecttoDatabase();
 
+// Connect to database
+import connecttoDatabase from "./database/mongodb.js";
+connecttoDatabase();
 
 // Middleware
 app.use(express.json({ limit: "50mb" }));
@@ -155,6 +160,7 @@ app.use("/api/v1/bookings", bookingsRouter);
 app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/upload", uploadRouter);
 app.use("/api/v1/referal", referalRoute);
+app.use("/api/v1/referral-admin", referralAdminRoute);
 
 // ✅ Serve static files (e.g., uploaded images)
 app.use("/uploads", express.static("uploads"));

@@ -15,7 +15,12 @@ import {
     getAdminRecentReferrals,
     getAdminReferralUsers,
     getAdminReferralAnalytics,
-    adminReferralUserAction
+    adminReferralUserAction,
+    trackShare,
+    getReferralAnalytics,
+    generateCustomReferralUrlController as generateCustomReferralUrl,
+    updateBankDetails,
+    getBankDetails
 } from '../controllers/user.controller.js';
 import isAuthenticated from '../middleware/isAuthenticated.js';
 import { uploadAvatar } from '../middleware/multerConfig.js';
@@ -37,6 +42,13 @@ userRoute.get('/my-bookings', isAuthenticated, getUserBookings);
 userRoute.get('/referral-info', isAuthenticated, getReferralInfo);
 userRoute.post('/redeem-rewards', isAuthenticated, redeemRewards);
 userRoute.get('/referral-leaderboard', getReferralLeaderboard);
+userRoute.post('/track-share', isAuthenticated, trackShare);
+userRoute.get('/referral-analytics', isAuthenticated, getReferralAnalytics);
+userRoute.post('/generate-custom-referral-url', isAuthenticated, generateCustomReferralUrl);
+
+// Bank details routes
+userRoute.put('/bank-details', isAuthenticated, updateBankDetails);
+userRoute.get('/bank-details', isAuthenticated, getBankDetails);
 
 // Admin referral management routes
 userRoute.get('/admin/referral-stats', isAuthenticated, getAdminReferralStats);

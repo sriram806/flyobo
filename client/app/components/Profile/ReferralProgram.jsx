@@ -6,30 +6,10 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import {
-  Gift,
-  Share,
-  Trophy,
-  Users,
-  ExternalLink,
-  Star,
-  Clipboard,
-  Check,
-  CheckCircle,
-  DollarSign,
-  Copy,
-  Award,
-  TrendingUp,
-  Calendar,
-  Target,
-  Facebook,
-  Twitter,
-  MessageCircle,
-  Mail,
-  Crown,
-  Zap,
-  BarChart3,
-  Shield
+  Gift, Share, Trophy, Users, ExternalLink, Star, Check, DollarSign,
+  Copy, Award, TrendingUp, Target, Crown, BarChart3, Shield
 } from "lucide-react";
+import ReferralTier from "./ReferralTier";
 
 const ReferralProgram = () => {
   const user = useSelector((state) => state?.auth?.user);
@@ -42,70 +22,32 @@ const ReferralProgram = () => {
   const [serverError, setServerError] = useState(false);
   const [authError, setAuthError] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [milestones, setMilestones] = useState([]);
-  const [socialShareCounts, setSocialShareCounts] = useState({
-    facebook: 0,
-    twitter: 0,
-    whatsapp: 0,
-    email: 0
-  });
 
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Referral Program - API_URL:", API_URL);
-    console.log("Referral Program - User:", user ? "Logged in" : "Not logged in");
-  }, []);
-
-  useEffect(() => {
-    // Test server connectivity first
-    const testConnection = async () => {
-      try {
-        const response = await fetch(`${API_URL}/user/profile`, { 
-          method: 'GET',
-          credentials: 'include'
-        });
-        console.log("Server connection test:", response.status);
-        setServerError(response.status >= 400);
-      } catch (error) {
-        console.error("Server connection failed:", error);
-        setServerError(true);
-      }
-    };
-
-    if (API_URL) {
-      testConnection();
-    }
-
-    if (user) {
-      fetchReferralData();
-    } else {
-      setLoading(false);
-      toast.error("Please log in to access the referral program");
-    }
-    
-    // Fetch leaderboard regardless of login status
-    fetchLeaderboard();
-  }, [user]);
+  if (!API_URL) {
+    console.warn("API URL not configured");
+    toast.warn("API URL not configured")
+    return;
+  }
 
   const fetchReferralData = async () => {
     try {
       if (!API_URL) {
-        toast.error("API configuration missing");
+        console.error("API url is missing");
         return;
       }
 
       if (!user) {
-        console.log("No user found, skipping referral data fetch");
+        console.error("No user found!");
         return;
       }
 
       const { data } = await axios.get(`${API_URL}/user/referral-info`, {
         withCredentials: true,
-        timeout: 10000 // 10 second timeout
+        timeout: 10000
       });
-      
+
       if (data.success) {
         setReferralData(data.data);
         setServerError(false);
@@ -115,7 +57,7 @@ const ReferralProgram = () => {
     } catch (error) {
       console.error("Error fetching referral data:", error);
       setServerError(true);
-      
+
       if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
         toast.error("Unable to connect to server. Please check if the server is running.");
       } else if (error.response?.status === 401) {
@@ -133,34 +75,41 @@ const ReferralProgram = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      if (!API_URL) {
-        console.warn("API URL not configured");
-        return;
-      }
-      
-      const { data } = await axios.get(`${API_URL}/user/referral-leaderboard`, {
-        withCredentials: true,
-        timeout: 5000 // 5 second timeout
+      setLoading(true);
+      const { data } = await axios.get(`${API_URL}/user/referral-leaderboard?limit=10`, {
+        withCredentials: true
       });
-      
+
       if (data.success) {
         setLeaderboard(data.data || []);
       } else {
-        setLeaderboard([]);
+        setError("Failed to load leaderboard");
       }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
-      // Don't show error to user for leaderboard, just set empty array
-      setLeaderboard([]);
+      setError("Failed to load leaderboard");
+      toast.error("Failed to load leaderboard");
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchReferralData();
+    } else {
+      setLoading(false);
+      toast.error("Please log in to access the referral program");
+    }
+    fetchLeaderboard();
+  }, [user]);
 
   const copyReferralLink = async () => {
     if (referralData?.referralLink) {
       try {
-        await navigator.clipboard.writeText(referralData.referralLink);
+        await navigator.clipboard.writeText(referralData.referralCode);
         setCopied(true);
-        toast.success("Referral link copied!");
+        toast.success("Referral Code copied!");
         setTimeout(() => setCopied(false), 2000);
       } catch (error) {
         toast.error("Failed to copy link");
@@ -168,27 +117,10 @@ const ReferralProgram = () => {
     }
   };
 
-  const shareReferralLink = async () => {
-    if (navigator.share && referralData?.referralLink) {
-      try {
-        await navigator.share({
-          title: 'Join Flyobo Travel',
-          text: `Join me on Flyobo and get ₹50 bonus! Use my referral code: ${referralData.referralCode}`,
-          url: referralData.referralLink
-        });
-      } catch (error) {
-        console.log("Share failed:", error);
-        copyReferralLink();
-      }
-    } else {
-      copyReferralLink();
-    }
-  };
-
   const handleRedeemRewards = async (e) => {
     e.preventDefault();
     const amount = parseInt(redeemAmount);
-    
+
     if (!amount || amount < 50) {
       toast.error("Minimum redemption amount is ₹50");
       return;
@@ -199,147 +131,134 @@ const ReferralProgram = () => {
       return;
     }
 
-    if (!API_URL) {
-      toast.error("API configuration missing");
+    try {
+      const bankResp = await axios.get(`${API_URL}/user/bank-details`, { withCredentials: true });
+      if (!(bankResp?.data?.success && bankResp.data.data && bankResp.data.data.accountNumber)) {
+        toast.error("Please add your bank details under Profile → Bank Details before redeeming rewards.");
+        return;
+      }
+    } catch (err) {
+      console.warn('Bank details check failed:', err);
+      toast.error("Unable to verify bank details. Please try again later.");
       return;
     }
 
     try {
       setRedeemLoading(true);
-      const { data } = await axios.post(`${API_URL}/user/redeem-rewards`, 
-        { amount }, 
-        { 
+      const { data } = await axios.post(`${API_URL}/user/redeem-rewards`,
+        { amount },
+        {
           withCredentials: true,
           timeout: 10000
         }
       );
-      
+
       toast.success(data.message || "Rewards redeemed successfully");
       setRedeemAmount("");
       fetchReferralData(); // Refresh data
     } catch (error) {
       console.error("Redeem error:", error);
-      
+
       if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
-        toast.error("Unable to connect to server. Please try again.");
+        toast.error("Network error. Please check your connection.");
       } else if (error.response?.status === 401) {
-        setAuthError(true);
         toast.error("Authentication required. Please log in again.");
       } else {
-        const msg = error?.response?.data?.message || "Failed to redeem rewards";
-        toast.error(msg);
+        toast.error(error.response?.data?.message || "Failed to redeem rewards");
       }
     } finally {
       setRedeemLoading(false);
     }
   };
 
-  // Advanced Social Sharing Functions
-  const shareToFacebook = () => {
-    if (!referralData?.referralLink) return;
-    
-    const url = encodeURIComponent(referralData.referralLink);
-    const text = encodeURIComponent("Join me on Flyobo and get amazing travel deals! Use my referral code for exclusive bonuses.");
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank');
-    trackSocialShare('facebook');
+  const getMilestoneData = () => {
+    if (!referralData) return [];
+
+    const baseMilestones = [
+      { id: 'first_referral', title: 'First Referral', target: 1, reward: 50, icon: Users },
+      { id: '5_referrals', title: 'Social Butterfly', target: 5, reward: 100, icon: Share },
+      { id: '10_referrals', title: 'Influencer', target: 10, reward: 250, icon: Star },
+      { id: '25_referrals', title: 'Ambassador', target: 25, reward: 500, icon: Award },
+      { id: '50_referrals', title: 'Champion', target: 50, reward: 1000, icon: Trophy },
+      { id: '100_referrals', title: 'Legend', target: 100, reward: 2500, icon: Crown }
+    ];
+
+    return baseMilestones.map(milestone => {
+      const userMilestone = referralData.milestones?.find(m => m.milestone === milestone.id);
+      return {
+        ...milestone,
+        achieved: userMilestone ? userMilestone.achieved : false,
+        achievedAt: userMilestone ? userMilestone.achievedAt : null
+      };
+    });
   };
 
-  const shareToTwitter = () => {
-    if (!referralData?.referralLink) return;
-    
-    const url = encodeURIComponent(referralData.referralLink);
-    const text = encodeURIComponent("🎉 Join me on Flyobo for amazing travel deals! Use my referral code for exclusive bonuses 🎁");
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-    trackSocialShare('twitter');
-  };
-
-  const shareToWhatsApp = () => {
-    if (!referralData?.referralLink) return;
-    
-    const text = encodeURIComponent(`🎉 Hey! I'm using Flyobo for amazing travel deals. Join using my referral link and we both get exclusive bonuses! ${referralData.referralLink}`);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-    trackSocialShare('whatsapp');
-  };
-
-  const shareViaEmail = () => {
-    if (!referralData?.referralLink) return;
-    
-    const subject = encodeURIComponent("Exclusive Travel Deals on Flyobo!");
-    const body = encodeURIComponent(`Hi there!\n\nI've been using Flyobo for booking amazing travel packages and thought you'd love it too!\n\nUse my referral link to join and we both get exclusive bonuses:\n${referralData.referralLink}\n\nHappy travels!\n`);
-    window.open(`mailto:?subject=${subject}&body=${body}`);
-    trackSocialShare('email');
-  };
-
-  const trackSocialShare = async (platform) => {
-    try {
-      await axios.post(`${API_URL}/user/track-social-share`, {
-        platform
-      }, {
-        withCredentials: true
-      });
-      setSocialShareCounts(prev => ({
-        ...prev,
-        [platform]: prev[platform] + 1
-      }));
-    } catch (error) {
-      console.error("Error tracking social share:", error);
-    }
-  };
-
-  // Milestone and Tier Functions
-  const getMilestones = () => [
-    { id: 'first_referral', title: 'First Referral', description: 'Invite your first friend', target: 1, reward: 50, icon: Users },
-    { id: '5_referrals', title: 'Social Butterfly', description: 'Invite 5 friends', target: 5, reward: 250, icon: Share },
-    { id: '10_referrals', title: 'Influencer', description: 'Invite 10 friends', target: 10, reward: 500, icon: Star },
-    { id: '25_referrals', title: 'Ambassador', description: 'Invite 25 friends', target: 25, reward: 1000, icon: Award },
-    { id: '50_referrals', title: 'Champion', description: 'Invite 50 friends', target: 50, reward: 2500, icon: Trophy },
-    { id: '100_referrals', title: 'Legend', description: 'Invite 100 friends', target: 100, reward: 5000, icon: Crown }
-  ];
-
-  const getTierInfo = (tier) => {
+  const getTierInfo = () => {
     const tiers = {
-      bronze: { 
-        name: 'Bronze', 
-        color: 'text-orange-600', 
-        bg: 'bg-orange-100', 
-        bgColor: 'bg-orange-100 dark:bg-orange-900', 
-        icon: Award, 
-        benefits: ['5% bonus on rewards'] 
-      },
-      silver: { 
-        name: 'Silver', 
-        color: 'text-gray-600', 
-        bg: 'bg-gray-100', 
-        bgColor: 'bg-gray-100 dark:bg-gray-700', 
-        icon: Trophy, 
-        benefits: ['10% bonus on rewards', 'Priority support'] 
-      },
-      gold: { 
-        name: 'Gold', 
-        color: 'text-yellow-600', 
-        bg: 'bg-yellow-100', 
-        bgColor: 'bg-yellow-100 dark:bg-yellow-900', 
-        icon: Crown, 
-        benefits: ['15% bonus on rewards', 'Priority support', 'Exclusive offers'] 
-      },
-      platinum: { 
-        name: 'Platinum', 
-        color: 'text-purple-600', 
-        bg: 'bg-purple-100', 
-        bgColor: 'bg-purple-100 dark:bg-purple-900', 
-        icon: Crown, 
-        benefits: ['20% bonus on rewards', 'Priority support', 'Exclusive offers', 'Early access'] 
-      },
-      diamond: { 
-        name: 'Diamond', 
-        color: 'text-blue-600', 
-        bg: 'bg-blue-100', 
-        bgColor: 'bg-blue-100 dark:bg-blue-900', 
-        icon: Crown, 
-        benefits: ['25% bonus on rewards', 'VIP support', 'Exclusive offers', 'Early access', 'Personal manager'] 
-      }
+      first: { name: 'First Referral', color: 'text-orange-600', bg: 'bg-orange-100', nextTier: 'Social Butterfly', nextThreshold: 5 },
+      social: { name: 'Social Butterfly', color: 'text-indigo-600', bg: 'bg-indigo-100', nextTier: 'Influencer', nextThreshold: 10 },
+      influencer: { name: 'Influencer', color: 'text-yellow-600', bg: 'bg-yellow-100', nextTier: 'Ambassador', nextThreshold: 25 },
+      ambassador: { name: 'Ambassador', color: 'text-purple-600', bg: 'bg-purple-100', nextTier: 'Champion', nextThreshold: 50 },
+      champion: { name: 'Champion', color: 'text-green-600', bg: 'bg-green-100', nextTier: 'Legend', nextThreshold: 100 },
+      legend: { name: 'Legend', color: 'text-blue-600', bg: 'bg-blue-100', nextTier: null, nextThreshold: null }
     };
-    return tiers[tier] || tiers.bronze;
+
+    const totalReferrals = referralData?.totalReferrals || 0;
+    const milestones = referralData?.milestones || [];
+
+    const milestoneAchieved = (id) => {
+      const m = milestones.find(ms => ms.milestone === id);
+      return !!(m && m.achieved);
+    };
+
+    if (milestoneAchieved('100_referrals') || totalReferrals >= 100) return tiers.legend;
+    if (milestoneAchieved('50_referrals') || totalReferrals >= 50) return tiers.champion;
+    if (milestoneAchieved('25_referrals') || totalReferrals >= 25) return tiers.ambassador;
+    if (milestoneAchieved('10_referrals') || totalReferrals >= 10) return tiers.influencer;
+    if (milestoneAchieved('5_referrals') || totalReferrals >= 5) return tiers.social;
+
+    return tiers.first;
+  };
+
+  const getTierProgress = () => {
+    if (!referralData) return 0;
+
+    const tierInfo = getTierInfo();
+    if (!tierInfo || !tierInfo.nextThreshold) return 100;
+
+    const progress = (referralData.totalReferrals / tierInfo.nextThreshold) * 100;
+    return Math.min(progress, 100);
+  };
+
+  const renderRewardHistoryItem = (reward) => {
+    const isPositive = reward.amount > 0;
+    const statusColors = {
+      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+      credited: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+      used: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      expired: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    };
+
+    return (
+      <div key={reward._id} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex-1">
+          <p className="font-medium text-gray-900 dark:text-white">{reward.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {new Date(reward.createdAt).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${isPositive ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+            }`}>
+            {isPositive ? '+' : ''}{reward.amount}
+          </span>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[reward.status]}`}>
+            {reward.status.charAt(0).toUpperCase() + reward.status.slice(1)}
+          </span>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -350,64 +269,32 @@ const ReferralProgram = () => {
     );
   }
 
-  if (authError && !loading) {
+  if (serverError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <Shield className="h-16 w-16 text-yellow-400 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Authentication Required
-        </h3>
+        <ExternalLink className="h-16 w-16 text-red-400 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Server Connection Error</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Your session has expired or you need to log in to access the referral program.
+          Unable to connect to the server. Please try again later.
         </p>
-        <div className="space-y-2">
-            <button 
-            onClick={() => {
-              setAuthError(false);
-              // open auth modal via global event
-              try {
-                window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { route: 'Login' } }));
-              } catch (e) {
-                window.location.href = '/login';
-              }
-            }}
-            className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors mr-3"
-          >
-            Go to Login
-          </button>
-          <button 
-            onClick={() => {
-              setAuthError(false);
-              fetchReferralData();
-            }}
-            className="px-6 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+        >
+          Retry Connection
+        </button>
       </div>
     );
   }
 
-  if (serverError && !loading) {
+  if (authError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <ExternalLink className="h-16 w-16 text-red-400 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Server Connection Error
-        </h3>
+        <Shield className="h-16 w-16 text-yellow-400 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Authentication Required</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Unable to connect to the server. Please make sure the backend is running on port 5000.
+          Please log in to access the referral program.
         </p>
-        <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
-          <p>Trying to connect to: {API_URL}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
       </div>
     );
   }
@@ -416,342 +303,153 @@ const ReferralProgram = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Gift className="h-16 w-16 text-gray-400 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Join the Referral Program
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Please log in to access your referral dashboard and start earning rewards.
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Join the Referral Program</h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          Sign up to start earning rewards by referring friends.
         </p>
       </div>
     );
   }
 
-  const shareOnSocial = (platform) => {
-    const referralLink = `${window.location.origin}/register?ref=${referralData?.referralCode}`;
-    const message = `Join FlyObo using my referral code ${referralData?.referralCode} and get ₹50 bonus! ${referralLink}`;
-    
-    // Update share counts
-    setSocialShareCounts(prev => ({
-      ...prev,
-      [platform]: prev[platform] + 1
-    }));
-    
-    const urls = {
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`,
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`,
-      whatsapp: `https://wa.me/?text=${encodeURIComponent(message)}`,
-      email: `mailto:?subject=Join FlyObo&body=${encodeURIComponent(message)}`
-    };
-    
-    if (urls[platform]) {
-      window.open(urls[platform], '_blank');
-    }
-  };
-
-  const currentTier = getTierInfo(referralData?.referralTier || 'bronze');
-  const milestoneList = getMilestones();
+  const milestoneList = getMilestoneData();
+  const tierInfo = getTierInfo();
+  const tierProgress = getTierProgress();
   const totalReferrals = referralData?.totalReferrals || 0;
 
+
   return (
-    <section className="w-full space-y-6">
-      {!referralData && !loading && user && !authError && !serverError && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-                Unable to load referral data. This might be a temporary issue.
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                setLoading(true);
-                fetchReferralData();
-              }}
-              className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Header with Tier Badge */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 bg-gradient-to-br from-sky-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {user?.name?.[0] || 'U'}
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Referral Program
-              </h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${currentTier.bg} ${currentTier.color}`}>
-                  {currentTier.name} Tier
-                </span>
-                <span className="text-gray-500 dark:text-gray-400 text-sm">
-                  {totalReferrals} referrals
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Referral Code</p>
-            <p className="text-lg font-mono font-bold text-gray-900 dark:text-white">
-              {referralData?.referralCode || 'Loading...'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
-          {[
-            { key: 'overview', label: 'Overview', icon: BarChart3 },
-            { key: 'share', label: 'Share & Earn', icon: Share },
-            { key: 'milestones', label: 'Milestones', icon: Target },
-            { key: 'leaderboard', label: 'Leaderboard', icon: Trophy }
-          ].map(tab => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.key
-                    ? 'border-sky-500 text-sky-600 dark:text-sky-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Header Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl p-6 text-white">
-          <div className="flex items-center gap-3">
-            <DollarSign className="h-8 w-8" />
-            <div>
-              <p className="text-sky-100 text-sm">Available Rewards</p>
-              <p className="text-2xl font-bold">₹{referralData?.availableRewards || 0}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white">
-          <div className="flex items-center gap-3">
-            <Users className="h-8 w-8" />
-            <div>
-              <p className="text-emerald-100 text-sm">Total Referrals</p>
-              <p className="text-2xl font-bold">{referralData?.totalReferrals || 0}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-6 text-white">
-          <div className="flex items-center gap-3">
-            <Gift className="h-8 w-8" />
-            <div>
-              <p className="text-purple-100 text-sm">Total Earned</p>
-              <p className="text-2xl font-bold">₹{referralData?.totalRewards || 0}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Referral Link Section */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Gift className="h-5 w-5" />
-          Your Referral Code
-        </h3>
-        
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <input
-                type="text"
-                value={referralData?.referralCode || ''}
-                readOnly
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg font-mono text-lg font-bold text-center"
-              />
-              <div className="absolute inset-y-0 right-3 flex items-center">
-                <span className="text-xs bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200 px-2 py-1 rounded">
-                  Code
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <button
-              onClick={copyReferralLink}
-              className="flex items-center gap-2 px-4 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-lg transition-colors"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? 'Copied!' : 'Copy Link'}
-            </button>
-            
-            <button
-              onClick={shareReferralLink}
-              className="flex items-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
-            >
-              <Share className="h-4 w-4" />
-              Share
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>How it works:</strong> Share your referral code with friends. They get ₹50 signup bonus, 
-            and you earn ₹100 for each successful referral!
+    <div className="space-y-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-md transition-all">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-sky-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
+            Referral Program
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-md">
+            Invite your friends to explore exciting travel packages and earn rewards
+            for every successful referral you make!
           </p>
         </div>
       </div>
-
-      {/* Redeem Rewards */}
-      {referralData?.availableRewards > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Redeem Rewards
-          </h3>
-          
-          <form onSubmit={handleRedeemRewards} className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="number"
-                value={redeemAmount}
-                onChange={(e) => setRedeemAmount(e.target.value)}
-                placeholder="Enter amount (min. ₹50)"
-                min="50"
-                max={referralData?.availableRewards}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
-              />
-            </div>
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-800">
+        <nav className="-mb-px flex space-x-8">
+          {[
+            { id: 'overview', label: 'Overview' },
+            { id: 'milestones', label: 'Milestones' },
+            { id: 'analytics', label: 'Analytics' },
+            { id: 'rewards', label: 'Rewards History' }
+          ].map((tab) => (
             <button
-              type="submit"
-              disabled={redeemLoading || !redeemAmount}
-              className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
+                ? 'border-sky-500 text-sky-600 dark:text-sky-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
             >
-              {redeemLoading ? 'Processing...' : 'Redeem Now'}
+              {tab.label}
             </button>
-          </form>
-        </div>
-      )}
+          ))}
+        </nav>
+      </div>
 
-      {/* Referral History */}
-      {referralData?.referredUsers?.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Your Referrals
-          </h3>
-          
-          <div className="space-y-3">
-            {referralData.referredUsers.map((referral, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {referral.user?.name?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {referral.user?.name || 'User'}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Joined {new Date(referral.joinedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-green-600">+₹{referral.rewardAmount}</p>
-                  <p className="text-xs text-gray-500">
-                    {referral.rewardClaimed ? 'Claimed' : 'Pending'}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-        </div>
-      )}
-
-      {/* Share & Earn Tab */}
-      {activeTab === 'share' && (
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
         <div className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Referrals</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalReferrals}</p>
+                </div>
+                <Users className="h-8 w-8 text-sky-500" />
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Available Rewards</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{referralData?.availableRewards || 0}</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-green-500" />
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Earned</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{referralData?.totalRewards || 0}</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-500" />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Share className="h-5 w-5" />
-              Share & Earn Rewards
+              <Gift className="h-5 w-5" />
+              Your Referral Code
             </h3>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <button
-                onClick={() => shareOnSocial('facebook')}
-                className="flex flex-col items-center gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                <Facebook className="h-6 w-6 text-blue-600" />
-                <span className="text-sm font-medium">Facebook</span>
-              </button>
-              
-              <button
-                onClick={() => shareOnSocial('twitter')}
-                className="flex flex-col items-center gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                <Twitter className="h-6 w-6 text-blue-400" />
-                <span className="text-sm font-medium">Twitter</span>
-              </button>
-              
-              <button
-                onClick={() => shareOnSocial('whatsapp')}
-                className="flex flex-col items-center gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                <MessageCircle className="h-6 w-6 text-green-500" />
-                <span className="text-sm font-medium">WhatsApp</span>
-              </button>
-              
-              <button
-                onClick={() => shareOnSocial('email')}
-                className="flex flex-col items-center gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                <Mail className="h-6 w-6 text-gray-600" />
-                <span className="text-sm font-medium">Email</span>
-              </button>
-            </div>
 
-            <div className="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Sharing Stats</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Facebook shares:</span>
-                  <span className="font-medium ml-2">{socialShareCounts.facebook}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Twitter shares:</span>
-                  <span className="font-medium ml-2">{socialShareCounts.twitter}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">WhatsApp shares:</span>
-                  <span className="font-medium ml-2">{socialShareCounts.whatsapp}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Email shares:</span>
-                  <span className="font-medium ml-2">{socialShareCounts.email}</span>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Referral Code
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={referralData?.referralCode || ''}
+                    readOnly
+                    className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono"
+                  />
+                  <button
+                    onClick={copyReferralLink}
+                    className="px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
+
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+            <ReferralTier />
+          </div>
+
+          {/* Redeem Rewards */}
+          {referralData?.availableRewards > 0 && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Redeem Rewards
+              </h3>
+              <form onSubmit={handleRedeemRewards} className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    value={redeemAmount}
+                    onChange={(e) => setRedeemAmount(e.target.value)}
+                    placeholder="Enter amount (min. ₹50)"
+                    min="50"
+                    max={referralData?.availableRewards}
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={redeemLoading || !redeemAmount}
+                  className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+                >
+                  {redeemLoading ? 'Processing...' : 'Redeem'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       )}
 
@@ -763,51 +461,59 @@ const ReferralProgram = () => {
               <Target className="h-5 w-5" />
               Referral Milestones
             </h3>
-            
+
             <div className="space-y-4">
               {milestoneList.map((milestone, index) => {
                 const isAchieved = totalReferrals >= milestone.target;
                 const progress = Math.min((totalReferrals / milestone.target) * 100, 100);
-                
+
                 return (
-                  <div key={index} className={`p-4 rounded-lg border ${
-                    isAchieved 
-                      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' 
-                      : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
+                  <div key={index} className={`p-4 rounded-lg border ${isAchieved
+                    ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+                    : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+                    }`}>
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          isAchieved ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                        }`}>
-                          {isAchieved ? <CheckCircle className="h-5 w-5" /> : <Target className="h-5 w-5" />}
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isAchieved
+                          ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                          }`}>
+                          <milestone.icon className="h-5 w-5" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">{milestone.title}</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{milestone.description}</p>
+                          <h4 className="font-medium text-gray-900 dark:text-white">{milestone.title}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {milestone.target} referral{milestone.target > 1 ? 's' : ''}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-green-600">₹{milestone.reward}</p>
-                        <p className="text-xs text-gray-500">{milestone.target} referrals</p>
+                        <p className="font-bold text-green-600 dark:text-green-400">₹{milestone.reward}</p>
+                        {isAchieved ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            Achieved
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                            {totalReferrals}/{milestone.target}
+                          </span>
+                        )}
                       </div>
                     </div>
-                    
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          isAchieved ? 'bg-green-500' : 'bg-sky-500'
-                        }`}
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                    
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {isAchieved 
-                        ? 'Milestone achieved!' 
-                        : `${milestone.target - totalReferrals} more referrals needed`
-                      }
-                    </p>
+
+                    {!isAchieved && (
+                      <div className="mt-3">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div
+                            className="bg-sky-500 h-2 rounded-full"
+                            style={{ width: `${progress}%` }}
+                          ></div>
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          {progress.toFixed(1)}% complete
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -816,94 +522,115 @@ const ReferralProgram = () => {
         </div>
       )}
 
-      {/* Leaderboard Tab */}
-      {activeTab === 'leaderboard' && (
+      {/* Analytics Tab */}
+      {activeTab === 'analytics' && (
         <div className="space-y-6">
+          {/* Referred Users */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-yellow-500" />
-              Referral Champions
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              Referred Users
             </h3>
-            
-            {leaderboard.length > 0 ? (
-              <div className="space-y-3">
-                {leaderboard.map((leader, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            {referralData?.referredUsers && referralData.referredUsers.length > 0 ? (
+              <div className="space-y-4">
+                {referralData.referredUsers.map((referral, index) => (
+                  <div key={referral.user?._id || referral._id || index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-500' : 'bg-gray-600'
-                      }`}>
-                        {index === 0 ? <Crown className="h-5 w-5" /> : index + 1}
-                      </div>
-                      <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-bold">
-                        {leader.name?.[0]?.toUpperCase() || 'U'}
+                      <div className="h-10 w-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-medium">
+                        {referral.user?.name?.[0] || 'U'}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {leader.name}
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {referral.user?.name || referral.refereeName || 'User'}
                         </p>
-                        <p className="text-sm text-gray-500">
-                          {leader.totalReferrals} referrals
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {referral.joinedAt ? `Joined ${new Date(referral.joinedAt).toLocaleDateString()}` : ''}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-green-600">₹{leader.totalRewards}</p>
-                      {index < 3 && <Star className="inline h-4 w-4 text-yellow-500 ml-1" />}
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        ₹{referral.rewardAmount || 0}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <Trophy className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No leaderboard data yet</h4>
-                <p className="text-gray-600 dark:text-gray-400">Start referring friends to see the leaderboard!</p>
-              </div>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                No referred users yet. Share your link to start earning!
+              </p>
             )}
+          </div>
+
+          {/* Referral Leaderboard */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              Referral Leaderboard
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Top referrers in our community</p>
+            <div className="space-y-4">
+              {leaderboard && leaderboard.length > 0 ? (
+                leaderboard.map((item, idx) => {
+                  const name = item?.user?.name || item?.name || item?.email || 'User';
+                  const joined = item?.user?.createdAt || item?.createdAt || item?.joinedAt || null;
+                  const amount = item?.totalRewards ?? item?.availableRewards ?? item?.rewardAmount ?? 0;
+
+                  return (
+                    <div key={item.user?._id || item._id || item.name || idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {/* Rank badge */}
+                          {(() => {
+                            const rank = item?.rank ?? (idx + 1);
+                            const rankClass = rank === 1 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : rank === 2 ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' : rank === 3 ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' : 'bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+                            return (
+                              <div className={`flex items-center justify-center h-8 w-8 rounded-full font-semibold ${rankClass} mr-2`}>#{rank}</div>
+                            );
+                          })()}
+
+                          <div className="h-10 w-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-medium">
+                            {name?.[0] || 'U'}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{name}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{joined ? `Joined ${new Date(joined).toLocaleDateString()}` : ''}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900 dark:text-white">₹{amount}</p>
+                        </div>
+                      </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No leaderboard data yet.</p>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Leaderboard */}
-      {leaderboard.length > 0 && (
+      {/* Rewards Tab */}
+      {activeTab === 'rewards' && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-yellow-500" />
-            Referral Leaderboard
+            <DollarSign className="h-5 w-5" />
+            Rewards History
           </h3>
-          
-          <div className="space-y-3">
-            {leaderboard.slice(0, 5).map((leader, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                    index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-500' : 'bg-gray-600'
-                  }`}>
-                    {index + 1}
-                  </div>
-                  <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {leader.name?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {leader.name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {leader.totalReferrals} referrals
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-green-600">₹{leader.totalRewards}</p>
-                  {index < 3 && <Star className="inline h-4 w-4 text-yellow-500 ml-1" />}
-                </div>
+
+          <div className="space-y-4">
+            {referralData?.rewardHistory && referralData.rewardHistory.length > 0 ? (
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                {referralData.rewardHistory.map(renderRewardHistoryItem)}
               </div>
-            ))}
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                No reward history yet
+              </p>
+            )}
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 

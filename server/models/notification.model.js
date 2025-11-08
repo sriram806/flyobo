@@ -1,6 +1,17 @@
 import mongoose, { Schema } from "mongoose"
 
 const notificationSchema = new Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    // The actor/source user who triggered this notification (optional)
+    actor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false
+    },
     title: {
         type: String,
         required: true
@@ -12,7 +23,8 @@ const notificationSchema = new Schema({
     status: {
         type: String,
         required: true,
-        default: "unread"
+        default: "unread",
+        enum: ['read', 'unread']
     }
 }, { timestamps: true });
 

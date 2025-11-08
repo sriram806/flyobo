@@ -41,13 +41,7 @@ const items = [
   {
     section: "Referral System",
     links: [
-      { key: "referrals-overview", label: "Referral Overview", icon: Gift },
-      { key: "referrals-users", label: "Referral Users", icon: UserCheck },
-      { key: "referrals-analytics", label: "Referral Analytics", icon: BarChart3 },
-      { key: "referrals-rewards", label: "Rewards Management", icon: Award },
-      { key: "referrals-leaderboard", label: "Leaderboard", icon: TrendingUp },
-      { key: "referrals-payouts", label: "Payouts", icon: DollarSign },
-      { key: "referrals-settings", label: "Referral Settings", icon: Settings },
+      { key: "referrals-overview", label: "Referral System", icon: Gift },
     ],
   },
 ];

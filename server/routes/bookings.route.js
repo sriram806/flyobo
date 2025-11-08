@@ -8,7 +8,8 @@ import {
   getUserBookings,
   getBookingAnalytics,
   getBookingTrends,
-  getCustomerSegments
+  getCustomerSegments,
+  updateBookingStatus
 } from '../controllers/bookings.controllers.js';
 
 const bookingsRouter = express.Router();
@@ -20,6 +21,7 @@ bookingsRouter.get('/user/:id', isAuthenticated, getUserBookings);
 
 // Admin routes
 bookingsRouter.post('/admin', isAuthenticated, isAdmin, adminCreateBooking);
+bookingsRouter.put('/admin/:bookingId', isAuthenticated, isAdmin, updateBookingStatus);
 
 // Analytics routes (Admin only)
 bookingsRouter.get('/analytics/overview', isAuthenticated, isAdmin, getBookingAnalytics);
