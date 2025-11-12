@@ -13,15 +13,16 @@ export const navItemsData = [
 const Navitems = ({ activeItem, isMobile }) => {
   return (
     <>
-      <div className="hidden md:flex items-center space-x-6">
+      {/* Desktop Navigation */}
+      <div className="hidden md:flex items-center space-x-8">
         {navItemsData.map((item, index) => (
           <Link href={item.url} key={index}>
             <span
               className={`${
                 activeItem === index
-                  ? "text-rose-600 dark:text-sky-300"
-                  : "text-gray-900 dark:text-white"
-              } text-lg font-medium transition-colors duration-300 hover:text-rose-600 dark:hover:text-sky-500`}
+                  ? "text-sky-600 dark:text-sky-300"
+                  : "text-gray-800 dark:text-gray-200"
+              } text-lg font-medium tracking-wide transition-all duration-300 hover:text-sky-500 dark:hover:text-sky-400`}
             >
               {item.name}
             </span>
@@ -29,11 +30,12 @@ const Navitems = ({ activeItem, isMobile }) => {
         ))}
       </div>
 
+      {/* Mobile Navigation */}
       {isMobile && (
-        <div className="md:hidden mt-5">
-          <div className="w-full text-center py-4">
+        <div className="md:hidden mt-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg">
+          <div className="w-full text-center py-4 border-b border-gray-200 dark:border-gray-700">
             <Link href="/">
-              <span className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <span className="text-3xl font-bold bg-gradient-to-r from-sky-500 to-sky-700 dark:from-sky-300 dark:to-sky-500 text-transparent bg-clip-text">
                 Flyobo
               </span>
             </Link>
@@ -41,11 +43,11 @@ const Navitems = ({ activeItem, isMobile }) => {
           {navItemsData.map((item, index) => (
             <Link href={item.url} key={index}>
               <span
-                className={`${
+                className={`block py-4 px-6 text-lg font-medium transition-all duration-300 ${
                   activeItem === index
-                    ? "text-rose-600 dark:text-sky-300"
-                    : "text-gray-900 dark:text-white"
-                } block py-3 px-6 text-lg font-medium transition-colors duration-300 hover:text-rose-600 dark:hover:text-sky-500`}
+                    ? "text-sky-600 dark:text-sky-300"
+                    : "text-gray-800 dark:text-gray-200 hover:text-sky-500 dark:hover:text-sky-400"
+                }`}
               >
                 {item.name}
               </span>

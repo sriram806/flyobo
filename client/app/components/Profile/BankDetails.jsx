@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import { CreditCard, CheckCircle, AlertCircle } from "lucide-react";
+import { HiOutlineRefresh } from "react-icons/hi";
 
 const BankDetails = () => {
   const user = useSelector((state) => state?.auth?.user);
@@ -138,9 +139,7 @@ const BankDetails = () => {
           onClick={fetchBankDetails}
           className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <HiOutlineRefresh className="h-4 w-4" />
           Refresh
         </button>
       </div>

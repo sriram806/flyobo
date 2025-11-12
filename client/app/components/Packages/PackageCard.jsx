@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import { Heart, MapPin, Calendar, Users, Star, TrendingUp, Sparkles, Clock } from "lucide-react";
+import { HiOutlineChevronRight } from "react-icons/hi";
 
 export default function PackageCard({ pkg, loading }) {
   const imgSrc = pkg?.images || pkg?.image ||
@@ -226,9 +227,7 @@ export default function PackageCard({ pkg, loading }) {
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105"
               >
                 View Details
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <HiOutlineChevronRight className="w-4 h-4" />
               </Link>
             </div>
           </>

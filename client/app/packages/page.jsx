@@ -13,6 +13,7 @@ import EmptyState from "../components/Packages/EmptyState";
 import PackageCard from "../components/Packages/PackageCard";
 import Footer from "../components/Layout/Footer";
 import { MapPin, Compass, Sparkles, TrendingUp } from "lucide-react";
+import { HiOutlineSearch, HiOutlineSelector } from "react-icons/hi";
 
 
 export default function Page() {
@@ -261,10 +262,8 @@ export default function Page() {
       <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8 sm:py-12 bg-gray-50 dark:bg-gray-900">
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-lg mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div className="relative flex-1">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <div className="relative flex-1">
+              <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -273,9 +272,7 @@ export default function Page() {
               />
             </div>
             <div className="relative w-full lg:w-56">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-              </svg>
+              <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -286,9 +283,7 @@ export default function Page() {
                 <option value="price_high">Price: High to Low</option>
                 <option value="rating">Top Rated</option>
               </select>
-              <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <HiOutlineSelector className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
           </div>
         </div>

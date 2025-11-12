@@ -4,15 +4,14 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 export default function Portal({ children }) {
-  const [mounted, setMounted] = useState(false);
   const [container, setContainer] = useState(null);
 
   useEffect(() => {
-    setMounted(true);
-    setContainer(document.body);
-    return () => setMounted(false);
+    if (typeof window !== "undefined") {
+      setContainer(document.body);
+    }
   }, []);
+  if (!container) return null;
 
-  if (!mounted || !container) return null;
   return createPortal(children, container);
 }

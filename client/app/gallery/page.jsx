@@ -5,6 +5,7 @@ import Footer from "../components/Layout/Footer";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import { Camera, Images, MapPin, Search, Calendar, X, ChevronLeft, ChevronRight, Play, Pause, Loader2 } from "lucide-react";
+import { HiOutlineEye, HiOutlineExclamationCircle } from "react-icons/hi";
 
 const yearsFromItems = (items) => {
   const ys = new Set(
@@ -157,10 +158,7 @@ const GalleryCard = ({ item, index, onOpen }) => (
       </div>
       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
         <div className="rounded-full bg-white/20 backdrop-blur-md p-2.5 border border-white/40 shadow-xl">
-          <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
+          <HiOutlineEye className="h-5 w-5 text-white" />
         </div>
       </div>
     </button>
@@ -386,9 +384,7 @@ export default function GalleryPage() {
             <div className="rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
-                  <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <HiOutlineExclamationCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
