@@ -44,6 +44,7 @@ function AdminLayoutContent({ children }) {
     gallery: "/admin/gallery",
     analytics: "/admin/analytics",
     contact: "/admin/conatcts",
+    home: "/admin/home",
     "analytics-users": "/admin/analytics/users",
     "analytics-packages": "/admin/analytics/packages",
     "analytics-bookings": "/admin/analytics/bookings",

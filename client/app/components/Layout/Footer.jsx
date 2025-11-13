@@ -3,10 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FiFacebook, FiInstagram, FiTwitter, FiMapPin, FiPhone, FiMail } from "react-icons/fi";
+import React from 'react';
+import { useHomeContent } from '@/app/context/HomeContentContext';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0b1220] text-gray-300 pt-10 pb-8 mt-10">
+    <footer className="bg-[#0b1220] dark:bg-[#0b1220] text-gray-300 pt-8 pb-8 mt-0 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
@@ -63,12 +65,21 @@ export default function Footer() {
           </div>
         </div>
 
-        <hr className="border-gray-700 mt-8" />
-
-        <div className="text-center text-xs text-gray-400 mt-4">
-          © {new Date().getFullYear()} Flyobo (Swagatam World LLP). All rights reserved.
+        <div className="text-center text-xs text-gray-400 mt-6">
+          {/* footer copy from editable content when available */}
+          <FooterCopy />
         </div>
       </div>
     </footer>
   );
+}
+
+// small component to read footer copy from HomeContentProvider if available
+function FooterCopy() {
+  try {
+    const { content } = useHomeContent();
+    return <span>{content?.footer?.copy || `© ${new Date().getFullYear()} Flyobo (Swagatam World LLP). All rights reserved.`}</span>;
+  } catch (e) {
+    return <span>© {new Date().getFullYear()} Flyobo (Swagatam World LLP). All rights reserved.</span>;
+  }
 }

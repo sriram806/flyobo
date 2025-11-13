@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Heading from './components/MetaData/Heading';
 import Header from './components/Layout/Header';
+import { HomeContentProvider } from './context/HomeContentContext';
 import Hero from './components/Home/Hero';
 import TopDestinations from './components/Home/TopDestinations';
 import BoldShowcase from './components/Home/BoldShowcase';
@@ -28,7 +29,7 @@ const Home = () => {
 
   return (
     <>
-      <SEO 
+      <SEO
         title="Discover Amazing Travel Experiences"
         description="Discover travel tips, destination guides, and vacation inspiration for your next adventure. Explore the world's amazing places with expert advice, top itineraries, and travel deals tailored for every kind of explorer."
         keywords="Travel, Adventure, Destinations, Vacation, Itineraries, Hotels, Flights, Tourism, Sightseeing, Travel Tips, Holiday, Guided Tours, Budget Travel, Luxury Travel, Family Travel, Solo Travel, Travel Deals"
@@ -37,7 +38,10 @@ const Home = () => {
       <WebsiteStructuredData />
       <OrganizationStructuredData />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        <Heading
+  {/* Home content provider allows admins to edit content client-side */}
+  {/* Wrap only the homepage children so provider is available to child components */}
+  <HomeContentProvider>
+  <Heading
           title="Flyobo"
           description="Discover travel tips, destination guides, and vacation inspiration for your next adventure. Explore the world's amazing places with expert advice, top itineraries, and travel deals tailored for every kind of explorer."
           keywords="Travel, Adventure, Destinations, Vacation, Itineraries, Hotels, Flights, Tourism, Sightseeing, Travel Tips, Holiday, Guided Tours, Budget Travel, Luxury Travel, Family Travel, Solo Travel, Travel Deals"
@@ -64,7 +68,8 @@ const Home = () => {
         </div>
         <Newsletter />
         <Footer />
-        <WhatsApp />
+  <WhatsApp />
+  </HomeContentProvider>
       </div>
     </>
   );

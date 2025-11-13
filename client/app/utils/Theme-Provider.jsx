@@ -25,7 +25,7 @@ const ThemeProvider = ({ children, ...props }) => {
       attribute="class" 
       defaultTheme="dark" 
       enableSystem={false}
-      storageKey="flyobo-theme"
+      forcedTheme="dark"
       {...props}
     >
       {children}

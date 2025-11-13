@@ -12,6 +12,7 @@ import {
   HiOutlineCamera,
   HiOutlineCog,
   HiCollection,
+  HiHome,
 } from "react-icons/hi";
 import {
   Gift,
@@ -36,8 +37,9 @@ const items = [
       { key: "package", label: "Packages", icon: HiOutlineBookmark },
       { key: "bookings", label: "Bookings", icon: HiOutlineCog },
       { key: "analytics", label: "Advanced Analytics", icon: HiOutlineBell },
-      { key: "contacts", label: "Contact", icon: HiCollection},
+      { key: "contacts", label: "Contact", icon: HiCollection },
       { key: "gallery", label: "Gallery", icon: HiOutlineCamera },
+      { key: "home", label: "Home", icon: HiHome }
     ],
   },
   {
@@ -79,9 +81,9 @@ const AdminSidebar = ({ selected = "overview", onSelect, onLogout }) => {
           const notes = resp?.data?.notifications || [];
           const unread = Array.isArray(notes) ? notes.filter((n) => n?.status !== 'read').length : 0;
           setNotificationsCount(unread);
-        } catch {}
+        } catch { }
       } catch (e) {
-        
+
       }
     };
     fetchCount();

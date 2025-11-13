@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useHomeContent } from '@/app/context/HomeContentContext';
 
 const Hero = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -18,6 +19,7 @@ const Hero = () => {
     ];
 
     const router = useRouter();
+    const { content } = useHomeContent();
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -32,14 +34,20 @@ const Hero = () => {
                 <div className="absolute inset-0 z-0">
                     <div className="absolute inset-0 bg-black/40 dark:bg-black/60"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 dark:from-black/80 via-transparent to-transparent"></div>
-                    <Image
-                        src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                        alt="Snowy mountains with a winding road at sunset"
-                        fill
-                        priority
-                        sizes="100vw"
-                        className="object-cover"
-                    />
+                    {content?.hero?.image ? (
+                        // allow a data URL or remote url
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={content.hero.image} alt={content.hero.title || 'Hero image'} className="object-cover w-full h-full absolute inset-0" />
+                    ) : (
+                        <Image
+                            src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                            alt="Snowy mountains with a winding road at sunset"
+                            fill
+                            priority
+                            sizes="100vw"
+                            className="object-cover"
+                        />
+                    )}
                 </div>
 
                 {/* Hero Content */}
@@ -56,10 +64,10 @@ const Hero = () => {
                             </div>
                         )}
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                            Discover Your Next <span className="text-rose-500">Adventure</span>
+                            {content?.hero?.title} <span className="text-rose-500">{content?.hero?.highlight}</span>
                         </h1>
                         <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-200">
-                            Explore the most beautiful places on Earth. Find and book amazing experiences at the best prices.
+                            {content?.hero?.subtitle}
                         </p>
 
                         {/* Search Bar */}
@@ -111,7 +119,7 @@ const Hero = () => {
                                     className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg font-medium transition duration-300 flex items-center justify-center gap-2"
                                 >
                                     <FiSearch className="h-5 w-5" />
-                                    <span>Search</span>
+                                    <span>{content?.hero?.cta || 'Search'}</span>
                                 </button>
                             </form>
                         </motion.div>

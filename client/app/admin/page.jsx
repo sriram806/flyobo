@@ -27,6 +27,7 @@ import AdminGallery from "../components/Admin/AdminGallery";
 import AdminProtected from "../hooks/adminProtected";
 import { Loader2 } from "lucide-react";
 import AdminContacts from "../components/Admin/AdminContacts";
+import AdminEditHome from "./home/page";
 
 // Advanced Analytics Component
 function AdminAnalytics() {
@@ -109,18 +110,17 @@ function AdminAnalytics() {
       <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border border-gray-200 dark:border-gray-800">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Analytics Dashboard</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Real-time data analysis and insights</p>
-        
+
         {/* Time Period Selector */}
         <div className="flex flex-wrap gap-2">
           {periods.map((p) => (
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                period === p.value
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${period === p.value
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
+                }`}
             >
               {p.label}
             </button>
@@ -220,6 +220,7 @@ function AdminPageContent() {
       {tab === "gallery" && <AdminGallery />}
       {tab === "analytics" && <AdminAnalytics />}
       {tab === "contacts" && <AdminContacts />}
+      {tab === "home" && <AdminEditHome />}
     </AdminProtected>
   );
 }

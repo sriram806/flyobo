@@ -22,8 +22,6 @@ const ResetPassword = ({ setRoute, setOpen }) => {
   const [values, setValues] = useState(Array(OTP_LENGTH).fill(""));
   const inputsRef = useRef([]);
   const code = useMemo(() => values.join(""), [values]);
-  const [showEmailInput, setShowEmailInput] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0); // seconds remaining
 
   // Prefill email from sessionStorage if available
@@ -161,155 +159,153 @@ const ResetPassword = ({ setRoute, setOpen }) => {
   const isFormValid = () => email && code.length === OTP_LENGTH && values.every((v) => v !== "") && password.length >= 6 && confirmPassword === password && !loading;
 
   return (
-    <div className="w-full flex items-center justify-center py-2">
-      <div className="w-full max-w-md mx-auto rounded-2xl p-6 sm:p-8">
-        <ModalHeader
-          icon={<HiOutlineKey size={28} />}
-          title="Reset your password"
-          description="Enter the 4-digit code we sent to your email and choose a new password."
-          gradientClass="from-blue-600 to-cyan-500"
-          shadowClass="shadow-blue-600/20"
-        />
+    <div className="w-full max-w-md mx-auto px-4 py-6 sm:px-6 sm:py-8 bg-white dark:bg-slate-900 rounded-2xl shadow-lg transition-all duration-300">
+      <ModalHeader
+        icon={<HiOutlineKey size={28} />}
+        title="Reset your password"
+        description="Enter the 4-digit code we sent to your email and choose a new password."
+        gradientClass="from-blue-600 to-cyan-500"
+        shadowClass="shadow-blue-600/20"
+      />
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label hidden className={`${styles.label} !text-left block`} htmlFor="email">Email address</label>
-            <input
-              hidden
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="yourmail@gmail.com"
-              className={`${styles.input} ${errors.email ? "border-red-500" : "border-gray-300 dark:border-gray-700"} text-center`}
-              aria-invalid={!!errors.email}
-              aria-describedby="email-error"
-              autoComplete="email"
-            />
-            {errors.email && <p id="email-error" className={`${styles.errorText} text-center`}>{errors.email}</p>}
-          </div>
-
-          <div>
-            <label className={`${styles.label} !text-left block`} htmlFor="otp-0">4-digit code</label>
-            <div className="mt-2 flex items-center justify-center gap-2 sm:gap-3">
-              {Array.from({ length: OTP_LENGTH }).map((_, i) => (
-                <input
-                  key={i}
-                  id={`otp-${i}`}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength="1"
-                  value={values[i]}
-                  onChange={(e) => handleOtpChange(i, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                  onPaste={i === 0 ? handleOtpPaste : undefined}
-                  ref={(el) => (inputsRef.current[i] = el)}
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-center text-lg sm:text-xl font-semibold tracking-widest text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
-                  aria-label={`Digit ${i + 1}`}
-                />
-              ))}
-            </div>
-            {errors.otp && <p id="otp-error" className={`${styles.errorText} text-center mt-3`}>{errors.otp}</p>}
-          </div>
-
-          <div>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPwd ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition 
-                ${errors.password ? "border-red-500" : "border-gray-400 dark:border-gray-600"} 
-                focus:border-gray-800 dark:focus:border-gray-200`}
-                aria-invalid={!!errors.password}
-                aria-describedby="password-error"
-                autoComplete="new-password"
-              />
-              <label
-                htmlFor="password"
-                className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
-                           top-0 -translate-y-1/2 text-xs
-                           peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
-                           peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
-              >
-                New password
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowPwd((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded"
-                aria-label={showPwd ? "Hide password" : "Show password"}
-              >
-                {showPwd ? (
-                  <AiOutlineEyeInvisible size={20} className="text-gray-600 dark:text-gray-300" />
-                ) : (
-                  <AiOutlineEye size={20} className="text-gray-600 dark:text-gray-300" />
-                )}
-              </button>
-            </div>
-            {errors.password && <p id="password-error" className={`${styles.errorText}`}>{errors.password}</p>}
-          </div>
-
-          <div>
-            <div className="relative">
-              <input
-                id="confirmPassword"
-                type={showConfirm ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm password"
-                className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition 
-                ${errors.confirmPassword ? "border-red-500" : "border-gray-400 dark:border-gray-600"} 
-                focus:border-gray-800 dark:focus:border-gray-200`}
-                aria-invalid={!!errors.confirmPassword}
-                aria-describedby="confirmPassword-error"
-                autoComplete="new-password"
-              />
-              <label
-                htmlFor="confirmPassword"
-                className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
-                           top-0 -translate-y-1/2 text-xs
-                           peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
-                           peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
-              >
-                Confirm new password
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowConfirm((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded"
-                aria-label={showConfirm ? "Hide password" : "Show password"}
-              >
-                {showConfirm ? (
-                  <AiOutlineEyeInvisible size={20} className="text-gray-600 dark:text-gray-300" />
-                ) : (
-                  <AiOutlineEye size={20} className="text-gray-600 dark:text-gray-300" />
-                )}
-              </button>
-            </div>
-            {errors.confirmPassword && <p id="confirmPassword-error" className={`${styles.errorText}`}>{errors.confirmPassword}</p>}
-          </div>
-
-          <button
-            type="submit"
-            disabled={!isFormValid()}
-            aria-busy={loading}
-            aria-disabled={!isFormValid()}
-            className={`mt-2 w-full ${styles.button} ${!isFormValid() ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {loading ? "Updating..." : "Reset password"}
-          </button>
-        </form>
-
-        <div className="mt-4 text-center text-sm text-gray-700 dark:text-gray-300">
-          Already reset? {" "}
-          <button type="button" className={`${styles.link}`} onClick={() => setRoute && setRoute("Login")}>
-            Back to Login
-          </button>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div>
+          <label hidden className={`${styles.label} !text-left block`} htmlFor="email">Email address</label>
+          <input
+            hidden
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="yourmail@gmail.com"
+            className={`${styles.input} ${errors.email ? "border-red-500" : "border-gray-300 dark:border-gray-700"} text-center`}
+            aria-invalid={!!errors.email}
+            aria-describedby="email-error"
+            autoComplete="email"
+          />
+          {errors.email && <p id="email-error" className={`${styles.errorText} text-center`}>{errors.email}</p>}
         </div>
+
+        <div>
+          <label className={`${styles.label} !text-left block`} htmlFor="otp-0">4-digit code</label>
+          <div className="mt-2 flex items-center justify-center gap-2 sm:gap-3">
+            {Array.from({ length: OTP_LENGTH }).map((_, i) => (
+              <input
+                key={i}
+                id={`otp-${i}`}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength="1"
+                value={values[i]}
+                onChange={(e) => handleOtpChange(i, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                onPaste={i === 0 ? handleOtpPaste : undefined}
+                ref={(el) => (inputsRef.current[i] = el)}
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-center text-lg sm:text-xl font-semibold tracking-widest text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
+                aria-label={`Digit ${i + 1}`}
+              />
+            ))}
+          </div>
+          {errors.otp && <p id="otp-error" className={`${styles.errorText} text-center mt-3`}>{errors.otp}</p>}
+        </div>
+
+        <div>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPwd ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition 
+              ${errors.password ? "border-red-500" : "border-gray-400 dark:border-gray-600"} 
+              focus:border-gray-800 dark:focus:border-gray-200`}
+              aria-invalid={!!errors.password}
+              aria-describedby="password-error"
+              autoComplete="new-password"
+            />
+            <label
+              htmlFor="password"
+              className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
+                         top-0 -translate-y-1/2 text-xs
+                         peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
+                         peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
+            >
+              New password
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowPwd((s) => !s)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded"
+              aria-label={showPwd ? "Hide password" : "Show password"}
+            >
+              {showPwd ? (
+                <AiOutlineEyeInvisible size={20} className="text-gray-600 dark:text-gray-300" />
+              ) : (
+                <AiOutlineEye size={20} className="text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
+          {errors.password && <p id="password-error" className={`${styles.errorText}`}>{errors.password}</p>}
+        </div>
+
+        <div>
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              type={showConfirm ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm password"
+              className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition 
+              ${errors.confirmPassword ? "border-red-500" : "border-gray-400 dark:border-gray-600"} 
+              focus:border-gray-800 dark:focus:border-gray-200`}
+              aria-invalid={!!errors.confirmPassword}
+              aria-describedby="confirmPassword-error"
+              autoComplete="new-password"
+            />
+            <label
+              htmlFor="confirmPassword"
+              className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
+                         top-0 -translate-y-1/2 text-xs
+                         peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
+                         peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
+            >
+              Confirm new password
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowConfirm((s) => !s)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded"
+              aria-label={showConfirm ? "Hide password" : "Show password"}
+            >
+              {showConfirm ? (
+                <AiOutlineEyeInvisible size={20} className="text-gray-600 dark:text-gray-300" />
+              ) : (
+                <AiOutlineEye size={20} className="text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
+          {errors.confirmPassword && <p id="confirmPassword-error" className={`${styles.errorText}`}>{errors.confirmPassword}</p>}
+        </div>
+
+        <button
+          type="submit"
+          disabled={!isFormValid()}
+          aria-busy={loading}
+          aria-disabled={!isFormValid()}
+          className={`mt-2 w-full ${styles.button} ${!isFormValid() ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          {loading ? "Updating..." : "Reset password"}
+        </button>
+      </form>
+
+      <div className="mt-4 text-center text-sm text-gray-700 dark:text-gray-300">
+        Already reset? {" "}
+        <button type="button" className={`${styles.link}`} onClick={() => setRoute && setRoute("Login") }>
+          Back to Login
+        </button>
       </div>
     </div>
   );

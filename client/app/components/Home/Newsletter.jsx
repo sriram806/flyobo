@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useHomeContent } from '@/app/context/HomeContentContext';
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
@@ -33,34 +34,36 @@ export default function Newsletter() {
     }
   };
 
+  const { content } = useHomeContent();
+
   return (
-    <section className="bg-[#0b1220] py-12 sm:py-16 mt-0">
+    <section className="bg-white dark:bg-[#0b1220] py-12 sm:py-16 mt-0 transition-colors duration-300">
       <div className="max-w-5xl mx-auto px-4 lg:px-8">
         <div className="text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">Get Exclusive Travel Deals</h2>
-          <p className="mt-2 text-gray-300">Subscribe to our newsletter and be the first to know about special offers, new destinations, and travel tips.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{content?.newsletter?.title}</h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">{content?.newsletter?.description}</p>
         </div>
         <form onSubmit={onSubmit} className="mt-5 flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
-          <input
+            <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email address"
-            className="flex-1 px-4 py-3 rounded-md border border-gray-700 bg-[#121a2b] text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-sky-600"
+            placeholder={content?.newsletter?.placeholder || 'Enter your email address'}
+            className="flex-1 px-4 py-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121a2b] text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-sky-600"
             aria-label="Email address"
             required
           />
           <button
             type="submit"
             disabled={status.type === "loading"}
-            className="px-5 py-3 rounded-md bg-gray-700 hover:bg-gray-600 disabled:opacity-70 text-white font-medium transition-colors"
+            className="px-5 py-3 rounded-md bg-sky-600 hover:bg-sky-700 disabled:opacity-70 text-white font-medium transition-colors"
           >
-            {status.type === "loading" ? "Subscribing..." : "Subscribe"}
+            {status.type === "loading" ? "Subscribing..." : (content?.newsletter?.button || 'Subscribe')}
           </button>
         </form>
-        <p className="mt-3 text-center text-xs text-gray-400">We respect your privacy. Unsubscribe at any time.</p>
+        <p className="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">{content?.newsletter?.privacy}</p>
         {status.message && (
-          <div className={`mt-3 text-center text-sm ${status.type === "error" ? "text-rose-400" : "text-emerald-400"}`}>
+          <div className={`mt-3 text-center text-sm ${status.type === "error" ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
             {status.message}
           </div>
         )}

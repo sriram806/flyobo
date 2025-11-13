@@ -1,308 +1,323 @@
 "use client";
 
-import React, { useState } from 'react';
-import { toast } from 'react-hot-toast';
+import React, { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillGithub } from "react-icons/ai";
-import { styles } from "../../../components/styles/style";
-import { NEXT_PUBLIC_BACKEND_URL } from '@/app/config/env';
-import { useDispatch } from 'react-redux';
-import { setAuthUser } from '@/redux/authSlice';
-import ModalHeader from "../components/ModalHeader";
 import { HiOutlineUser } from "react-icons/hi";
+import { toast } from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setAuthUser } from "@/redux/authSlice";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import ReferralInput from "../../../components/Auth/ReferralInput";
+import ModalHeader from "../components/ModalHeader";
 
+export default function SignUp({ setOpen, setRoute }) {
+  const dispatch = useDispatch();
 
-const SignUp = ({ setOpen, setRoute }) => {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    referralCode: "",
   });
   const [showPwd, setShowPwd] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
-  const [referralCode, setReferralCode] = useState("");
-  const [errors, setErrors] = useState({ name: "", email: "", password: "", terms: "" });
   const [loading, setLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const dispatch = useDispatch();
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const validate = () => {
-    const next = { name: "", email: "", password: "", terms: "" };
-    let valid = true;
-
-    if (!formData.name.trim()) {
-      next.name = "Name is required";
-      valid = false;
-    } else if (formData.name.trim().length < 2) {
-      next.name = "Name must be at least 2 characters";
-      valid = false;
+  const validateStep = () => {
+    const newErrors = {};
+    if (step === 1 && formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
+    if (step === 2 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Enter a valid email";
+    }
+    if (step === 3 && formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    if (step === 3 && !acceptTerms) {
+      newErrors.terms = "You must accept the Terms & Privacy Policy";
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email) {
-      next.email = "Email is required";
-      valid = false;
-    } else if (!emailRegex.test(formData.email)) {
-      next.email = "Enter a valid email address";
-      valid = false;
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast.error(Object.values(newErrors)[0]);
+      return false;
     }
-
-    if (!formData.password) {
-      next.password = "Password is required";
-      valid = false;
-    } else if (formData.password.length < 6) {
-      next.password = "Password must be at least 6 characters";
-      valid = false;
-    }
-
-    if (!acceptTerms) {
-      next.terms = "You must accept the Terms to continue";
-      valid = false;
-    }
-
-    setErrors(next);
-    return valid;
+    return true;
   };
 
-  const isFormValid = () => {
-    return (
-      formData.name.trim().length >= 2 &&
-      !!formData.email &&
-      formData.password.length >= 6 &&
-      acceptTerms &&
-      !loading
-    );
+  const nextStep = () => {
+    if (validateStep()) setStep(step + 1);
   };
+
+  const prevStep = () => setStep(step - 1);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) { toast.error("Please fix the errors and try again."); return; }
+    if (!validateStep()) return;
+
     try {
       setLoading(true);
-      const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+      const API_URL =
+        NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+
       const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-          referralCode: referralCode.trim() || undefined,
-        }),
+        body: JSON.stringify(formData),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Registration failed");
 
-      if (!res.ok) {
-        let serverMsg = data?.message || data?.error || "Registration failed";
-        if (res.status === 404) {
-          serverMsg = `Endpoint not found (404): ${endpoint}`;
-        }
-        if (/email/i.test(serverMsg)) {
-          setErrors((prev) => ({ ...prev, email: serverMsg }));
-        } else if (/password/i.test(serverMsg)) {
-          setErrors((prev) => ({ ...prev, password: serverMsg }));
-        }
-        toast.error(serverMsg);
-        throw new Error(serverMsg);
-      }
-
-      const user = data?.user || data?.data?.user || null;
-      if (user) {
-        dispatch(setAuthUser(user));
-      }
-      toast.success("Registration successful. Check your email for the OTP code.");
-      if (setRoute) setRoute("Verification");
+      dispatch(setAuthUser(data.user));
+      toast.success("Account created successfully!");
+      setRoute("Verification");
     } catch (err) {
-      console.error(err);
-      if (!err?.message) toast.error("Something went wrong. Please try again.");
+      toast.error(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
   return (
-    <div className="w-full">
+    <div className="w-full max-w-md mx-auto px-6 bg-white dark:bg-slate-900 rounded-2xl shadow-lg transition-all duration-300">
       <ModalHeader
         icon={<HiOutlineUser size={24} />}
-        title="Create your account"
-        description="Join Flyobo and start your journey."
-        gradientClass="from-emerald-600 to-teal-500"
-        shadowClass="shadow-emerald-600/20"
+        title="Create Account"
+        description="Join Flyobo in a few simple steps"
+        gradientClass="from-sky-600 to-blue-500"
+        shadowClass="shadow-sky-600/20"
       />
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-        {/* Name */}
-        <div className="relative">
-          <input
-            id="name"
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Your Name"
-            className={`peer w-full bg-transparent border-2 rounded-xl h-14 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition 
-            ${errors.name ? "border-red-500" : "border-gray-400 dark:border-gray-600"} 
-            focus:border-gray-800 dark:focus:border-gray-200`}
-            aria-invalid={!!errors.name}
-            aria-describedby="name-error"
-            autoComplete="name"
-          />
-          <label
-            htmlFor="name"
-            className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
-                       top-0 -translate-y-1/2 text-xs
-                       peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
-                       peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
-          >
-            Your Name
-          </label>
-        </div>
-        {errors.name && <p id="name-error" className={`${styles.errorText}`}>{errors.name}</p>}
 
-        {/* Email */}
-        <div>
+      {/* Step Indicator */}
+      <div className="flex justify-center gap-2 mt-5">
+        {[1, 2, 3].map((n) => (
+          <div
+            key={n}
+            className={`h-2 w-8 rounded-full transition-all ${
+              step >= n ? "bg-sky-500" : "bg-gray-300 dark:bg-gray-700"
+            }`}
+          />
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+        {/* STEP 1 - Name + Referral */}
+        {step === 1 && (
+          <>
+            <div className="relative">
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Name"
+                className={`peer w-full bg-transparent border-2 rounded-xl h-14 px-3 pt-5 pb-2 text-gray-900 dark:text-gray-100 outline-none transition
+                ${
+                  errors.name
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-700"
+                }
+                focus:border-sky-500 dark:focus:border-sky-400`}
+                required
+              />
+              <label
+                htmlFor="name"
+                className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
+                  top-0 -translate-y-1/2 text-xs
+                  peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
+                  peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
+              >
+                Name
+              </label>
+              {errors.name && (
+                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+              )}
+            </div>
+
+            <ReferralInput
+              onReferralChange={(val) =>
+                setFormData({ ...formData, referralCode: val })
+              }
+            />
+          </>
+        )}
+
+        {/* STEP 2 - Email */}
+        {step === 2 && (
           <div className="relative">
             <input
-              id="email"
               type="email"
+              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Email"
-              className={`peer w-full bg-transparent border-2 rounded-xl h-14 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition 
-              ${errors.email ? "border-red-500" : "border-gray-400 dark:border-gray-600"} 
-              focus:border-gray-800 dark:focus:border-gray-200`}
-              aria-invalid={!!errors.email}
-              aria-describedby="email-error"
-              autoComplete="email"
+              className={`peer w-full bg-transparent border-2 rounded-xl h-14 px-3 pt-5 pb-2 text-gray-900 dark:text-gray-100 outline-none transition
+                ${
+                  errors.email
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-700"
+                }
+                focus:border-sky-500 dark:focus:border-sky-400`}
+              required
             />
             <label
               htmlFor="email"
-              className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
-                         top-0 -translate-y-1/2 text-xs
-                         peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
-                         peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
+              className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
+                top-0 -translate-y-1/2 text-xs
+                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
+                peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
             >
               Email
             </label>
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+            )}
           </div>
-          {errors.email && <p id="email-error" className={`${styles.errorText}`}>{errors.email}</p>}
-        </div>
+        )}
 
-        {/* Password */}
-        <div>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPwd ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition 
-              ${errors.password ? "border-red-500" : "border-gray-400 dark:border-gray-600"} 
-              focus:border-gray-800 dark:focus:border-gray-200`}
-              aria-invalid={!!errors.password}
-              aria-describedby="password-error"
-              autoComplete="new-password"
-            />
-            <label
-              htmlFor="password"
-              className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
-                         top-0 -translate-y-1/2 text-xs
-                         peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
-                         peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
-            >
-              Password
+        {/* STEP 3 - Password */}
+        {step === 3 && (
+          <>
+            <div className="relative">
+              <input
+                type={showPwd ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Password"
+                className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-gray-900 dark:text-gray-100 outline-none transition
+                  ${
+                    errors.password
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-700"
+                  }
+                  focus:border-sky-500 dark:focus:border-sky-400`}
+                required
+              />
+              <label
+                htmlFor="password"
+                className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all
+                  top-0 -translate-y-1/2 text-xs
+                  peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:-translate-y-1/2
+                  peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs"
+              >
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowPwd(!showPwd)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-500 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400 transition"
+              >
+                {showPwd ? (
+                  <AiOutlineEyeInvisible size={20} />
+                ) : (
+                  <AiOutlineEye size={20} />
+                )}
+              </button>
+              {errors.password && (
+                <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="h-4 w-4 text-sky-600 border-gray-300 rounded"
+              />
+              I agree to{" "}
+              <button type="button" className="text-sky-600 hover:underline">
+                Terms
+              </button>{" "}
+              and{" "}
+              <button type="button" className="text-sky-600 hover:underline">
+                Privacy Policy
+              </button>
             </label>
+            {errors.terms && (
+              <p className="text-sm text-red-500 mt-1">{errors.terms}</p>
+            )}
+          </>
+        )}
+
+        {/* Step Controls */}
+        <div className="flex justify-between items-center mt-4">
+          {step > 1 && (
             <button
               type="button"
-              onClick={() => setShowPwd((s) => !s)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-              aria-label={showPwd ? "Hide password" : "Show password"}
+              onClick={prevStep}
+              className="text-gray-600 dark:text-gray-400 hover:text-sky-600 text-sm font-medium"
             >
-              {showPwd ? (
-                <AiOutlineEye size={22} className="text-gray-700 dark:text-gray-200" />
-              ) : (
-                <AiOutlineEyeInvisible size={22} className="text-gray-700 dark:text-gray-200" />
-              )}
+              ← Back
             </button>
-          </div>
-          {errors.password && <p id="password-error" className={`${styles.errorText}`}>{errors.password}</p>}
-        </div>
-
-        {/* Referral Code */}
-        <div className="mt-6">
-          <ReferralInput 
-            onReferralChange={setReferralCode}
-            disabled={loading}
-          />
-        </div>
-
-        {/* Terms */}
-        <div className="mt-4">
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input
-              type="checkbox"
-              checked={acceptTerms}
-              onChange={(e) => setAcceptTerms(e.target.checked)}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-            />
-            I agree to the <button type="button" className={`${styles.link}`}>Terms</button> and <button type="button" className={`${styles.link}`}>Privacy Policy</button>
-          </label>
-          {errors.terms && <p className={`${styles.errorText}`}>{errors.terms}</p>}
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={!isFormValid()}
-          aria-busy={loading}
-          aria-disabled={!isFormValid()}
-          className={`mt-5 ${styles.button} ${!isFormValid() ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          {loading ? "Creating account..." : "Create account"}
-        </button>
-
-        {/* Divider */}
-        <div className={`${styles.divider}`}>
-          <span className="h-px flex-1 bg-gray-300 dark:bg-gray-700" />
-          <span className="text-sm text-gray-500">OR</span>
-          <span className="h-px flex-1 bg-gray-300 dark:bg-gray-700" />
-        </div>
-
-        {/* Social Sign Up */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button type="button" className={`${styles.socialButton}`} aria-label="Continue with Google">
-            <FcGoogle size={20} />
-          </button>
-          <button type="button" className={`${styles.socialButton}`} aria-label="Continue with GitHub">
-            <AiFillGithub size={20} />
-          </button>
-        </div>
-
-        {/* Switch to Login */}
-        <div className="mt-4 text-center text-sm text-gray-700 dark:text-gray-300">
-          Already have an account? {" "}
-          <button type="button" className={`${styles.link}`} onClick={() => setRoute && setRoute("Login")}>
-            Sign in
-          </button>
+          )}
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl font-medium transition ml-auto"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl font-medium transition ml-auto disabled:opacity-50"
+            >
+              {loading ? "Creating..." : "Sign Up"}
+            </button>
+          )}
         </div>
       </form>
+
+      {/* Social login */}
+      <div className="flex items-center gap-3 mt-8">
+        <span className="h-px flex-1 bg-gray-300 dark:bg-gray-700" />
+        <span className="text-sm text-gray-500">OR</span>
+        <span className="h-px flex-1 bg-gray-300 dark:bg-gray-700" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mt-4">
+        <button
+          type="button"
+          className="flex items-center justify-center gap-2 border-2 border-gray-300 dark:border-gray-700 rounded-xl py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
+        >
+          <FcGoogle size={20} /> Google
+        </button>
+        <button
+          type="button"
+          className="flex items-center justify-center gap-2 border-2 border-gray-300 dark:border-gray-700 rounded-xl py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
+        >
+          <AiFillGithub size={20} /> GitHub
+        </button>
+      </div>
+
+      {/* Already have account */}
+      <div className="mt-6 text-center text-sm text-gray-700 dark:text-gray-300">
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={() => setRoute("Login")}
+          className="text-sky-600 hover:underline"
+        >
+          Log in
+        </button>
+      </div>
     </div>
   );
-};
-
-export default SignUp;
+}

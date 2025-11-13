@@ -147,9 +147,9 @@ export default function PackageListItem({ pkg, loading }) {
                   </div>
                   
                   <Link
-                    href={`/packages/${pkg?.slug || pkg?.id || pkg?._id || "item"}`}
-                    className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white px-4 py-2.5 text-sm font-semibold shadow-md transition-all duration-300 hover:scale-105"
-                  >
+                      href={`/packages/${pkg?.slug || pkg?.id || pkg?._id || "item"}`}
+                      className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 dark:from-sky-500 dark:to-indigo-700 hover:from-sky-700 hover:to-indigo-700 text-white px-4 py-2.5 text-sm font-semibold shadow-md dark:shadow-none transition-all duration-300 hover:scale-105"
+                    >
                     View Details
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

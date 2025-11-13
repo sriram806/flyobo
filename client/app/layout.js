@@ -21,6 +21,8 @@ export default function RootLayout({ children }) {
             <AuthLoader>
               {children}
             </AuthLoader>
+            {/* Debug overlay to inspect theme state at runtime */}
+            <ThemeChecker />
           </ThemeProvider>
         </ClientProvider>
         <Toaster position="bottom-right" toastOptions={{ duration: 3500 }} />

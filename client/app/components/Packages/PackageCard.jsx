@@ -85,7 +85,7 @@ export default function PackageCard({ pkg, loading }) {
     setFavBusy(false);
   };
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md hover:shadow-2xl transition-all duration-500">
+  <article className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md hover:shadow-2xl transition-all duration-500">
       {/* Image Section */}
       <div className="aspect-[16/10] w-full overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
         {loading ? (
@@ -131,7 +131,7 @@ export default function PackageCard({ pkg, loading }) {
                 className={`inline-flex items-center justify-center w-11 h-11 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 ${
                   isFav
                     ? "bg-rose-500 text-white hover:bg-rose-600 scale-110"
-                    : "bg-white/90 text-gray-700 hover:bg-white dark:bg-gray-900/80 dark:text-gray-200 dark:hover:bg-gray-900 hover:scale-110"
+                    : "bg-white/90 text-gray-700 hover:bg-white dark:bg-gray-800/80 dark:text-gray-200 dark:hover:bg-gray-700 hover:scale-110"
                 } ${favBusy ? "opacity-70 cursor-not-allowed" : ""}`}
               >
                 <Heart className={`w-5 h-5 ${isFav ? 'fill-current' : ''}`} />
@@ -224,7 +224,7 @@ export default function PackageCard({ pkg, loading }) {
               
               <Link
                 href={`/packages/${pkg?.slug || pkg?.id || pkg?._id || "item"}`}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-sky-500/30 transition-all duration-300 hover:scale-105"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 dark:from-sky-500 dark:to-indigo-700 hover:from-sky-700 hover:to-indigo-700 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-sky-500/30 dark:shadow-none transition-all duration-300 hover:scale-105"
               >
                 View Details
                 <HiOutlineChevronRight className="w-4 h-4" />

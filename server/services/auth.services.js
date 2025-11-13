@@ -80,10 +80,8 @@ export const createSendToken = (user, statusCode, res, message) => {
         isAccountVerified: userObj.isAccountVerified,
         avatar: userObj.avatar,
         createdAt: userObj.createdAt,
-        // include frequently-used profile fields so login returns the latest values
         phone: userObj.phone || null,
         bio: userObj.bio || null,
-        // include basic referral and bank info if present (non-sensitive)
         referral: userObj.referral || undefined,
         bankDetails: userObj.bankDetails || undefined,
     };

@@ -13,8 +13,13 @@ export const createLayout = async (req, res) => {
         let newLayout;
 
         if (type === "Banner") {
-            const { image, title, subTitle } = req.body;
-            if (!image) return res.status(400).json({ success: false, message: "Image is required" });
+      // Only admin users are allowed to create banner layouts
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      }
+
+      const { image, title, subTitle } = req.body;
+      if (!image) return res.status(400).json({ success: false, message: "Image is required" });
 
             const uploaded = await cloudinary.v2.uploader.upload(image, { folder: "Layout" });
 
@@ -26,7 +31,7 @@ export const createLayout = async (req, res) => {
             });
         }
 
-    if (type === "FAQ") {
+  if (type === "FAQ") {
       // Only admin users are allowed to create FAQ layouts
       if (!req.user || req.user.role !== 'admin') {
         return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
@@ -47,7 +52,7 @@ export const createLayout = async (req, res) => {
             newLayout = await Layout.create({ type: "FAQ", faq: faqData });
         }
 
-        if (type === "Category") {
+  if (type === "Category") {
             const { categories } = req.body;
             if (!categories || !Array.isArray(categories) || categories.length === 0) {
                 return res.status(400).json({ success: false, message: "Categories are required" });
@@ -132,27 +137,32 @@ export const editLayout = async (req, res) => {
 
         let updatedLayout;
 
-        if (type === "Banner") {
-            const { image, title, subTitle } = req.body;
+    if (type === "Banner") {
+      // Only admin users are allowed to edit banner layouts
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      }
 
-            const oldBanner = await Layout.findOne({ type: "Banner" });
-            if (oldBanner?.image?.public_id) {
-                await cloudinary.v2.uploader.destroy(oldBanner.image.public_id);
-            }
+      const { image, title, subTitle } = req.body;
 
-            const uploaded = await cloudinary.v2.uploader.upload(image, { folder: "Layout" });
+      const oldBanner = await Layout.findOne({ type: "Banner" });
+      if (oldBanner?.image?.public_id) {
+        await cloudinary.v2.uploader.destroy(oldBanner.image.public_id);
+      }
 
-            updatedLayout = await Layout.findOneAndUpdate(
-                { type: "Banner" },
-                {
-                    type: "Banner",
-                    image: { public_id: uploaded.public_id, url: uploaded.secure_url },
-                    title,
-                    subTitle,
-                },
-                { new: true, upsert: true }
-            );
-        }
+      const uploaded = await cloudinary.v2.uploader.upload(image, { folder: "Layout" });
+
+      updatedLayout = await Layout.findOneAndUpdate(
+        { type: "Banner" },
+        {
+          type: "Banner",
+          image: { public_id: uploaded.public_id, url: uploaded.secure_url },
+          title,
+          subTitle,
+        },
+        { new: true, upsert: true }
+      );
+    }
 
     if (type === "FAQ") {
       // Only admin users are allowed to edit FAQ layouts

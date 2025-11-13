@@ -162,7 +162,7 @@ const Verification = ({ setOpen, setRoute }) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-md mx-auto px-4 py-6 sm:px-6 sm:py-8 bg-white dark:bg-slate-900 rounded-2xl shadow-lg transition-all duration-300">
       <ModalHeader
         icon={<HiOutlineShieldCheck size={24} />}
         title="Enter verification code"
@@ -171,7 +171,7 @@ const Verification = ({ setOpen, setRoute }) => {
         shadowClass="shadow-sky-600/20"
       />
 
-      <form onSubmit={handleSubmit} className="mt-12 space-y-6">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
         <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4">
           {Array.from({ length: OTP_LENGTH }).map((_, i) => (
             <input
