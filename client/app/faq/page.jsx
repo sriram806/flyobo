@@ -7,13 +7,17 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import Heading from "../components/MetaData/Heading";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
-import SEO from "../components/MetaData/SEO";
-import { WebsiteStructuredData, OrganizationStructuredData } from "../components/MetaData/StructuredData";
+import FaqHero from "../components/Faq/FaqHero";
+import { Search } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Page() {
   const [openItem, setOpenItem] = useState(-1);
+  const [query, setQuery] = useState("");
+  const [expandedAll, setExpandedAll] = useState(false);
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState("");
+
   const user = useSelector((s) => s?.auth?.user);
   const isAdmin = user?.role === "admin" || user?.isAdmin === true;
 
@@ -24,55 +28,63 @@ export default function Page() {
 
   useEffect(() => {
     let cancelled = false;
+
     const load = async () => {
       try {
         const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
         const base = (API_URL || "").replace(/\/$/, "");
-        if (!base) {
-          setError("Backend URL not configured");
-          setLoading(false);
-          return;
-        }
         const { data } = await axios.get(`${base}/layout`, { params: { type: "FAQ" }, withCredentials: true });
-        if (cancelled) return;
-        setFaqs(data?.layout?.faq || []);
-      } catch (e) {
+        if (!cancelled) setFaqs(data?.layout?.faq || []);
+      } catch {
         if (!cancelled) setError("Unable to load FAQs. Please try again later.");
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
+
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => (cancelled = true);
   }, []);
+
+  const filteredFaqs = faqs.filter((item) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+
+    return (
+      item.question.toLowerCase().includes(q) ||
+      item.answer.toLowerCase().includes(q) ||
+      (item.tags || []).join(",").toLowerCase().includes(q)
+    );
+  });
 
   const addFaq = () => {
     if (!isAdmin) return;
-    setFaqs((arr) => [...arr, { question: "", answer: "" }]);
+    setFaqs([...faqs, { question: "", answer: "" }]);
   };
 
   const updateFaq = (idx, key, val) => {
     if (!isAdmin) return;
-    setFaqs((arr) => arr.map((it, i) => (i === idx ? { ...it, [key]: val } : it)));
+    setFaqs(faqs.map((f, i) => (i === idx ? { ...f, [key]: val } : f)));
   };
 
   const deleteFaq = async (idx) => {
     if (!isAdmin) return;
     try {
       const item = faqs[idx];
+      const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+      const base = (API_URL || "").replace(/\/$/, "");
+
       if (item?._id) {
-        const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-        const base = (API_URL || "").replace(/\/$/, "");
         await axios.delete(`${base}/layout`, {
           params: { type: "FAQ", id: item._id },
           withCredentials: true,
         });
       }
-      setFaqs((arr) => arr.filter((_, i) => i !== idx));
-    } catch (e) {
-      setError("Failed to delete FAQ item. Check admin rights and try again.");
+
+      setFaqs(faqs.filter((_, i) => i !== idx));
+      toast.success("Successfully Delete")
+    } catch {
+      setError("Failed to delete FAQ.");
     }
   };
 
@@ -80,25 +92,17 @@ export default function Page() {
     if (!isAdmin) return;
     try {
       setSaving(true);
+
       const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
       const base = (API_URL || "").replace(/\/$/, "");
-      const payload = { type: "FAQ", faq: faqs.map((f) => ({ question: f.question, answer: f.answer })) };
+      const payload = { type: "FAQ", faq: faqs };
 
-      const resPut = await axios
-        .put(`${base}/layout`, payload, { withCredentials: true })
-        .catch(() => null);
+      const res = await axios.put(`${base}/layout`, payload, { withCredentials: true });
+      if (res?.data?.layout?.faq) setFaqs(res.data.layout.faq);
 
-      if (resPut?.data?.layout?.faq) {
-        setFaqs(resPut.data.layout.faq);
-        return;
-      }
-
-      const resPost = await axios.post(`${base}/layout`, payload, { withCredentials: true });
-      if (resPost?.data?.layout?.faq) {
-        setFaqs(resPost.data.layout.faq);
-      }
-    } catch (e2) {
-      setError("Failed to save FAQs. Check admin rights and try again.");
+      toast.success("Successfully Saved")
+    } catch {
+      setError("Failed to save FAQs.");
     } finally {
       setSaving(false);
     }
@@ -106,101 +110,94 @@ export default function Page() {
 
   return (
     <>
-      <SEO
-        title="Frequently Asked Questions - Flyobo Travel"
-        description="Find quick answers to common travel booking questions. Learn about packages, customization, cancellations, and customer support."
-        keywords="FAQ, Travel FAQ, Booking Questions, Travel Support, Package Information, Cancellation Policy"
-        url="https://www.flyobo.com/faq"
-      />
-      <WebsiteStructuredData />
-      <OrganizationStructuredData />
       <Heading
         title="FAQ | Flyobo"
-        description="Find quick answers to common travel booking questions. Learn about packages, customization, cancellations, and customer support."
+        description="Find answers to your travel booking queries. Packages, customizations, support & more."
         url="https://www.flyobo.com/faq"
       />
-      <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
 
-      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
         <section className="max-w-5xl mx-auto px-4 lg:px-8 py-12 sm:py-16">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 shadow-lg shadow-sky-500/30 mb-6">
-              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-gray-900 via-sky-800 to-indigo-900 dark:from-white dark:via-sky-200 dark:to-indigo-200 bg-clip-text text-transparent mb-4">
-              Frequently Asked Questions
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Get instant answers to bookings, customization, payments, and support queries.
-            </p>
+          <FaqHero />
+
+          {/* Search Bar */}
+          <div className="mt-10 flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 shadow-sm">
+            <Search className="w-5 h-5 text-gray-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for a question..."
+              className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200"
+            />
           </div>
 
           {error && (
-            <div className="mb-6 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4">
-              <p className="text-sm text-amber-800 dark:text-amber-200">{error}</p>
+            <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
             </div>
           )}
 
-          <div className="space-y-4">
+          {/* FAQ List */}
+          <div className="space-y-4 mt-10">
             {loading ? (
-              <div className="text-center text-gray-500 text-sm py-10">Loading FAQs...</div>
-            ) : faqs.length === 0 ? (
+              <div className="text-center py-10 text-gray-500">Loading FAQs...</div>
+            ) : filteredFaqs.length === 0 ? (
               <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-                No FAQs available at the moment.
+                No results found.
               </div>
             ) : (
-              faqs.map((item, idx) => {
-                const expanded = openItem === idx;
+              filteredFaqs.map((item, idx) => {
+                const expanded = expandedAll || openItem === idx;
+
                 return (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-all duration-300"
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6"
                   >
                     <button
-                      className="w-full flex justify-between items-start text-left p-6"
-                      onClick={() => setOpenItem(expanded ? -1 : idx)}
+                      onClick={() =>
+                        setOpenItem(openItem === idx ? -1 : idx)
+                      }
+                      className="w-full flex justify-between items-center text-left"
                     >
-                      <div className="flex items-start gap-4 flex-1">
-                        <span className="text-sky-600 font-semibold">Q:</span>
-                        <h2 className="font-medium text-gray-900 dark:text-gray-100">{item.question}</h2>
-                      </div>
-                      <span className="text-gray-400">{expanded ? "−" : "+"}</span>
+                      <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        {item.question}
+                      </h2>
+                      <span className="text-gray-400 text-xl">
+                        {expanded ? "−" : "+"}
+                      </span>
                     </button>
 
+                    {/* Answer */}
                     {expanded && (
-                      <div className="px-6 pb-6">
-                        <div className="flex items-start gap-4">
-                          <span className="text-emerald-600 font-semibold">A:</span>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">{item.answer}</p>
-                        </div>
-                      </div>
+                      <p className="mt-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {item.answer}
+                      </p>
                     )}
 
-                    {/* Admin Edit Mode */}
+                    {/* Admin Edit */}
                     {isAdmin && (
-                      <div className="px-6 pb-6 border-t border-gray-200 dark:border-gray-800 pt-4 space-y-3">
+                      <div className="mt-6 space-y-3 border-t pt-4 border-gray-200 dark:border-gray-700">
                         <input
-                          className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-800"
+                          className="w-full px-3 py-2 text-gray-800 dark:text-green-100 bg-gray-50 dark:bg-gray-900 border rounded-lg text-sm"
                           value={item.question}
-                          onChange={(e) => updateFaq(idx, "question", e.target.value)}
-                          placeholder="Edit question"
+                          onChange={(e) =>
+                            updateFaq(idx, "question", e.target.value)
+                          }
                         />
                         <textarea
-                          className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 min-h-[80px]"
+                          className="w-full px-3 py-2 text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 border rounded-lg text-sm"
                           value={item.answer}
-                          onChange={(e) => updateFaq(idx, "answer", e.target.value)}
-                          placeholder="Edit answer"
+                          onChange={(e) =>
+                            updateFaq(idx, "answer", e.target.value)
+                          }
+                          rows={3}
                         />
                         <button
                           onClick={() => deleteFaq(idx)}
-                          className="text-sm text-rose-600 hover:underline"
+                          className="text-sm p-1 rounded border text-red-600   dark:text-red-400 hover:bg-red-500 hover:text-white"
                         >
                           Delete
                         </button>
@@ -212,19 +209,18 @@ export default function Page() {
             )}
           </div>
 
-          {/* Admin Controls */}
           {isAdmin && (
-            <div className="mt-8 flex gap-3">
+            <div className="mt-10 flex gap-3">
               <button
                 onClick={addFaq}
-                className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm hover:bg-sky-700 transition-all"
+                className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm"
               >
                 + Add FAQ
               </button>
               <button
                 onClick={saveFaqs}
                 disabled={saving}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+                className="px-4 py-2 border rounded-lg text-sm dark:border-gray-700"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
