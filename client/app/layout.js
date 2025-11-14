@@ -4,8 +4,6 @@ import ThemeProvider from "./utils/Theme-Provider";
 import ClientProvider from "./hoc/ClientProvider";
 import AuthLoader from "./components/Auth/AuthLoader";
 import { Toaster } from "react-hot-toast";
-import ThemeChecker from "./components/Debug/ThemeChecker";
-import CssTest from "./components/Debug/CssTest";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -21,8 +19,6 @@ export default function RootLayout({ children }) {
             <AuthLoader>
               {children}
             </AuthLoader>
-            {/* Debug overlay to inspect theme state at runtime */}
-            <ThemeChecker />
           </ThemeProvider>
         </ClientProvider>
         <Toaster position="bottom-right" toastOptions={{ duration: 3500 }} />
