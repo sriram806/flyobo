@@ -16,16 +16,13 @@ import { WebsiteStructuredData, OrganizationStructuredData } from './components/
 import FeaturedPackages from './components/Home/FeaturedPackages';
 import Testimonials from './components/Home/Testimonials';
 import TravelBlog from './components/Home/TravelBlog';
-import TravelStats from './components/Home/TravelStats';
 import SpecialOffers from './components/Home/SpecialOffers';
 import WhyChooseUs from './components/Home/WhyChooseUs';
-import { useTheme } from 'next-themes';
 
 const Home = () => {
   const [open, setOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(0);
   const [route, setRoute] = useState("");
-  const { theme, setTheme } = useTheme();
 
   return (
     <>
@@ -53,7 +50,6 @@ const Home = () => {
             route={route}
           />
           <Hero />
-          <TravelStats />
           <SpecialOffers />
           <FeaturedPackages />
           <WhyChooseUs />

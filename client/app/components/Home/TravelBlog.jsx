@@ -46,12 +46,12 @@ const BlogCard = ({ post }) => {
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
         />
       </div>
-      
+
       <div className="p-6">
         <div className="flex flex-wrap gap-2 mb-3">
           {post.tags.map((tag, index) => (
-            <span 
-              key={index} 
+            <span
+              key={index}
               className="inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
             >
               <FiTag className="mr-1" size={12} />
@@ -59,15 +59,15 @@ const BlogCard = ({ post }) => {
             </span>
           ))}
         </div>
-        
+
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
           {post.title}
         </h3>
-        
+
         <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
           {post.excerpt}
         </p>
-        
+
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
           <div className="flex items-center">
             <FiUser className="mr-1" />
@@ -78,12 +78,12 @@ const BlogCard = ({ post }) => {
             <span>{post.date}</span>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-500 dark:text-gray-400">
             {post.readTime}
           </span>
-          <Link 
+          <Link
             href={`/blog/${post.id}`}
             className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
           >
@@ -100,21 +100,14 @@ const TravelBlog = () => {
   return (
     <section className="py-16 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Travel Blog</h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Inspiration and tips for your next adventure
-          </p>
-        </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogPosts.map((post) => (
             <BlogCard key={post.id} post={post} />
           ))}
         </div>
-        
+
         <div className="mt-12 text-center">
-          <Link 
+          <Link
             href="/blog"
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
           >

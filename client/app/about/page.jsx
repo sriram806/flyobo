@@ -10,6 +10,7 @@ import {
   WebsiteStructuredData,
   OrganizationStructuredData,
 } from "../components/MetaData/StructuredData";
+import WhyChooseUs from "../components/Home/WhyChooseUs";
 
 /**
  * AboutPage — Modern Blue theme + Framer Motion animations
@@ -313,6 +314,8 @@ export default function AboutPage() {
             </div>
           </motion.div>
         </section>
+        
+          <WhyChooseUs />
 
         <Footer />
       </div>
