@@ -193,6 +193,16 @@ export default function Page() {
     currentPage * pageSize
   );
 
+  const filtersActive = Boolean(
+    (String(search || "").trim().length > 0) ||
+    minPrice > 0 ||
+    maxPrice < 100000 ||
+    minRating > 0 ||
+    minDays !== 1 ||
+    maxDays !== 30 ||
+    (categories && categories.length > 0)
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
       <Heading
@@ -203,11 +213,16 @@ export default function Page() {
       />
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-[#0a0a0a] dark:via-gray-900 dark:to-indigo-950">
+      {/* Hero Section (hidden when filters are active) */}
+      {!filtersActive && (
+        <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-[#0a0a0a] dark:via-gray-900 dark:to-indigo-950">
         <div className="mx-auto max-w-7xl px-4 lg:px-8 py-12 sm:py-16">
           <div className="relative rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md overflow-hidden">
+
+            <div className="absolute top-1 left-0 w-89 h-60 bg-sky-300 blur-3xl rounded-full animate-pulse" />
+            <div className="absolute bottom-0.5 right-1 w-90 h-60 bg-sky-500  blur-3xl rounded-full animate-pulse" />
             <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.08]">
+
               <div
                 className="absolute inset-0"
                 style={{
@@ -222,25 +237,6 @@ export default function Page() {
             <div className="absolute bottom-10 right-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-2xl" />
 
             <div className="relative z-10 p-8 sm:p-12 lg:p-16 text-center">
-              <div className="inline-flex items-center justify-center mb-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-2xl blur-xl opacity-50 animate-pulse" />
-                  <div className="relative p-4 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 shadow-2xl">
-                    <Compass className="w-10 h-10 text-white" strokeWidth={2} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-3 text-sm text-gray-600 dark:text-gray-400">
-                <nav className="inline-flex items-center gap-2 text-xs text-gray-500">
-                  <a href="/" className="hover:underline">
-                    Home
-                  </a>
-                  <span>/</span>
-                  <span className="font-semibold">Packages</span>
-                </nav>
-              </div>
-
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold mb-3 text-gray-900 dark:text-gray-50">
                 <span className="bg-gradient-to-r from-gray-900 via-sky-800 to-indigo-900 dark:from-white dark:via-sky-200 dark:to-indigo-200 bg-clip-text text-transparent">
                   Discover Your Perfect Journey
@@ -321,7 +317,8 @@ export default function Page() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      )}
 
       {/* Search & Filters */}
       <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8 sm:py-12 bg-gray-50 dark:bg-[#0a0a0a]">
@@ -361,6 +358,8 @@ export default function Page() {
 
         <section className="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
           <FiltersPanel
+            search={search}
+            setSearch={setSearch}
             uniqueCategories={uniqueCategories}
             minPrice={minPrice}
             maxPrice={maxPrice}
@@ -374,7 +373,7 @@ export default function Page() {
             setMaxDays={setMaxDays}
             categories={categories}
             setCategories={setCategories}
-            resetFilters={resetFilters}
+            onReset={resetFilters}
           />
 
           <div className="lg:col-span-3 space-y-6">
@@ -393,11 +392,10 @@ export default function Page() {
             ) : (
               <>
                 <div
-                  className={`grid ${
-                    view === "grid"
-                      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
-                      : "grid-cols-1 gap-4"
-                  }`}
+                  className={`grid ${view === "grid"
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
+                    : "grid-cols-1 gap-4"
+                    }`}
                 >
                   {pageItems.map((pkg) =>
                     view === "grid" ? (
