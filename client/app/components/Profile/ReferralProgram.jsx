@@ -318,7 +318,7 @@ const ReferralProgram = () => {
 
 
   return (
-    <div className="space-y-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-md transition-all">
+    <div className="space-y-6 rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-md transition-all">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-sky-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
@@ -405,11 +405,11 @@ const ReferralProgram = () => {
                     type="text"
                     value={referralData?.referralCode || ''}
                     readOnly
-                    className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono"
+                    className="flex-1 px-4 py-3 border text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono"
                   />
                   <button
                     onClick={copyReferralLink}
-                    className="px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="px-4 py-3 bg-gray-200/80 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   >
                     {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
                   </button>
@@ -437,7 +437,7 @@ const ReferralProgram = () => {
                     placeholder="Enter amount (min. ₹50)"
                     min="50"
                     max={referralData?.availableRewards}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
+                    className="w-full text-gray-500 dark:text-gray-300 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
                   />
                 </div>
                 <button

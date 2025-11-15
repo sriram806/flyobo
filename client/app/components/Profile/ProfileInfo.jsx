@@ -3,15 +3,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
-import {
-  HiOutlineMail,
-  HiOutlinePencil,
-  HiOutlineBadgeCheck,
-  HiOutlineBell,
-  HiOutlineLink,
-  HiOutlineCalendar,
-  HiOutlinePhone,
-} from "react-icons/hi";
+import { HiOutlineMail, HiOutlinePencil, HiOutlineBadgeCheck, HiOutlineCalendar, HiOutlinePhone, } from "react-icons/hi";
 import ReferralTier from "./ReferralTier";
 
 const ProfileInfo = () => {
@@ -33,7 +25,6 @@ const ProfileInfo = () => {
     }
   })();
 
-  // Dynamic profile stats derived from user data
   const trips = user?.stats?.totalBookings ?? user?.totalBookings ?? 0;
   const wishlist = user?.favoritePackages?.length ?? user?.stats?.wishlistCount ?? 0;
   const reviews = user?.reviewsCount ?? (Array.isArray(user?.reviews) ? user.reviews.length : 0) ?? 0;
@@ -48,10 +39,10 @@ const ProfileInfo = () => {
 
   return (
     <section className="w-full">
-      <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+      <div className="relative overflow-hidden rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
         <div className="relative p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-            <div className="h-24 w-24 rounded-full shadow-md border-4 border-white dark:border-gray-900 overflow-hidden bg-sky-600 flex items-center justify-center">
+            <div className="h-24 w-24 rounded-full shadow-md border-4 border-gray-200/90 dark:border-gray-700/90 overflow-hidden bg-sky-600 flex items-center justify-center">
               {user?.avatar?.url ? (
                 <img
                   src={`${user.avatar.url}${user?.updatedAt ? `?v=${new Date(user.updatedAt).getTime()}` : `?v=${Date.now()}`}`}
@@ -99,7 +90,7 @@ const ProfileInfo = () => {
               {user?.role === 'admin' && (
                 <Link
                   href="/admin?tab=dashboard"
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="inline-flex text-gray-800 dark:text-gray-100 items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700/40 transition-colors"
                   aria-label="Admin dashboard"
                 >
                   Admin
@@ -107,10 +98,10 @@ const ProfileInfo = () => {
               )}
               <Link
                 href="/profile/edit"
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="inline-flex text-gray-800 dark:text-gray-100 items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700/40 transition-colors"
                 aria-label="Edit profile"
               >
-                <HiOutlinePencil /> Edit
+                Edit
               </Link>
             </div>
           </div>

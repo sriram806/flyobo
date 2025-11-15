@@ -35,10 +35,8 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
   const [search, setSearch] = useState("");
   const pathname = usePathname();
 
-  // Dynamic badge counts (safe fallbacks)
   const bookingsCount = user?.bookings?.length ?? user?.bookingsCount ?? 0;
   const wishlistCount = user?.wishlist?.length ?? user?.wishlistCount ?? 0;
-  // Prefer an explicit unread count if available on the user object; otherwise try notifications array
   const notificationsCount =
     user?.unreadNotificationsCount ??
     (Array.isArray(user?.notifications)
@@ -47,7 +45,7 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
 
   return (
     <aside
-      className={`relative flex flex-col rounded-2xl border border-gray-200 dark:border-gray-800 
+      className={`relative flex flex-col rounded border border-gray-200 dark:border-gray-800 
       bg-white dark:bg-gray-900 shadow-sm overflow-hidden w-full lg:w-auto lg:sticky lg:top-24`}
     >
       {/* Profile Header */}
@@ -67,7 +65,7 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
 
       {/* Search Input */}
       <div className="p-3">
-        <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl focus-within:ring-2 focus-within:ring-sky-400">
+        <div className="flex items-center gap-2 px-3 py-2 bg-sky-100 dark:bg-gray-800 rounded focus-within:ring-2 focus-within:ring-sky-400">
           <Search className="h-4 w-4 text-gray-400" />
           <input
             type="text"
@@ -109,7 +107,7 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
                     key={it.key}
                     onClick={() => onSelect?.(it.key)}
                     aria-label={it.label}
-                    className={`relative w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors duration-200 ${
+                    className={`relative w-full flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors duration-200 ${
                       active
                         ? "bg-sky-500/10 text-sky-600 dark:text-sky-400"
                         : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -133,7 +131,7 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
       <div className="p-3 mt-auto border-t border-gray-200 dark:border-gray-800">
         <button
           onClick={onLogout}
-          className="mt-2 w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 transition-colors"
+          className="mt-1 w-full flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-rose-600 dark:text-red-600 hover:bg-sky-500/10 transition-colors"
         >
           <LogOut className="h-5 w-5" />
           <span>Logout</span>

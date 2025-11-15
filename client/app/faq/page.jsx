@@ -115,10 +115,8 @@ export default function Page() {
         description="Find answers to your travel booking queries. Packages, customizations, support & more."
         url="https://www.flyobo.com/faq"
       />
-
-
+      <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
         <section className="max-w-5xl mx-auto px-4 lg:px-8 py-12 sm:py-16">
           <FaqHero />
 

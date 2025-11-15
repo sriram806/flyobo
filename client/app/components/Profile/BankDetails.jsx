@@ -125,7 +125,7 @@ const BankDetails = () => {
   }
 
   return (
-    <div className="space-y-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-md transition-all">
+    <div className="space-y-6 rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-md transition-all">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -137,10 +137,9 @@ const BankDetails = () => {
         </div>
         <button
           onClick={fetchBankDetails}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
         >
           <HiOutlineRefresh className="h-4 w-4" />
-          Refresh
         </button>
       </div>
 
@@ -176,7 +175,7 @@ const BankDetails = () => {
                 value={bankDetails.accountHolderName}
                 onChange={handleInputChange}
                 placeholder="Enter account holder name"
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
+                className="w-full text-gray-900 dark:text-gray-200 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
                 required
               />
             </div>
@@ -191,7 +190,7 @@ const BankDetails = () => {
                 value={bankDetails.accountNumber}
                 onChange={handleInputChange}
                 placeholder="Enter account number"
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
+                className="w-full text-gray-900 dark:text-gray-200 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
                 required
               />
             </div>
@@ -206,7 +205,7 @@ const BankDetails = () => {
                 value={bankDetails.bankName}
                 onChange={handleInputChange}
                 placeholder="Enter bank name"
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
+                className="w-full text-gray-900 dark:text-gray-200 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
                 required
               />
             </div>
@@ -221,7 +220,7 @@ const BankDetails = () => {
                 value={bankDetails.ifscCode}
                 onChange={handleInputChange}
                 placeholder="Enter IFSC code"
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
+                className="w-full text-gray-900 dark:text-gray-200 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-transparent rounded-lg"
                 required
               />
             </div>
@@ -239,9 +238,9 @@ const BankDetails = () => {
         </form>
 
         {bankDetails.accountNumber && (
-          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Important Information</h4>
-            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+          <div className="mt-6 p-4 bg-amber-100 dark:bg-amber-300/25 rounded-lg">
+            <h4 className="font-medium text-black dark:text-white mb-2">Important Information</h4>
+            <ul className="text-sm text-gray-600 dark:text-gray-50/55 space-y-1">
               <li>• Your bank details are used for reward payments.</li>
               <li>• Details are saved immediately; no admin approval is required to store them.</li>
               <li>• Ensure the account number and IFSC are correct to avoid transfer failures.</li>

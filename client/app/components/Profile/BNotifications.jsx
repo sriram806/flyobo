@@ -145,19 +145,19 @@ export default function BNotifications() {
   };
 
   return (
-    <div className="relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg p-6 transition-all">
+    <div className="relative rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg p-6 transition-all">
       {/* 🔍 Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <input
           placeholder="Search notifications..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm outline-none focus:ring-2 focus:ring-sky-500"
+          className="flex-1 text-gray-900 dark:text-gray-200 px-4 py-2 rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm outline-none focus:ring-2 focus:ring-sky-500"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 rounded-xl border bg-gray-50 dark:bg-gray-800 text-sm"
+          className="px-3 py-2 text-gray-900 dark:text-gray-200 rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm"
         >
           <option value="all">All</option>
           <option value="unread">Unread</option>
@@ -166,7 +166,7 @@ export default function BNotifications() {
         <select
           value={actorFilter}
           onChange={(e) => setActorFilter(e.target.value)}
-          className="px-3 py-2 rounded-xl border bg-gray-50 dark:bg-gray-800 text-sm"
+          className="px-3 py-2 text-gray-900 dark:text-gray-200 rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm"
         >
           <option value="all">From: All</option>
           {actorOptions.map((a) => (
@@ -177,7 +177,7 @@ export default function BNotifications() {
         </select>
         <button
           onClick={markAllRead}
-          className="px-4 py-2 rounded-xl bg-sky-600 text-white text-sm hover:bg-sky-700 transition"
+          className="px-4 py-2 rounded bg-sky-600 text-white text-sm hover:bg-sky-700 transition"
         >
           Mark all as read
         </button>

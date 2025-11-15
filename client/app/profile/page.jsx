@@ -53,31 +53,32 @@ const ProfileContent = () => {
         keywords="Travel, Adventure, Destinations, Vacation, Itineraries, Hotels, Flights, Tourism, Sightseeing, Travel Tips, Holiday, Guided Tours, Budget Travel, Luxury Travel, Family Travel, Solo Travel, Travel Deals"
       />
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
+      <main className="min-h-screen bg-gray-100/90 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Sidebar */}
+            <aside className="lg:col-span-1">
+              <SideBarProfile
+                selected={selected}
+                onSelect={(key) => {
+                  setSelected(key);
+                  router.push(`/profile?tab=${key}`);
+                }}
+                onLogout={handleLogout}
+              />
+            </aside>
 
-      <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            <SideBarProfile
-              selected={selected}
-              onSelect={(key) => {
-                setSelected(key);
-                router.push(`/profile?tab=${key}`);
-              }}
-              onLogout={handleLogout}
-            />
-          </aside>
-
-          {/* Content */}
-          <section className="lg:col-span-3">
-            {selected === "overview" && <ProfileInfo />}
-            {selected === "bookings" && <ProfileBookings />}
-            {selected === "wishlist" && <FavouriteBookings />}
-            {selected === "referral" && <ReferralProgram />}
-            {selected === "bank-details" && <BankDetails />}
-            {selected === "notifications" && <BNotifications />}
-            {selected === "settings" && <ProfileSetting />}
-          </section>
+            {/* Content */}
+            <section className="lg:col-span-3">
+              {selected === "overview" && <ProfileInfo />}
+              {selected === "bookings" && <ProfileBookings />}
+              {selected === "wishlist" && <FavouriteBookings />}
+              {selected === "referral" && <ReferralProgram />}
+              {selected === "bank-details" && <BankDetails />}
+              {selected === "notifications" && <BNotifications />}
+              {selected === "settings" && <ProfileSetting />}
+            </section>
+          </div>
         </div>
       </main>
       <Footer />

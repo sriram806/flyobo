@@ -102,7 +102,7 @@ const ProfileSetting = () => {
 
   return (
     <section className="w-full">
-      <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+      <div className="relative overflow-hidden rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
         <div className="relative p-6 sm:p-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Account Settings</h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
@@ -128,7 +128,7 @@ const ProfileSetting = () => {
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     autoComplete="current-password"
                     minLength={6}
-                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
+                    className="mt-1 text-gray-900 dark:text-gray-200 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
                     placeholder="•••••••"
                   />
                 </div>
@@ -144,7 +144,7 @@ const ProfileSetting = () => {
                       onChange={(e) => setNewPassword(e.target.value)}
                       autoComplete="new-password"
                       minLength={6}
-                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
+                      className="mt-1 text-gray-900 dark:text-gray-200 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
                       placeholder="•••••••"
                     />
                   </div>
@@ -159,7 +159,7 @@ const ProfileSetting = () => {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       autoComplete="new-password"
                       minLength={6}
-                      className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
+                      className="mt-1 w-full text-gray-900 dark:text-gray-200 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
                       placeholder="•••••••"
                     />
                     {passwordsMismatch && (
@@ -181,7 +181,7 @@ const ProfileSetting = () => {
             </div>
 
             {/* 🗑️ Delete Account */}
-            <div className="rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50/60 dark:bg-rose-950/30 p-4 sm:p-6">
+            <div className="rounded-xl border border-rose-300 dark:border-rose-900 bg-red-500/10 dark:bg-rose-950/30 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Delete Account</h3>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 Permanently delete your account and remove all associated data.
