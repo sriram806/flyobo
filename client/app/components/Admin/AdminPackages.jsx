@@ -74,7 +74,7 @@ const AdminPackages = () => {
         `${API_URL}/package/edit-package/${id}`,
         // send both keys to be safe with backend casing
         { status: next, Status: next },
-        { withCredentials: true }
+        { withCskyentials: true }
       );
 
       toast.success(`Status changed to ${next}`);
@@ -151,7 +151,7 @@ const AdminPackages = () => {
     <div className="space-y-4">
       {/* Excel Bulk Upload Section */}
       {showUploadModal && (
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-6">
+        <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Bulk Upload Packages</h3>
             <button
@@ -204,12 +204,12 @@ const AdminPackages = () => {
                 <div className="space-y-1 text-sm">
                   <p className="text-gray-700 dark:text-gray-300">Total: {uploadResults.total}</p>
                   <p className="text-green-600 dark:text-green-400">✓ Success: {uploadResults.success.length}</p>
-                  <p className="text-red-600 dark:text-red-400">✗ Failed: {uploadResults.failed.length}</p>
+                  <p className="text-sky-600 dark:text-sky-400">✗ Failed: {uploadResults.failed.length}</p>
                 </div>
                 {uploadResults.failed.length > 0 && (
                   <details className="mt-2">
                     <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400">View failed rows</summary>
-                    <ul className="mt-2 space-y-1 text-xs text-red-600 dark:text-red-400">
+                    <ul className="mt-2 space-y-1 text-xs text-sky-600 dark:text-sky-400">
                       {uploadResults.failed.map((f, i) => (
                         <li key={i}>Row {f.row}: {f.error}</li>
                       ))}
@@ -222,7 +222,7 @@ const AdminPackages = () => {
         </div>
       )}
       
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-6">
+      <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex-1">Packages</h2>
           <div className="flex gap-2">
@@ -237,12 +237,12 @@ const AdminPackages = () => {
               placeholder="Search packages..."
               value={q}
               onChange={(e) => { setPage(1); setQ(e.target.value); }}
-              className="w-full sm:w-64 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+              className="w-full text-gray-800 dark:text-gray-100 sm:w-64 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
             />
             <select
               value={pageSize}
               onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
-              className="rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 text-sm"
+              className="rounded-lg text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 text-sm"
               title="Items per page"
             >
               {[5,10,20,50].map(sz => (
@@ -251,7 +251,7 @@ const AdminPackages = () => {
             </select>
             <Link
               href="/admin/packages/create"
-              className="rounded-lg bg-rose-600 text-white px-4 py-2 text-sm hover:bg-rose-700"
+              className="rounded-lg bg-sky-600 text-white px-4 py-2 text-sm hover:bg-sky-700"
             >Create Package</Link>
           </div>
         </div>
@@ -300,10 +300,10 @@ const AdminPackages = () => {
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/admin/packages/edit?id=${p._id || p.id}`}
-                          className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          className="px-3 py-1.5 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-300/90 dark:hover:bg-gray-800"
                         >Edit</Link>
                         <button
-                          className="px-3 py-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700"
+                          className="px-3 py-1.5 rounded-lg bg-sky-600 text-white hover:bg-sky-700"
                           onClick={() => removePkg(p._id || p.id)}
                         >Delete</button>
                       </div>
@@ -322,12 +322,12 @@ const AdminPackages = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50"
+              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >Previous</button>
             {
-              // Numbered page buttons with a small window
+              // Numbesky page buttons with a small window
               (() => {
                 const windowSize = 5;
                 const start = Math.max(1, page - Math.floor(windowSize/2));
@@ -338,7 +338,7 @@ const AdminPackages = () => {
                 return pages.map(n => (
                   <button
                     key={n}
-                    className={`px-3 py-1.5 rounded-lg border text-sm ${n === page ? 'bg-rose-600 text-white border-rose-600' : 'border-gray-200 dark:border-gray-700'}`}
+                    className={`px-3 py-1.5 rounded-lg border text-sm ${n === page ? 'bg-sky-600 text-white border-sky-600' : 'border-gray-200 dark:border-gray-700'}`}
                     onClick={() => setPage(n)}
                     disabled={n === page}
                   >{n}</button>
@@ -346,7 +346,7 @@ const AdminPackages = () => {
               })()
             }
             <button
-              className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50"
+              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-800 dark:border-gray-700 disabled:opacity-50"
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >Next</button>

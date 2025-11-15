@@ -25,9 +25,9 @@ import AdminPackages from "../components/Admin/AdminPackages";
 import AdminBookings from "../components/Admin/AdminBookings";
 import AdminGallery from "../components/Admin/AdminGallery";
 import AdminProtected from "../hooks/adminProtected";
-import { Loader2 } from "lucide-react";
 import AdminContacts from "../components/Admin/AdminContacts";
 import AdminEditHome from "./home/page";
+import Loading from "../components/LoadingScreen/Loading";
 
 // Advanced Analytics Component
 function AdminAnalytics() {
@@ -94,10 +94,9 @@ function AdminAnalytics() {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-900 p-12 rounded-lg border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-900 p-12 rounded border border-gray-200 dark:border-gray-800">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 mx-auto mb-3 text-blue-600 animate-spin" />
-          <p className="text-gray-600 dark:text-gray-400">Loading analytics data...</p>
+          <Loading />
         </div>
       </div>
     );
@@ -118,8 +117,8 @@ function AdminAnalytics() {
               key={p.value}
               onClick={() => setPeriod(p.value)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${period === p.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
             >
               {p.label}
@@ -227,7 +226,7 @@ function AdminPageContent() {
 
 export default function AdminDashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div><Loading /></div>}>
       <AdminPageContent />
     </Suspense>
   );

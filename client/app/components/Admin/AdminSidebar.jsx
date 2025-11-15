@@ -15,14 +15,7 @@ import {
   HiHome,
 } from "react-icons/hi";
 import {
-  Gift,
-  Users,
-  TrendingUp,
-  Award,
-  Settings,
-  BarChart3,
-  DollarSign,
-  UserCheck
+  Gift
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import axios from "axios";
@@ -36,7 +29,6 @@ const items = [
       { key: "users", label: "Users", icon: HiOutlineUser },
       { key: "package", label: "Packages", icon: HiOutlineBookmark },
       { key: "bookings", label: "Bookings", icon: HiOutlineCog },
-      { key: "analytics", label: "Advanced Analytics", icon: HiOutlineBell },
       { key: "contacts", label: "Contact", icon: HiCollection },
       { key: "gallery", label: "Gallery", icon: HiOutlineCamera },
       { key: "home", label: "Home", icon: HiHome }
@@ -93,7 +85,7 @@ const AdminSidebar = ({ selected = "overview", onSelect, onLogout }) => {
 
   return (
     <aside
-      className={`relative flex flex-col rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden 
+      className={`relative flex flex-col rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden 
         w-full lg:w-auto lg:sticky lg:top-24`}
     >
       <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3">
@@ -162,7 +154,7 @@ const AdminSidebar = ({ selected = "overview", onSelect, onLogout }) => {
       <div className="p-2 mt-32 border-t border-gray-200 dark:border-gray-800">
         <button
           onClick={onLogout}
-          className="mt-2 w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-sky-600 dark:text-sky-400 hover:bg-sky-500/10"
+          className="mt-2 w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-rose-600 dark:text-red-500 hover:bg-sky-500/10"
         >
           <HiOutlineLogout className="h-5 w-5" />
           <span>Logout</span>

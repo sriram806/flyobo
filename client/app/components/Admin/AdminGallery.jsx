@@ -197,7 +197,7 @@ export default function AdminGallery() {
       <Toaster position="top-right" />
 
       {/* Form Section */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin • Gallery</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Create, edit, and delete gallery items.
@@ -299,65 +299,89 @@ export default function AdminGallery() {
       </div>
 
       {/* Gallery List Section */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
         <div className="overflow-x-auto">
-          <table className="min-w-full border text-sm">
-            <thead>
-              <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                <th className="border px-3 py-2 text-left">Image</th>
-                <th className="border px-3 py-2 text-left">Title</th>
-                <th className="border px-3 py-2 text-left">Category</th>
-                <th className="border px-3 py-2 text-left">Tags</th>
-                <th className="border px-3 py-2 text-left">Created</th>
-                <th className="border px-3 py-2 text-center">Actions</th>
+          <table className="min-w-full text-sm">
+            <thead> 
+              <tr className="text-xs tracking-wider text-gray-600 bg-gray-300/90 dark:bg-gray-700/30 dark:text-gray-300">
+                <th className="px-3 py-2 text-left">Thumbnail</th>
+                <th className="px-3 py-2 text-left">Title</th>
+                <th className="px-3 py-2 text-left">Category</th>
+                <th className="px-3 py-2 text-left">Tags</th>
+                <th className="px-3 py-2 text-left">Uploaded</th>
+                <th className="px-3 py-2 text-left">Created</th>
+                <th className="px-3 py-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="px-3 py-6 text-center" colSpan={6}>
+                  <td className="px-3 py-6 text-center text-gray-500" colSpan={7}>
                     Loading...
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-6 text-center text-gray-500" colSpan={6}>
+                  <td className="px-3 py-6 text-center text-gray-500" colSpan={7}>
                     No items found
                   </td>
                 </tr>
               ) : (
                 items.map((it) => (
-                  <tr key={it._id} className="border-t border-gray-100 dark:border-gray-800">
-                    <td className="border px-3 py-2">
-                      <img
-                        src={it.image}
-                        alt={it.title}
-                        className="h-16 w-24 object-cover rounded"
-                      />
+                  <tr
+                    key={it._id}
+                    className="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-3">
+                        <div className="h-16 w-24 flex-shrink-0 overflow-hidden rounded">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={it.image}
+                            alt={it.title}
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/placeholder.png';
+                            }}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      </div>
                     </td>
-                    <td className="border px-3 py-2 text-gray-900 dark:text-white">{it.title}</td>
-                    <td className="border px-3 py-2 capitalize text-gray-700 dark:text-gray-300">
-                      {it.category}
+                    <td className="px-3 py-2 text-gray-900 dark:text-white">{it.title || "Untitled"}</td>
+                    <td className="px-3 py-2 capitalize text-gray-700 dark:text-gray-300">
+                      {it.category || "-"}
                     </td>
-                    <td className="border px-3 py-2 text-gray-700 dark:text-gray-300">
-                      {Array.isArray(it.tags) ? it.tags.join(", ") : "-"}
+                    <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
+                      {Array.isArray(it.tags) ? it.tags.join(", ") : (it.tags || "-")}
                     </td>
-                    <td className="border px-3 py-2 text-gray-700 dark:text-gray-300">
-                      {new Date(it.createdAt).toLocaleString()}
+                    <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
+                      {it.uploadedBy?.name || it.uploadedBy?.email || "-"}
                     </td>
-                    <td className="border px-3 py-2 text-center">
+                    <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
+                      {it.createdAt ? new Date(it.createdAt).toLocaleString() : "-"}
+                    </td>
+                    <td className="px-3 py-2 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => onEdit(it)}
-                          className="rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3 py-2 text-white"
+                          title="Edit"
+                          className="inline-flex items-center gap-2 rounded-md bg-emerald-600 hover:bg-emerald-700 px-2 py-1 text-white"
                         >
-                          Edit
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
+                          </svg>
+                          <span className="hidden sm:inline">Edit</span>
                         </button>
+
                         <button
                           onClick={() => onDelete(it._id)}
-                          className="rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 text-white"
+                          title="Delete"
+                          className="inline-flex items-center gap-2 rounded-md bg-red-600 hover:bg-red-700 px-2 py-1 text-white"
                         >
-                          Delete
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                          </svg>
+                          <span className="hidden sm:inline">Delete</span>
                         </button>
                       </div>
                     </td>

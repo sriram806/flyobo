@@ -100,7 +100,7 @@ export default function AdminContacts() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+      <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -118,13 +118,13 @@ export default function AdminContacts() {
               placeholder="Search by name or email..."
               value={q}
               onChange={(e) => { setPage(1); setQ(e.target.value); }}
-              className="w-full pl-4 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-transparent transition-all"
+              className="w-full text-gray-900 dark:text-gray-100 pl-4 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-transparent transition-all"
             />
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+      <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
@@ -180,7 +180,7 @@ export default function AdminContacts() {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => openView(m._id || m.id)}
-                          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium hover:shadow-sm"
+                          className="inline-flex text-gray-900 dark:text-gray-100 items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium hover:shadow-sm"
                         >
                            View
                         </button>
@@ -233,14 +233,13 @@ export default function AdminContacts() {
                 {!selected.isRead && (
                   <button onClick={() => handleMarkRead(selected._id || selected.id)} className="px-3 py-1 rounded-md bg-emerald-600 text-white">Mark read</button>
                 )}
-                <button onClick={() => { setSelected(null); }} className="px-3 py-1 rounded-md border">Close</button>
+                <button onClick={() => { setSelected(null); }} className="px-3 py-1 text-gray-900 dark:text-gray-100 rounded-md border">Close</button>
               </div>
             </div>
 
             <div className="mt-4 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{selected.message}</div>
 
             <div className="mt-6 flex justify-end gap-2">
-              <button onClick={() => { setSelected(null); }} className="px-4 py-2 rounded-lg border">Close</button>
             </div>
           </div>
         </div>

@@ -6,19 +6,52 @@ import { toast } from "react-hot-toast";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import Link from "next/link";
 
-const StatCard = ({ label, value, trend }) => (
-  <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/60 p-4">
-    <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</div>
-    <div className="mt-1 flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
-      {value}
-      {trend !== undefined && (
-        <span className={`text-sm font-semibold ${trend >= 0 ? "text-green-500" : "text-red-500"}`}>
-          {trend >= 0 ? "▲" : "▼"} {Math.abs(trend)}%
-        </span>
+const StatCard = ({ label, value, trend, series }) => {
+  // simple inline sparkline generator
+  const Sparkline = ({ data = [], stroke = "#06b6d4" }) => {
+    if (!data || data.length === 0) return null;
+    const w = 120; const h = 36; const pad = 4;
+    const vals = data.map((d) => Number(d.value || 0));
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const range = max - min || 1;
+    const step = (w - pad * 2) / Math.max(1, vals.length - 1);
+    const points = vals.map((v, i) => {
+      const x = pad + i * step;
+      const y = pad + (1 - (v - min) / range) * (h - pad * 2);
+      return `${x},${y}`;
+    }).join(" ");
+    const pathD = vals.map((v, i) => {
+      const x = pad + i * step;
+      const y = pad + (1 - (v - min) / range) * (h - pad * 2);
+      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ');
+    return (
+      <svg width={w} height={h} className="block">
+        <path d={pathD} fill="none" stroke={stroke} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  };
+
+  return (
+    <div className="rounded border border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/60 p-4">
+      <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="mt-1 flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
+        {value}
+        {trend !== undefined && (
+          <span className={`text-sm font-semibold ${trend >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {trend >= 0 ? "▲" : "▼"} {Math.abs(trend)}%
+          </span>
+        )}
+      </div>
+      {series && series.length > 0 && (
+        <div className="mt-2">
+          <Sparkline data={series} stroke={trend >= 0 ? '#10B981' : '#ef4444'} />
+        </div>
       )}
     </div>
-  </div>
-);
+  );
+};
 
 const AdminDashboard = () => {
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -33,6 +66,7 @@ const AdminDashboard = () => {
   const [revenue, setRevenue] = useState({ daily: 0, weekly: 0, monthly: 0, yearly: 0 });
   const [allUsers, setAllUsers] = useState([]);
   const [allPackages, setAllPackages] = useState([]);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   const initials = (name = "") => {
     const parts = String(name).trim().split(/\s+/);
@@ -188,7 +222,7 @@ const AdminDashboard = () => {
     return () => {
       mounted = false;
     };
-  }, [API_URL]);
+  }, [API_URL, refreshCounter]);
 
   // Build normalized series for charts and trend
   const userSeries = useMemo(() => (userAnalytics.last12Months || []).map((x) => {
@@ -228,133 +262,221 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-        <p className="mt-1 text-gray-600 dark:text-gray-400">Overview of your platform.</p>
+      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">Overview and quick actions for your travel platform.</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setRefreshCounter((c) => c + 1)}
+            disabled={loading}
+            className={`inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-sky-300 ${loading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+
+          <Link href="/" target="_blank" className="inline-flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-gray-800 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800">
+            View Site
+          </Link>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatCard label="Total Users" value={loading ? "..." : userAnalytics.total} trend={userTrend} />
-        <StatCard label="Total Packages" value={loading ? "..." : packageAnalytics.total} trend={packageTrend} />
-        <StatCard label="Total Bookings" value={loading ? "..." : bookingsAnalytics.total} trend={bookingsTrend} />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center gap-4">
+          <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.6 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <div className="text-xs text-gray-500 dark:text-gray-400">Total Users</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{loading ? '...' : userAnalytics.total}</div>
+            <div className={`text-sm ${userTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>{userTrend >= 0 ? `▲ ${userTrend}%` : `▼ ${Math.abs(userTrend)}%`}</div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center gap-4">
+          <div className="p-3 rounded-md bg-green-50 dark:bg-green-900/20 text-green-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3v5h8v-5h3a1 1 0 001-1V7M16 3H8v4h8V3z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <div className="text-xs text-gray-500 dark:text-gray-400">Total Packages</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{loading ? '...' : packageAnalytics.total}</div>
+            <div className={`text-sm ${packageTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>{packageTrend >= 0 ? `▲ ${packageTrend}%` : `▼ ${Math.abs(packageTrend)}%`}</div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center gap-4">
+          <div className="p-3 rounded-md bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4l3 8 4-16 3 8h4" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <div className="text-xs text-gray-500 dark:text-gray-400">Total Bookings</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{loading ? '...' : bookingsAnalytics.total}</div>
+            <div className={`text-sm ${bookingsTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>{bookingsTrend >= 0 ? `▲ ${bookingsTrend}%` : `▼ ${Math.abs(bookingsTrend)}%`}</div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center gap-4">
+          <div className="p-3 rounded-md bg-rose-50 dark:bg-rose-900/20 text-rose-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.12-3 2.5S10.343 13 12 13s3-1.12 3-2.5S13.657 8 12 8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <div className="text-xs text-gray-500 dark:text-gray-400">Revenue (Today)</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">₹{Number(revenue.daily || 0).toLocaleString('en-IN')}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Weekly ₹{Number(revenue.weekly || 0).toLocaleString('en-IN')}</div>
+          </div>
+        </div>
       </div>
 
-      {/* Revenue breakdown */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      {/* Services Panel */}
+      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Platform Services</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Quick access to backend services and administration pages.</p>
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Status: <span className="text-green-600">Connected</span></div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { key: 'users', title: 'Users', count: userAnalytics.total, href: '/admin?tab=users', color: 'bg-blue-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.6 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>) },
+            { key: 'packages', title: 'Packages', count: packageAnalytics.total, href: '/admin?tab=package', color: 'bg-green-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3v5h8v-5h3a1 1 0 001-1V7M16 3H8v4h8V3z"/></svg>) },
+            { key: 'bookings', title: 'Bookings', count: bookingsAnalytics.total, href: '/admin?tab=bookings', color: 'bg-yellow-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4l3 8 4-16 3 8h4"/></svg>) },
+            { key: 'gallery', title: 'Gallery', count: undefined, href: '/admin?tab=gallery', color: 'bg-emerald-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7"/></svg>) },
+            { key: 'analytics', title: 'Analytics', count: undefined, href: '/admin?tab=analytics', color: 'bg-sky-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3v18M4 7h14M4 12h9M4 17h6"/></svg>) },
+            { key: 'contacts', title: 'Contacts / Notifications', count: undefined, href: '/admin?tab=contacts', color: 'bg-gray-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>) },
+            { key: 'referrals', title: 'Referrals', count: undefined, href: '/admin/referrals', color: 'bg-rose-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A2 2 0 0122 9.618V14a2 2 0 01-1.447 1.938L16 18M9 14l-4.553 2.276A2 2 0 013 14.382V10a2 2 0 011.447-1.938L8 6"/></svg>) },
+            { key: 'otp', title: 'OTP Service', count: undefined, href: '/', color: 'bg-indigo-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 1.657-1.343 3-3 3S6 12.657 6 11s1.343-3 3-3 3 1.343 3 3zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>) },
+          ].map((s) => (
+            <div key={s.key} className="flex items-center gap-3 p-3 rounded border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+              <div className={`p-2 rounded-md ${s.color} flex items-center justify-center`}>{s.icon}</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-gray-900 dark:text-white truncate">{s.title}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{s.count !== undefined ? `${s.count} items` : 'Manage and inspect'}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href={s.href} className="text-sm text-sky-600 hover:underline">Open</Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Revenue overview */}
+      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Revenue Overview</h2>
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Today" value={`₹${Number(revenue.daily).toLocaleString('en-IN')}`} />
-          <StatCard label="Last 7 Days" value={`₹${Number(revenue.weekly).toLocaleString('en-IN')}`} />
-          <StatCard label="This Month" value={`₹${Number(revenue.monthly).toLocaleString('en-IN')}`} />
-          <StatCard label="This Year" value={`₹${Number(revenue.yearly).toLocaleString('en-IN')}`} />
+          <div className="p-3 rounded bg-gray-50 dark:bg-gray-800">
+            <div className="text-xs text-gray-500 dark:text-gray-400">Today</div>
+            <div className="text-lg font-semibold">₹{Number(revenue.daily).toLocaleString('en-IN')}</div>
+          </div>
+          <div className="p-3 rounded bg-gray-50 dark:bg-gray-800">
+            <div className="text-xs text-gray-500 dark:text-gray-400">Last 7 Days</div>
+            <div className="text-lg font-semibold">₹{Number(revenue.weekly).toLocaleString('en-IN')}</div>
+          </div>
+          <div className="p-3 rounded bg-gray-50 dark:bg-gray-800">
+            <div className="text-xs text-gray-500 dark:text-gray-400">This Month</div>
+            <div className="text-lg font-semibold">₹{Number(revenue.monthly).toLocaleString('en-IN')}</div>
+          </div>
+          <div className="p-3 rounded bg-gray-50 dark:bg-gray-800">
+            <div className="text-xs text-gray-500 dark:text-gray-400">This Year</div>
+            <div className="text-lg font-semibold">₹{Number(revenue.yearly).toLocaleString('en-IN')}</div>
+          </div>
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">New Users</h2>
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">Recently joined travelers (latest 5)</p>
-        {loading ? <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p> : (
-          latestUsers.length === 0 ? <p className="text-sm text-gray-600 dark:text-gray-400">No recent users.</p> :
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm text-left border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
-                <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                  <tr>
-                    <th className="px-4 py-2">Avatar</th>
-                    <th className="px-4 py-2">Name</th>
-                    <th className="px-4 py-2">Email</th>
-                    <th className="px-4 py-2">Joined</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {latestUsers.map((u) => (
-                    <tr key={u._id || u.id || u.email} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="px-4 py-2">
-                        <div className="h-9 w-9 flex items-center justify-center rounded-full bg-blue-600 text-white text-xs font-semibold">
-                          {initials(u.name)}
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 text-gray-900 dark:text-white">{u.name || "Unknown"}</td>
-                      <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{u.email}</td>
-                      <td className="px-4 py-2 text-gray-500 dark:text-gray-400">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Latest Users */}
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">New Users</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Recently joined travelers (latest 5)</p>
             </div>
-        )}
-      </div>
-
-      {/* Recent Packages */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Packages</h2>
-            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Recently added or updated (latest 5)</p>
+            <Link href="/admin?tab=users" className="text-sm text-sky-600 hover:underline">View all</Link>
           </div>
-          <Link href="/admin?tab=package" className="text-sm text-sky-600 hover:underline">View all</Link>
+          <div className="mt-4 space-y-3">
+            {latestUsers.length === 0 ? (
+              <div className="text-sm text-gray-500 dark:text-gray-400">No recent users.</div>
+            ) : (
+              latestUsers.map((u) => (
+                <div key={u._id || u.id || u.email} className="flex items-center gap-3 p-3 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <div className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-600 text-white font-semibold">{initials(u.name)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-gray-900 dark:text-white truncate">{u.name || 'Unknown'}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.email}</div>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-        {recentPackages.length === 0 ? (
-          <p className="text-sm text-gray-600 dark:text-gray-400">No packages available.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
-              <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                <tr>
-                  <th className="px-4 py-2">Title</th>
-                  <th className="px-4 py-2">Destination</th>
-                  <th className="px-4 py-2">Duration</th>
-                  <th className="px-4 py-2">Price</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {recentPackages.map((p) => (
-                  <tr key={p._id || p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-4 py-2 text-gray-900 dark:text-white">{p.title}</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{p.destination || '-'}</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{p.duration ?? p.days ?? 0} days</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">₹{Number(p.price || 0).toLocaleString('en-IN')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
 
-      {/* Recent Bookings */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Recent Bookings</h2>
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">Latest 5 bookings</p>
-        {recentBookings.length === 0 ? (
-          <p className="text-sm text-gray-600 dark:text-gray-400">No bookings yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
-              <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                <tr>
-                  <th className="px-4 py-2">Booking</th>
-                  <th className="px-4 py-2">User (Email)</th>
-                  <th className="px-4 py-2">Package</th>
-                  <th className="px-4 py-2">Amount</th>
-                  <th className="px-4 py-2">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {recentBookings.map((b) => (
-                  <tr key={b._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-4 py-2 text-gray-900 dark:text-white">{String(b._id).slice(0, 8)}…</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{b.userEmail || '-'}</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{b.packageTitle || '-'}</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">₹{Number(b.amount || 0).toLocaleString('en-IN')}</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{b.createdAt ? new Date(b.createdAt).toLocaleString() : '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Recent Packages & Bookings */}
+        <div className="space-y-6">
+          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Packages</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Recently added or updated</p>
+              </div>
+              <Link href="/admin?tab=package" className="text-sm text-sky-600 hover:underline">View all</Link>
+            </div>
+            <div className="mt-4 space-y-2">
+              {recentPackages.length === 0 ? (
+                <div className="text-sm text-gray-500 dark:text-gray-400">No packages available.</div>
+              ) : (
+                recentPackages.map((p) => (
+                  <div key={p._id || p.id} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white truncate">{p.title}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{p.destination || '-'} · {p.duration ?? p.days ?? 0} days</div>
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">₹{Number(p.price || 0).toLocaleString('en-IN')}</div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        )}
+
+          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Bookings</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Latest 5 bookings</p>
+              </div>
+              <Link href="/admin?tab=bookings" className="text-sm text-sky-600 hover:underline">View all</Link>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {recentBookings.length === 0 ? (
+                <div className="text-sm text-gray-500 dark:text-gray-400">No bookings yet.</div>
+              ) : (
+                recentBookings.map((b) => (
+                  <div key={b._id} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">{String(b._id).slice(0, 8)}…</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{b.userEmail || '-'}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{b.packageTitle || '-'}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">₹{Number(b.amount || 0).toLocaleString('en-IN')}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
