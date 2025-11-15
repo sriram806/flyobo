@@ -85,7 +85,7 @@ export default function PackageCard({ pkg, loading }) {
     setFavBusy(false);
   };
   return (
-  <article className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md hover:shadow-2xl transition-all duration-500">
+  <article className="group relative overflow-hidden rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md hover:shadow-2xl transition-all duration-500">
       {/* Image Section */}
       <div className="aspect-[16/10] w-full overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
         {loading ? (

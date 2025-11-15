@@ -68,8 +68,6 @@ const GalleryCard = ({ item, index, onOpen }) => {
                         <Share2 className="w-5 h-5 text-black" />
                     </button>
                 </div>
-
-                {/* TITLE ON IMAGE */}
                 <div
                     className="
             absolute bottom-0 left-0 right-0 

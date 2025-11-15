@@ -75,8 +75,8 @@ export default function UserMenu({ user, onLogout, variant = "desktop" }) {
         ref={buttonRef}
         onClick={() => setOpen((o) => !o)}
         className={`${variant === "desktop"
-            ? "flex items-center gap-2 pl-2 pr-1 py-1.5"
-            : "p-1.5"
+            ? "flex items-center gap-2 pl-1 pr-1 py-1.5"
+            : "p-1"
           } rounded-full border border-gray-200 dark:border-gray-700 
         bg-white dark:bg-gray-800 hover:shadow-sm transition-all duration-200`}
         aria-haspopup="menu"
@@ -88,9 +88,6 @@ export default function UserMenu({ user, onLogout, variant = "desktop" }) {
         >
           {initial}
         </div>
-        {variant === "desktop" && (
-          <HiOutlineChevronDown className={`h-4 w-4 opacity-70 transition-transform duration-300 ${open ? "rotate-180" : "rotate-0"}`} />
-        )}
       </button>
 
       {/* Dropdown menu */}

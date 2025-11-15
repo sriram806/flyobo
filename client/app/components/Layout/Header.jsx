@@ -203,7 +203,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
             {/* Top bar: glass effect with sky accents */}
             <div
                 className="sticky top-0 z-[1000] w-full border-b border-gray-200 dark:border-gray-800
-        bg-white/80 dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-gray-900/70
+        bg-white dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-white dark:supports-[backdrop-filter]:bg-gray-900/70
         transition-colors duration-300"
             >
                 <div className="max-w-7xl mx-auto px-4 lg:px-8">
@@ -238,7 +238,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                             </button>
 
                             {/* Notifications */}
-                            {user && (
+                            {user && user.role === "admin" && (
                                 <div className="relative">
                                     <button
                                         ref={notifButtonRef}

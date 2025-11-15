@@ -6,7 +6,7 @@ export default function ResultsToolbar({ filteredCount, sortBy, setSortBy, view,
   return (
     <div
       className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 
-      rounded-2xl border border-gray-200 dark:border-gray-800 
+      rounded border border-gray-200 dark:border-gray-800 
       bg-gradient-to-br from-gray-50 via-white to-gray-100 
       dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 
       px-5 py-4 shadow-sm transition-all duration-300"

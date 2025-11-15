@@ -10,7 +10,7 @@ export default function PaginationBar({ currentPage, totalPages, onPrev, onNext 
       <button
         disabled={currentPage <= 1}
         onClick={onPrev}
-        className={`inline-flex items-center gap-1 rounded-lg border border-gray-200 dark:border-gray-700 px-3.5 py-2.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-sky-500/60 hover:bg-gray-50 dark:hover:bg-gray-800 ${
+        className={`inline-flex items-center gap-1 rounded border border-gray-200 dark:border-gray-700 px-3.5 py-2.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-sky-500/60 hover:bg-gray-50 dark:hover:bg-gray-800 ${
           currentPage <= 1 ? "opacity-60 cursor-not-allowed" : ""
         }`}
       >

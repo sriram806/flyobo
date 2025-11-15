@@ -30,8 +30,8 @@ export default function FiltersPanel({
   return (
     <aside className="lg:col-span-1">
       <div
-        className="rounded-2xl border border-gray-200 dark:border-gray-800 
-        bg-gradient-to-br from-white via-gray-50 to-indigo-50 
+        className="rounded border border-gray-200 dark:border-gray-800 
+        bg-gradient-to-br from-white via-sky-100 to-sky-200 
         dark:from-[#0a0a0a] dark:via-gray-900 dark:to-indigo-950 
         p-5 space-y-6 shadow-md dark:shadow-none transition-all duration-500"
       >

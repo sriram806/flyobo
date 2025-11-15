@@ -217,7 +217,7 @@ export default function Page() {
       {!filtersActive && (
         <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-[#0a0a0a] dark:via-gray-900 dark:to-indigo-950">
         <div className="mx-auto max-w-7xl px-4 lg:px-8 py-12 sm:py-16">
-          <div className="relative rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md overflow-hidden">
+          <div className="relative rounded border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md overflow-hidden">
 
             <div className="absolute top-1 left-0 w-89 h-60 bg-sky-300 blur-3xl rounded-full animate-pulse" />
             <div className="absolute bottom-0.5 right-1 w-90 h-60 bg-sky-500  blur-3xl rounded-full animate-pulse" />
@@ -322,7 +322,7 @@ export default function Page() {
 
       {/* Search & Filters */}
       <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8 sm:py-12 bg-gray-50 dark:bg-[#0a0a0a]">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-lg mb-8">
+        <div className="bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 p-6 shadow-lg mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="relative flex-1">
               <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />

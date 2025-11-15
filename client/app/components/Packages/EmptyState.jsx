@@ -8,7 +8,7 @@ export default function EmptyState({
   onReset,
 }) {
   return (
-    <div className="mt-10 text-center py-16 border-2 border-dashed rounded-2xl
+    <div className="mt-10 text-center py-16 border-2 border-dashed rounded
       border-gray-300 dark:border-gray-800
       bg-gradient-to-br from-gray-50 via-white to-indigo-50
       dark:from-[#0a0a0a] dark:via-gray-900 dark:to-indigo-950

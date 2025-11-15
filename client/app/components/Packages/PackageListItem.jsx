@@ -25,7 +25,7 @@ export default function PackageListItem({ pkg, loading }) {
   const highlights = formatHighlights(pkg?.highlights);
 
   return (
-    <article className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-5 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
+    <article className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-5 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Image */}
         <div className="w-full sm:w-48 h-40 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 relative">

@@ -17,7 +17,6 @@ import FeaturedPackages from './components/Home/FeaturedPackages';
 import Testimonials from './components/Home/Testimonials';
 import TravelBlog from './components/Home/TravelBlog';
 import SpecialOffers from './components/Home/SpecialOffers';
-import WhyChooseUs from './components/Home/WhyChooseUs';
 
 const Home = () => {
   const [open, setOpen] = useState(false);
@@ -52,7 +51,6 @@ const Home = () => {
           <Hero />
           <SpecialOffers />
           <FeaturedPackages />
-          <WhyChooseUs />
           <TopDestinations />
           <BoldShowcase />
           <Testimonials />
