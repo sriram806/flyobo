@@ -4,6 +4,7 @@ import ThemeProvider from "./utils/Theme-Provider";
 import ClientProvider from "./hoc/ClientProvider";
 import AuthLoader from "./components/Auth/AuthLoader";
 import { Toaster } from "react-hot-toast";
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
         </ClientProvider>
         <Toaster position="bottom-right" toastOptions={{ duration: 3500 }} />
       </body>
+      <GoogleAnalytics gaId="G-HJ1B29719N" />
     </html>
   );
 }
