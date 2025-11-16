@@ -57,7 +57,7 @@ const PackageCard = ({ package: pkg }) => {
         </div>
         
         <Link 
-          href={`/packages/${pkg?._id || pkg?.id}`}
+          href={`/packages/${pkg?.slug || pkg?._id || pkg?.id}`}
           className="mt-4 block w-full text-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2 rounded-lg transition-all duration-300"
         >
           View Details

@@ -28,7 +28,7 @@ export default function FiltersPanel({
   onReset,
 }) {
   return (
-    <aside className="lg:col-span-1">
+    <aside className="lg:col-span-1 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-auto">
       <div
         className="rounded border border-gray-200 dark:border-gray-800 
         bg-gradient-to-br from-white via-sky-100 to-sky-200 

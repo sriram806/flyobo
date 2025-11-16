@@ -6,6 +6,16 @@ import path from 'path';
 import xlsx from 'xlsx';
 import fs from 'fs';
 
+// simple slug generator: lowercase, replace non-alphanum with hyphens, collapse hyphens
+function slugify(text = '') {
+  return String(text)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
+}
+
 // ✅ 1. CREATE A PACKAGE
 export const uploadPackage = async (req, res) => {
   try {
@@ -46,6 +56,11 @@ export const uploadPackage = async (req, res) => {
       data.images = getFileUrl(req, req.file.filename, 'packages');
     } else if (data.imageUrl && data.imageUrl.trim()) {
       data.images = data.imageUrl.trim();
+    }
+
+    // generate slug from title if not provided
+    if (data.title && !data.slug) {
+      data.slug = slugify(data.title);
     }
 
     createPackage(data, res, req);
@@ -107,6 +122,11 @@ export const EditPackage = async (req, res) => {
     } else if (data.imageUrl && data.imageUrl.trim()) {
       data.images = data.imageUrl.trim();
     }
+
+    // update slug when title changes
+    if (data.title) {
+      data.slug = slugify(data.title);
+    }
     const UpdatedPackage = await Package.findByIdAndUpdate(
       packageId,
       { $set: data },
@@ -128,13 +148,22 @@ export const getSinglePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
 
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(packageId)) {
-      return res.status(400).json({ message: 'Invalid package ID format' });
+    let foundPackage = null;
+
+    // If it's a valid ObjectId, try by id first
+    if (mongoose.Types.ObjectId.isValid(packageId)) {
+      foundPackage = await Package.findById(packageId).populate('reviews.user', 'name');
     }
 
-    const foundPackage = await Package.findById(packageId)
-      .populate('reviews.user', 'name');
+    // If not found by id, or the param wasn't an ObjectId, try by slug or title
+    if (!foundPackage) {
+      const maybeSlug = decodeURIComponent(packageId).toString().toLowerCase();
+      foundPackage = await Package.findOne({ slug: maybeSlug }).populate('reviews.user', 'name');
+      if (!foundPackage) {
+        // fallback: try exact title match
+        foundPackage = await Package.findOne({ title: decodeURIComponent(packageId) }).populate('reviews.user', 'name');
+      }
+    }
 
     if (!foundPackage) {
       return res.status(404).json({ message: 'Package not found' });
@@ -152,16 +181,32 @@ export const getSinglePackage = async (req, res) => {
 export const getAllPackages = async (req, res) => {
   try {
       // Pass query parameters to the service
-      const packages = await getAllPackagesServices(req.query);
+      const result = await getAllPackagesServices(req.query);
+      // result: { packages, total }
       res.status(200).json({
           success: true,
-          packages
+          packages: result.packages,
+          total: result.total
       });
   } catch (error) {
       res.status(500).json({
           success: false,
           message: error.message
       });
+  }
+};
+
+// GET distinct locations/destinations for filter dropdowns
+export const getPackageLocations = async (req, res) => {
+  try {
+    // Find distinct values from destination and location fields
+    const dests = await Package.distinct('destination');
+    const locs = await Package.distinct('location');
+    // Merge, dedupe and filter empty values
+    const merged = Array.from(new Set([...(dests || []), ...(locs || [])].map(s => (s || '').toString().trim()).filter(Boolean)));
+    res.status(200).json({ success: true, locations: merged });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -324,6 +369,8 @@ export const bulkUploadPackages = async (req, res) => {
         }
 
         // Create package
+        // generate slug
+        packageData.slug = slugify(packageData.title);
         const newPackage = await Package.create(packageData);
         results.success.push({
           row: i + 2,

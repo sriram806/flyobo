@@ -25,6 +25,9 @@ const AdminPackages = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadResults, setUploadResults] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [locationFilter, setLocationFilter] = useState("");
+  const [jumpPage, setJumpPage] = useState('');
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
@@ -35,8 +38,10 @@ const AdminPackages = () => {
     try {
       setLoading(true);
       
-      const data = await authRequest.get(`${API_URL}/package/get-packages`, { q, page, limit: pageSize });
-      
+      const params = { q, page, limit: pageSize };
+      if (locationFilter) params.location = locationFilter;
+      const data = await authRequest.get(`${API_URL}/package/get-packages`, params);
+
       const list = data?.packages || data?.data || [];
       if (Array.isArray(list) && list.length > 0) {
         // normalize status casing for UI
@@ -55,6 +60,17 @@ const AdminPackages = () => {
     }
   };
 
+  const loadLocations = async () => {
+    if (!API_URL) return;
+    try {
+      const data = await authRequest.get(`${API_URL}/package/locations`);
+      const locs = data?.locations || [];
+      setLocations(locs);
+    } catch (e) {
+      setLocations([]);
+    }
+  };
+
   const toggleStatus = async (pkg) => {
     if (!API_URL) return;
     const id = pkg._id || pkg.id;
@@ -70,12 +86,7 @@ const AdminPackages = () => {
         )
       );
 
-      await axios.put(
-        `${API_URL}/package/edit-package/${id}`,
-        // send both keys to be safe with backend casing
-        { status: next, Status: next },
-        { withCskyentials: true }
-      );
+      await authRequest.put(`${API_URL}/package/edit-package/${id}`, { status: next, Status: next });
 
       toast.success(`Status changed to ${next}`);
     } catch (err) {
@@ -95,7 +106,11 @@ const AdminPackages = () => {
 
   useEffect(() => {
     load();
-  }, [q, page, pageSize]);
+  }, [q, page, pageSize, locationFilter]);
+
+  useEffect(() => {
+    loadLocations();
+  }, []);
 
 
   const removePkg = async (id) => {
@@ -232,6 +247,16 @@ const AdminPackages = () => {
             >
               📊 Bulk Upload
             </button>
+            <select
+              value={locationFilter}
+              onChange={(e) => { setLocationFilter(e.target.value); setPage(1); }}
+              className="rounded-lg text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 text-sm"
+            >
+              <option value="">All Locations</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
             <input
               type="text"
               placeholder="Search packages..."
@@ -324,6 +349,11 @@ const AdminPackages = () => {
             <button
               className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
               disabled={page <= 1}
+              onClick={() => setPage(1)}
+            >First</button>
+            <button
+              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
+              disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >Previous</button>
             {
@@ -350,6 +380,15 @@ const AdminPackages = () => {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >Next</button>
+            <button
+              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
+              disabled={page >= totalPages}
+              onClick={() => setPage(totalPages)}
+            >Last</button>
+            <div className="flex items-center gap-2 ml-2">
+              <input value={jumpPage} onChange={(e) => setJumpPage(e.target.value)} placeholder="#" className="w-16 rounded-lg border border-gray-300 dark:border-gray-700 px-2 py-1 text-sm bg-transparent text-gray-800 dark:text-gray-100" />
+              <button onClick={() => { const n = parseInt(jumpPage); if (!isNaN(n) && n >=1 && n <= totalPages) setPage(n); setJumpPage(''); }} className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-800 text-sm">Go</button>
+            </div>
           </div>
         </div>
       </div>

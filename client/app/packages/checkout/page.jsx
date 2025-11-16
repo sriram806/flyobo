@@ -184,10 +184,10 @@ export default function CheckoutPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({
+            body: JSON.stringify({
             amount: total, // your backend may require multiply by 100; adapt accordingly
             currency: "INR",
-            packageId: pkg?.id || pkg?._id || slug,
+            packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
             meta: { travelers: Number(travelers), startDate }
           })
         });
@@ -212,7 +212,7 @@ export default function CheckoutPage() {
                 credentials: "include",
                 body: JSON.stringify({
                   ...response,
-                  packageId: pkg?.id || pkg?._id || slug,
+                  packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
                   meta: { travelerDetails, startDate, notes, subtotal, tax, fee, discountAmount, total }
                 })
               });
@@ -226,7 +226,7 @@ export default function CheckoutPage() {
                   headers: { "Content-Type": "application/json" },
                   credentials: "include",
                   body: JSON.stringify({
-                    packageId: pkg?.id || pkg?._id || slug,
+                    packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
                     name, email, phone,
                     travelers: Number(travelers),
                     travelerDetails,
@@ -316,8 +316,8 @@ export default function CheckoutPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({
-            packageId: pkg?.id || pkg?._id || slug,
+            body: JSON.stringify({
+            packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
             name, email, phone,
             travelers: Number(travelers),
             travelerDetails,
@@ -459,8 +459,8 @@ export default function CheckoutPage() {
                                   method: "POST",
                                   headers: { "Content-Type": "application/json" },
                                   credentials: "include",
-                                  body: JSON.stringify({
-                                    packageId: pkg?.id || pkg?._id || slug,
+                                    body: JSON.stringify({
+                                    packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
                                     name, email, phone,
                                     travelers: Number(travelers),
                                     travelerDetails,

@@ -71,7 +71,7 @@ export default function Page() {
 
   return (
     <section className="lg:col-span-3">
-      <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+      <div className="relative overflow-hidden rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
         <div className="p-6 sm:p-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Create Package
@@ -81,7 +81,7 @@ export default function Page() {
           </p>
 
           {error && (
-            <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-red-700 dark:bg-red-950/40 dark:border-red-900">
+            <div className="mt-4 rounded-md border border-sky-200 bg-sky-50 p-3 text-sky-700 dark:bg-sky-950/40 dark:border-sky-900">
               {error}
             </div>
           )}
@@ -98,7 +98,7 @@ export default function Page() {
               <input
                 value={form.title}
                 onChange={onChange("title")}
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="Enter package title"
               />
             </div>
@@ -111,7 +111,7 @@ export default function Page() {
               <textarea
                 value={form.description}
                 onChange={onChange("description")}
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="Enter package description"
               />
             </div>
@@ -135,7 +135,7 @@ export default function Page() {
                 type="number"
                 value={form.price}
                 onChange={onChange("price")}
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="e.g. 4999"
               />
             </div>
@@ -149,7 +149,7 @@ export default function Page() {
                 type="number"
                 value={form.estimatedPrice}
                 onChange={onChange("estimatedPrice")}
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="e.g. 5999"
               />
             </div>
@@ -163,7 +163,7 @@ export default function Page() {
                 type="number"
                 value={form.duration}
                 onChange={onChange("duration")}
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="e.g. 5"
               />
             </div>
@@ -176,7 +176,7 @@ export default function Page() {
               <input
                 value={form.destination}
                 onChange={onChange("destination")}
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="City / Region"
               />
             </div>
@@ -189,7 +189,7 @@ export default function Page() {
               <select
                 value={form.status}
                 onChange={onChange("status")}
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
+                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
               >
                 <option value="active">Active</option>
                 <option value="draft">Draft</option>
@@ -201,14 +201,14 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => router.push("/admin?tab=package")}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="inline-flex  text-gray-800 dark:text-gray-100 items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg bg-rose-600 text-white px-4 py-2 text-sm hover:bg-rose-700 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2 text-sm hover:bg-sky-700 disabled:opacity-60"
               >
                 {saving ? "Saving..." : "Create"}
               </button>

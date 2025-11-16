@@ -26,6 +26,14 @@ const packageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  slug: {
+    type: String,
+    required: false,
+    lowercase: true,
+    trim: true,
+    unique: true,
+    sparse: true,
+  },
   description: {
     type: String,
     required: true

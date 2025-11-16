@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import sendMail from "../config/nodemailer.js";
 import Package from "../models/package.model.js";
+import mongoose from 'mongoose';
 import { getAllBookingsServices, newBooking, processReferralReward } from "../services/booking.services.js";
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 
@@ -44,7 +45,15 @@ export const createBooking = async (req, res) => {
             });
         }
 
-        const pkg = await Package.findById(packageId);
+        // Resolve package by id or slug/title
+        let pkg = null;
+        if (mongoose.Types.ObjectId.isValid(packageId)) {
+            pkg = await Package.findById(packageId);
+        }
+        if (!pkg) {
+            const maybeSlug = decodeURIComponent(packageId || '').toString().toLowerCase();
+            pkg = await Package.findOne({ slug: maybeSlug }) || await Package.findOne({ title: decodeURIComponent(packageId || '') });
+        }
         if (!pkg) {
             return res.status(400).json({
                 success: false,
@@ -157,7 +166,15 @@ export const adminCreateBooking = async (req, res) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        const pkg = await Package.findById(packageId);
+        // Resolve package by id or slug/title for admin flow as well
+        let pkg = null;
+        if (mongoose.Types.ObjectId.isValid(packageId)) {
+            pkg = await Package.findById(packageId);
+        }
+        if (!pkg) {
+            const maybeSlug = decodeURIComponent(packageId || '').toString().toLowerCase();
+            pkg = await Package.findOne({ slug: maybeSlug }) || await Package.findOne({ title: decodeURIComponent(packageId || '') });
+        }
         if (!pkg) return res.status(404).json({ success: false, message: "Package not found" });
 
         const already = user.packages?.some((p) => p.toString() === pkg._id.toString());

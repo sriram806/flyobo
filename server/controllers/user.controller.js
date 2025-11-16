@@ -1,4 +1,6 @@
 import User from "../models/user.model.js";
+import Package from '../models/package.model.js';
+import mongoose from 'mongoose';
 import { 
   trackSocialShare, 
   getUserReferralAnalytics, 
@@ -186,11 +188,25 @@ export const addFavouritePackage = async (req, res) => {
 
     if (!user.favoritePackages) user.favoritePackages = [];
 
-    if (user.favoritePackages.includes(packageId)) {
+    // Resolve packageId: accept ObjectId, slug, or title
+    let pkg = null;
+    if (mongoose.Types.ObjectId.isValid(String(packageId))) {
+      pkg = await Package.findById(packageId);
+    }
+    if (!pkg) {
+      const maybeSlug = String(packageId).toLowerCase();
+      pkg = await Package.findOne({ slug: maybeSlug }) || await Package.findOne({ title: packageId });
+    }
+    if (!pkg) {
+      return res.status(404).json({ success: false, message: 'Package not found' });
+    }
+
+    const pkgIdStr = String(pkg._id);
+    if (user.favoritePackages.some(id => String(id) === pkgIdStr)) {
       return res.status(400).json({ success: false, message: 'Package already in favourites' });
     }
 
-    user.favoritePackages.push(packageId);
+    user.favoritePackages.push(pkg._id);
     await user.save();
 
     await user.populate('favoritePackages', 'title price destination images');
@@ -216,13 +232,25 @@ export const removeFavouritePackage = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    if (!user.favoritePackages || !user.favoritePackages.includes(packageId)) {
+    // Resolve package identifier (accept slug/title or ObjectId)
+    let pkg = null;
+    if (mongoose.Types.ObjectId.isValid(String(packageId))) {
+      pkg = await Package.findById(packageId);
+    }
+    if (!pkg) {
+      const maybeSlug = String(packageId).toLowerCase();
+      pkg = await Package.findOne({ slug: maybeSlug }) || await Package.findOne({ title: packageId });
+    }
+    if (!pkg) {
+      return res.status(404).json({ success: false, message: 'Package not found' });
+    }
+
+    const pkgIdStr = String(pkg._id);
+    if (!user.favoritePackages || !user.favoritePackages.some(id => String(id) === pkgIdStr)) {
       return res.status(400).json({ success: false, message: 'Package not found in favourites' });
     }
 
-    user.favoritePackages = user.favoritePackages.filter(
-      (id) => id.toString() !== packageId.toString()
-    );
+    user.favoritePackages = user.favoritePackages.filter((id) => String(id) !== pkgIdStr);
     await user.save();
 
     await user.populate('favoritePackages', 'title price destination images');

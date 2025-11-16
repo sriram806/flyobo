@@ -41,27 +41,66 @@ export const createPackage = async (data, res, req) => {
 };
 
 export const getAllPackagesServices = async (filters = {}) => {
-    let query = {};
-    
-    // Apply filters
-    if (filters.status) {
-        query.Status = filters.status;
+  let query = {};
+
+  // Status / featured filters
+  if (filters.status) {
+    query.Status = filters.status;
+  }
+  if (filters.featured !== undefined) {
+    query.featured = filters.featured === 'true' || filters.featured === true;
+  }
+
+  // Location filter (destination or location field)
+  if (filters.location) {
+    query.$or = [
+      { destination: { $regex: filters.location, $options: 'i' } },
+      { location: { $regex: filters.location, $options: 'i' } }
+    ];
+  }
+
+  // Search query: search title, destination, description
+  if (filters.q) {
+    const q = String(filters.q).trim();
+    if (q.length > 0) {
+      const regex = { $regex: q, $options: 'i' };
+      query.$or = query.$or ? query.$or.concat([
+        { title: regex },
+        { destination: regex },
+        { location: regex },
+        { description: regex }
+      ]) : [
+        { title: regex },
+        { destination: regex },
+        { location: regex },
+        { description: regex }
+      ];
     }
-    
-    if (filters.featured !== undefined) {
-        query.featured = filters.featured === 'true' || filters.featured === true;
-    }
-    
-    let packagesQuery = Package.find(query).sort({ createdAt: -1 });
-    
-    // Apply limit if specified
-    if (filters.limit) {
-        const limit = parseInt(filters.limit);
-        if (!isNaN(limit) && limit > 0) {
-            packagesQuery = packagesQuery.limit(limit);
-        }
-    }
-    
-    const packages = await packagesQuery;
-    return packages;
+  }
+
+  // Pagination
+  let page = 1;
+  let limit = 0; // 0 => no limit
+  if (filters.page) {
+    const p = parseInt(filters.page);
+    if (!isNaN(p) && p > 0) page = p;
+  }
+  if (filters.limit) {
+    const l = parseInt(filters.limit);
+    if (!isNaN(l) && l > 0) limit = l;
+  }
+
+  const baseQuery = Package.find(query).sort({ createdAt: -1 });
+
+  // Count total matching
+  const total = await Package.countDocuments(query);
+
+  let packagesQuery = baseQuery;
+  if (limit > 0) {
+    const skip = (page - 1) * limit;
+    packagesQuery = packagesQuery.skip(skip).limit(limit);
+  }
+
+  const packages = await packagesQuery;
+  return { packages, total };
 };

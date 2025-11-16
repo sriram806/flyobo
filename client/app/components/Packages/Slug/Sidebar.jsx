@@ -6,7 +6,7 @@ import Price from "./ui/Price";
 
 export default function Sidebar({ price, mrp, hasDiscount, discountPct, title, slug, url }) {
   return (
-    <aside className="w-full lg:w-auto">
+    <aside className="w-full lg:w-auto lg:sticky lg:top-24 lg:self-start">
       <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-5 shadow-sm space-y-4">
         <Price price={price} mrp={mrp} hasDiscount={hasDiscount} discountPct={discountPct} />
 

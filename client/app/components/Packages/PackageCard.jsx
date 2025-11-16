@@ -18,7 +18,7 @@ export default function PackageCard({ pkg, loading }) {
   // Favourites integration (using user routes)
   const [isFav, setIsFav] = useState(false);
   const [favBusy, setFavBusy] = useState(false);
-  const packageId = pkg?._id || pkg?.id || pkg?.slug;
+  const packageId = pkg?.slug || pkg?.id || pkg?._id;
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const getAuthConfig = () => {

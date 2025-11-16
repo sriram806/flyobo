@@ -7,6 +7,7 @@ import {
   deletePackage,
   getPackagebyUser,
   getAllPackages,
+  getPackageLocations,
   bulkUploadPackages,
 } from '../controllers/package.controller.js';
 import isAuthenticated from '../middleware/isAuthenticated.js';
@@ -18,6 +19,7 @@ packageRouter.post('/', isAuthenticated, uploadPackageImage, uploadPackage); //�
 packageRouter.post('/bulk-upload', isAuthenticated, uploadExcelFile, bulkUploadPackages); //✅ 9. BULK UPLOAD FROM EXCEL
 packageRouter.put('/edit-package/:id', isAuthenticated, uploadPackageImage, EditPackage); //✅ 2. UPDATE PACKAGE & WORKING
 packageRouter.get('/get-packages', getAllPackages);
+packageRouter.get('/locations', getPackageLocations);
 packageRouter.get('/get-package/:id', isAuthenticated, getPackagebyUser);
 packageRouter.post('/:id/reviews', isAuthenticated, addReview); //✅ 5. ADDING REVIEW TO PACKAGE & WORKING
 packageRouter.delete('/:id', isAuthenticated, deletePackage); //✅ 6. DELETE PACKAGE FROM DATABASE & WORKING
