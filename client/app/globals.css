@@ -80,3 +80,30 @@ html.dark {
 .test-theme-text {
     color: var(--color-text-primary);
 }
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp .5s ease-out forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn .6s ease-out forwards;
+}
+
+/* Utility: hide native scrollbars for overflow containers */
+.no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}

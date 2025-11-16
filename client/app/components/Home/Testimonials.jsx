@@ -1,163 +1,296 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { FiStar, FiMessageSquare } from "react-icons/fi";
+import { FiStar, FiMessageSquare, FiMapPin, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-const testimonials = [
+/**
+ * Testimonials data: Indian + global mix.
+ * Some entries include light Telugu/Hinglish slang for authenticity.
+ */
+const TESTIMONIALS = [
   {
     id: 1,
-    name: "Sarah Johnson",
-    role: "Adventure Traveler",
-    content: "Flyobo made our honeymoon to Bali absolutely perfect! The attention to detail and personalized service exceeded our expectations. We'll definitely be booking with them again.",
-    avatar: "https://ui-avatars.com/api/?name=Sarah+Johnson&background=0D8ABC&color=fff",
+    name: "Anusha Reddy",
+    role: "Software Engineer",
+    content:
+      "Goa trip enti ante next level vibe! Flyobo arranged a beach resort and night cruise — super smooth and value for money. Bro, beach la sunsets marchipoledu.",
+    avatar: "https://ui-avatars.com/api/?name=Anusha+Reddy&background=FDE8F0&color=7C3A5A",
     rating: 5,
-    location: "Bali, Indonesia"
+    location: "Goa, India",
   },
   {
     id: 2,
-    name: "Michael Chen",
-    role: "Business Traveler",
-    content: "As a frequent business traveler, I appreciate Flyobo's seamless booking process and reliable service. Their 24/7 support team has always been there when I needed them.",
-    avatar: "https://ui-avatars.com/api/?name=Michael+Chen&background=7879F1&color=fff",
-    rating: 5,
-    location: "Tokyo, Japan"
+    name: "Vikram Teja",
+    role: "Startup Founder",
+    content:
+      "Manali snow experience was amazing. Cabin stay with mountain view — Flyobo support quick ga respond chesaru when flights changed. Highly recommended.",
+    avatar: "https://ui-avatars.com/api/?name=Vikram+Teja&background=EEF2FF&color=3B1B6E",
+    rating: 4.7,
+    location: "Manali, Himachal Pradesh",
   },
   {
     id: 3,
-    name: "Emma Rodriguez",
-    role: "Family Vacationer",
-    content: "Traveling with three kids can be challenging, but Flyobo made it so easy! Their family-friendly packages and thoughtful recommendations made our trip to Europe unforgettable.",
-    avatar: "https://ui-avatars.com/api/?name=Emma+Rodriguez&background=F59E0B&color=fff",
+    name: "Priya Sharma",
+    role: "Luxury Traveler",
+    content:
+      "Maldives package was pure luxury. Private villa, personalized dining — Flyobo understood every little detail. Best honeymoon ever.",
+    avatar: "https://ui-avatars.com/api/?name=Priya+Sharma&background=FFF1F0&color=9B2B2B",
     rating: 5,
-    location: "Paris, France"
+    location: "Maldives",
   },
   {
     id: 4,
-    name: "David Wilson",
-    role: "Solo Traveler",
-    content: "As a solo traveler, safety and local experiences are my top priorities. Flyobo delivered both with their carefully curated solo traveler packages and local guide connections.",
-    avatar: "https://ui-avatars.com/api/?name=David+Wilson&background=10B981&color=fff",
-    rating: 5,
-    location: "Cusco, Peru"
+    name: "Arjun Reddy",
+    role: "Travel Vlogger",
+    content:
+      "Kerala backwaters lo boat house stay antaga relax aindi — food and scenery top-notch. Camera ki perfect shots kuda vachayi. Next trip ready!",
+    avatar: "https://ui-avatars.com/api/?name=Arjun+Reddy&background=EFF6FF&color=0B4A6F",
+    rating: 4.9,
+    location: "Alleppey, Kerala",
   },
   {
     id: 5,
-    name: "Priya Sharma",
-    role: "Luxury Traveler",
-    content: "The luxury package to Maldives was beyond words. Every detail was perfect, from the private villa to the personalized dining experiences. Flyobo truly understands luxury travel.",
-    avatar: "https://ui-avatars.com/api/?name=Priya+Sharma&background=EF4444&color=fff",
-    rating: 5,
-    location: "Maldives"
+    name: "Maria Gomez",
+    role: "Digital Nomad",
+    content:
+      "Bali was a dream — yoga mornings, cafes, and surf. Flyobo curated experiences that felt local and genuine. Loved it!",
+    avatar: "https://ui-avatars.com/api/?name=Maria+Gomez&background=FFF7ED&color=8C4A2F",
+    rating: 4.6,
+    location: "Bali, Indonesia",
   },
   {
     id: 6,
-    name: "James Thompson",
-    role: "Budget Traveler",
-    content: "I was skeptical about budget travel until I tried Flyobo. They helped me plan an amazing two-week trip across Southeast Asia without breaking the bank. Incredible value!",
-    avatar: "https://ui-avatars.com/api/?name=James+Thompson&background=8B5CF6&color=fff",
-    rating: 5,
-    location: "Bangkok, Thailand"
-  }
+    name: "David Wilson",
+    role: "Solo Traveler",
+    content:
+      "Cusco & Machu Picchu were expertly planned. Local guide recommendations and safety tips were on point. Smooth adventure overall.",
+    avatar: "https://ui-avatars.com/api/?name=David+Wilson&background=EEF7F2&color=146A3C",
+    rating: 4.8,
+    location: "Cusco, Peru",
+  },
 ];
 
-const TestimonialCard = ({ testimonial, isActive }) => {
+/* ----------------------
+   Small UI helper components
+   ---------------------- */
+
+const AnimatedStars = ({ rating = 5 }) => {
+  // rating can be decimal (e.g., 4.7). We'll show full stars and a faint partial star
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.4;
+  const stars = [...Array(full)];
   return (
-    <motion.div
-      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 ${
-        isActive ? "ring-2 ring-blue-500" : ""
-      }`}
-      whileHover={{ y: -5 }}
-    >
-      <div className="flex items-center mb-4">
-        <img
-          src={testimonial.avatar}
-          alt={testimonial.name}
-          className="w-12 h-12 rounded-full object-cover"
-        />
-        <div className="ml-4">
-          <h4 className="font-bold text-gray-900 dark:text-white">{testimonial.name}</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{testimonial.role}</p>
-        </div>
-        <div className="ml-auto flex items-center text-amber-500">
-          {[...Array(testimonial.rating)].map((_, i) => (
-            <FiStar key={i} className="fill-current" />
-          ))}
-        </div>
-      </div>
-      
-      <div className="relative">
-        <FiMessageSquare className="absolute top-0 left-0 text-gray-300 dark:text-gray-600 text-2xl" />
-        <p className="text-gray-700 dark:text-gray-300 pl-6 mt-2">
-          {testimonial.content}
-        </p>
-      </div>
-      
-      <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
-        <span>{testimonial.location}</span>
-      </div>
-    </motion.div>
+    <div className="flex items-center gap-1" aria-hidden>
+      {stars.map((_, i) => (
+        <motion.span
+          key={i}
+          initial={{ scale: 0.8, opacity: 0.6 }}
+          animate={{ scale: [1, 1.06, 1], opacity: 1 }}
+          transition={{ duration: 0.8, delay: i * 0.06 }}
+          className="text-amber-500"
+        >
+          <FiStar />
+        </motion.span>
+      ))}
+      {half && (
+        <span className="text-amber-400 opacity-80">
+          <FiStar />
+        </span>
+      )}
+    </div>
   );
 };
 
-const Testimonials = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const containerRef = useRef(null);
+/* ----------------------
+   Testimonial Card
+   ---------------------- */
 
-  const scrollToIndex = (index) => {
+const TestimonialCard = ({ t, isActive }) => {
+  return (
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.5 }}
+      className={`relative rounded-2xl p-6 min-h-[220px] bg-white/90 dark:bg-[#0b0b10]/80 border border-gray-200/60 dark:border-gray-700/40 shadow-sm ${
+        isActive ? "ring-2 ring-sky-200/60 dark:ring-sky-400/40" : ""
+      }`}
+      aria-label={`Review by ${t.name}`}
+    >
+      <div className="flex items-start gap-4">
+        <img
+          src={t.avatar}
+          alt={t.name}
+          className="w-12 h-12 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+        />
+
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.name}</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t.role}</p>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <AnimatedStars rating={t.rating} />
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-start gap-3">
+            <div className="text-gray-300 dark:text-gray-600 mt-1">
+              <FiMessageSquare />
+            </div>
+            <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">{t.content}</p>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <FiMapPin className="text-sm" />
+            <span>{t.location}</span>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+};
+
+/* ----------------------
+   Main Testimonials Slider
+   ---------------------- */
+
+export default function Testimonials() {
+  const containerRef = useRef(null);
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const SLIDE_INTERVAL = 4000; // S1 = 6s
+
+  // Auto-slide timer with pause-on-hover/focus:
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => {
+      setActive((s) => (s + 1) % TESTIMONIALS.length);
+    }, SLIDE_INTERVAL);
+    return () => clearInterval(id);
+  }, [paused]);
+
+  // Scroll to active index
+  useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    const card = container.children[index];
+    const card = container.children[active];
     if (!card) return;
-    container.scrollTo({ left: card.offsetLeft - 16, behavior: "smooth" });
-    setActiveIndex(index);
-  };
+    // smooth center alignment: scroll so card's left sits with some offset
+    const offset = card.offsetLeft - 16;
+    container.scrollTo({ left: offset, behavior: "smooth" });
+  }, [active]);
 
-  const next = () => scrollToIndex((activeIndex + 1) % testimonials.length);
-  const prev = () => scrollToIndex((activeIndex - 1 + testimonials.length) % testimonials.length);
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "ArrowRight") setActive((s) => (s + 1) % TESTIMONIALS.length);
+      if (e.key === "ArrowLeft") setActive((s) => (s - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Pause on mouse enter / focus
+  const handleMouseEnter = () => setPaused(true);
+  const handleMouseLeave = () => setPaused(false);
+
+  // Swipe support (basic)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let startX = 0;
+    let moved = false;
+
+    const onTouchStart = (e) => {
+      startX = e.touches[0].clientX;
+      moved = false;
+      setPaused(true);
+    };
+    const onTouchMove = (e) => {
+      const dx = e.touches[0].clientX - startX;
+      if (Math.abs(dx) > 10) moved = true;
+    };
+    const onTouchEnd = (e) => {
+      setPaused(false);
+      if (!moved) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (dx < -30) setActive((s) => (s + 1) % TESTIMONIALS.length);
+      if (dx > 30) setActive((s) => (s - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    el.addEventListener("touchend", onTouchEnd);
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
 
   return (
-    <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+    <section
+      className="py-12 md:py-16"
+      aria-labelledby="testimonials-heading"
+    >
+      {/* Pastel Premium background */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#fffaf7] via-[#f7eff8] to-[#f3f7ff] dark:from-[#0b0b0f] dark:via-[#0f0b12] dark:to-[#08060a]" />
+
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What Our Travelers Say</h2>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Don't just take our word for it - hear from travelers who've experienced Flyobo
+            <h2 id="testimonials-heading" className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+              What Our Travelers Say
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 max-w-xl">
+              Real stories from travelers — honest, local, and curated for Flyobo.
             </p>
-          </div>
-          <div className="flex gap-3">
-            <button onClick={prev} aria-label="Previous testimonials" className="p-2 rounded-md bg-white dark:bg-gray-800 shadow">
-              ◀
-            </button>
-            <button onClick={next} aria-label="Next testimonials" className="p-2 rounded-md bg-white dark:bg-gray-800 shadow">
-              ▶
-            </button>
           </div>
         </div>
 
-        <div ref={containerRef} className="flex gap-6 overflow-x-auto pb-4" role="list" aria-label="Customer testimonials">
-          {testimonials.map((testimonial, index) => (
-            <div key={testimonial.id} style={{ minWidth: 320 }} role="listitem">
-              <TestimonialCard 
-                testimonial={testimonial} 
-                isActive={index === activeIndex}
-              />
+        {/* Slider container */}
+        <div
+          ref={containerRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onFocus={handleMouseEnter}
+          onBlur={handleMouseLeave}
+          className="relative flex gap-6 overflow-x-auto no-scrollbar pb-4 snap-x snap-mandatory touch-pan-x"
+          role="list"
+          aria-label="Customer testimonials"
+        >
+          {TESTIMONIALS.map((t, idx) => (
+            <div
+              key={t.id}
+              role="listitem"
+              style={{ minWidth: 340 }}
+              className="snap-center"
+            >
+              <TestimonialCard t={t} isActive={idx === active} />
             </div>
           ))}
         </div>
 
-        <div className="mt-6 text-center">
-          <button 
-            onClick={() => next()}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            Read More Reviews
-          </button>
+        {/* Pagination dots */}
+        <div className="mt-6 flex items-center justify-center gap-3">
+          {TESTIMONIALS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                i === active ? "bg-sky-400 dark:bg-sky-300 scale-110" : "bg-gray-300 dark:bg-gray-600"
+              }`}
+              aria-label={`Go to review ${i + 1}`}
+            />
+          ))}
         </div>
       </div>
     </section>
   );
-};
-
-export default Testimonials;
+}

@@ -13,15 +13,8 @@ import {
 import WhyChooseUs from "../components/Home/WhyChooseUs";
 
 /**
- * AboutPage — Modern Blue theme + Framer Motion animations
- *
- * - split hero (text + image)
- * - animated stats
- * - animated mission cards
- * - animated timeline
- * - animated CTA
- *
- * Tailwind + light/dark mode friendly
+ * AboutPage — Flyobo Premium Travel Theme
+ * S1 Design Standard | Supports Dark/Light Mode
  */
 
 const stats = [
@@ -53,7 +46,7 @@ const values = [
 const timeline = [
   {
     year: "2024",
-    text: "Flyobo was founded with a mission to simplify travel discovery.",
+    text: "Flyobo was founded to redefine how people discover travel.",
   },
   {
     year: "2025",
@@ -62,8 +55,8 @@ const timeline = [
 ];
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
 };
 
 const stagger = {
@@ -79,12 +72,13 @@ export default function AboutPage() {
     <>
       <SEO
         title="About Flyobo - Our Mission and Story"
-        description="Learn about Flyobo's mission to make travel planning joyful, our values, and the story of how we became a trusted travel companion since our founding in 2024."
+        description="Learn about Flyobo's mission to make travel planning joyful, our values, and the story of how we became a trusted travel companion since 2024."
         keywords="About Flyobo, Travel Company, Travel Mission, Travel Story, Sustainable Travel, Local Impact"
         url="https://www.flyobo.com/about"
       />
       <WebsiteStructuredData />
       <OrganizationStructuredData />
+
       <Heading
         title="About Flyobo"
         description="We've been building delightful travel experiences through curation, technology, and a traveler-first approach since 2024."
@@ -97,7 +91,7 @@ export default function AboutPage() {
         <section className="relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 lg:px-8 py-14 sm:py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Left - Text */}
+              {/* Left Text */}
               <motion.div
                 initial="hidden"
                 whileInView="show"
@@ -107,7 +101,7 @@ export default function AboutPage() {
               >
                 <motion.h1
                   variants={fadeUp}
-                  className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight"
+                  className="text-4xl sm:text-5xl font-extrabold leading-tight text-gray-900 dark:text-white"
                 >
                   Travel made{" "}
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-indigo-600">
@@ -120,10 +114,8 @@ export default function AboutPage() {
                   variants={fadeUp}
                   className="text-lg text-gray-700 dark:text-gray-300 max-w-xl"
                 >
-                  Discover curated trips with Flyobo — from scenic hills to
-                  vibrant cities. Since our launch in 2024, we've obsessed over
-                  the small details so you can fully enjoy the moments that
-                  matter.
+                  Discover curated trips — from scenic hills to vibrant cities.
+                  Every experience is crafted with details that matter.
                 </motion.p>
 
                 <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
@@ -135,29 +127,28 @@ export default function AboutPage() {
                   </a>
                   <a
                     href="#contact"
-                    className="inline-flex items-center justify-center rounded-xl border border-sky-200 dark:border-sky-700 px-5 py-3 text-sm font-semibold text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-800 transition"
+                    className="inline-flex items-center justify-center rounded-xl border border-sky-300 dark:border-sky-700 px-5 py-3 text-sm font-semibold text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-800 transition"
                   >
                     Talk to us
                   </a>
                 </motion.div>
               </motion.div>
 
-              {/* Right - Image with subtle parallax */}
+              {/* Right Image */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="w-full flex justify-center lg:justify-end"
               >
-                <div className="w-full max-w-md lg:max-w-lg rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/5 transition-transform">
+                <div className="w-full max-w-md lg:max-w-lg rounded-3xl overflow-hidden shadow-xl ring-1 ring-black/5 dark:ring-white/5">
                   <div className="relative h-72 sm:h-96 lg:h-[420px]">
                     <img
                       src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop"
-                      alt="Travel - Flyobo"
-                      className="w-full h-full object-cover transform transition-transform duration-500 hover:scale-105"
+                      alt="Flyobo Travel"
+                      className="w-full h-full object-cover duration-500 hover:scale-[1.04]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                   </div>
                 </div>
               </motion.div>
@@ -174,11 +165,11 @@ export default function AboutPage() {
             variants={stagger}
             className="grid grid-cols-2 sm:grid-cols-4 gap-6"
           >
-            {stats.map((s, idx) => (
+            {stats.map((s) => (
               <motion.div
                 key={s.label}
                 variants={fadeUp}
-                className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 p-6 text-center shadow-sm"
+                className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 text-center shadow-sm"
               >
                 <div className="text-3xl font-extrabold text-sky-600 dark:text-sky-400">
                   {s.value}
@@ -191,9 +182,9 @@ export default function AboutPage() {
           </motion.div>
         </section>
 
-        {/* MISSION / VALUES */}
+        {/* VALUES */}
         <section className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
-          <div className="rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 p-8 sm:p-12 shadow">
+          <div className="rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 sm:p-12 shadow">
             <motion.h2
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -212,8 +203,7 @@ export default function AboutPage() {
               className="mt-4 text-gray-700 dark:text-gray-300 max-w-2xl"
             >
               Since 2024, we’ve aimed to make travel planning as joyful as the
-              journey. We blend curated recommendations, trust, and modern
-              technology to guide every traveler.
+              journey, powered by curation and trust.
             </motion.p>
 
             <motion.div
@@ -223,11 +213,11 @@ export default function AboutPage() {
               variants={stagger}
               className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             >
-              {values.map((v, i) => (
+              {values.map((v) => (
                 <motion.div
                   key={v.title}
                   variants={fadeUp}
-                  className="rounded-xl p-5 bg-gradient-to-br from-white/60 to-white/40 dark:from-gray-800/60 dark:to-gray-800/40 border border-gray-100 dark:border-gray-700 shadow-sm"
+                  className="rounded-xl p-5 bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 shadow-sm"
                 >
                   <div className="text-sky-600 dark:text-sky-400 font-semibold">
                     {v.title}
@@ -243,7 +233,7 @@ export default function AboutPage() {
 
         {/* TIMELINE */}
         <section className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
-          <div className="rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 p-8 sm:p-12 shadow">
+          <div className="rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 sm:p-12 shadow">
             <motion.h2
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -259,14 +249,10 @@ export default function AboutPage() {
               whileInView="show"
               viewport={{ once: true, amount: 0.2 }}
               variants={stagger}
-              className="mt-8 relative border-l-2 border-sky-200 dark:border-sky-700"
+              className="mt-8 relative border-l-2 border-sky-300 dark:border-sky-700"
             >
               {timeline.map((t, i) => (
-                <motion.li
-                  key={i}
-                  variants={fadeUp}
-                  className="mb-10 ml-6 relative"
-                >
+                <motion.li key={i} variants={fadeUp} className="mb-10 ml-6 relative">
                   <span className="absolute -left-4 top-0 h-4 w-4 rounded-full bg-sky-600 border-2 border-white dark:border-gray-900" />
                   <time className="text-xs font-semibold text-sky-600 dark:text-sky-400">
                     {t.year}
@@ -277,6 +263,9 @@ export default function AboutPage() {
             </motion.ol>
           </div>
         </section>
+
+        {/* Why Choose Us */}
+        <WhyChooseUs />
 
         {/* CTA */}
         <section className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
@@ -304,7 +293,6 @@ export default function AboutPage() {
               >
                 Contact Support
               </a>
-
               <a
                 href="/packages"
                 className="inline-flex items-center justify-center rounded-xl bg-white/10 text-white px-6 py-3 text-sm font-semibold hover:bg-white/20 transition"
@@ -314,8 +302,6 @@ export default function AboutPage() {
             </div>
           </motion.div>
         </section>
-        
-          <WhyChooseUs />
 
         <Footer />
       </div>
