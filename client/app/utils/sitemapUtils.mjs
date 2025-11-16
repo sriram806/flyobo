@@ -5,46 +5,50 @@
  * @returns {Promise<Array>} Array of package objects
  */
 export async function fetchPackages() {
+  // Always return an array (possibly empty). This prevents consumers like
+  // `getPackageRoutes` from throwing when calling `.map` on undefined.
   try {
-    // Try to fetch packages from the configured backend API.
     const base =
       process.env.NEXT_PUBLIC_BACKEND_URL ||
       (process.env.NODE_ENV === "development"
         ? "http://localhost:5000/api/v1"
         : "https://flyobo.com/api/v1");
 
-    // Try common collection endpoints. Some backends expose `/packages`, others `/package`.
-    const endpoints = [`${base}/packages`, `${base}/package`];
-    let response = null;
+    const endpoints = [`${base}/packages`, `${base}/package`, `${base}/packages/get-packages`];
     let data = null;
 
     for (const ep of endpoints) {
       try {
-        response = await fetch(ep, { method: "GET" });
-        if (!response.ok) continue;
-        data = await response.json();
+        const res = await fetch(ep, { method: "GET" });
+        if (!res || !res.ok) continue;
+        data = await res.json();
         break;
       } catch (e) {
-        // try next endpoint
-        console.warn(`sitemapUtils: failed to fetch from ${ep}:`, e.message || e);
+        console.warn(`sitemapUtils: failed to fetch packages from ${ep}:`, e?.message || e);
         continue;
       }
     }
 
     if (data) {
-      // Normalize shapes: backends may return { packages: [...] } or { data: [...] } or direct array
       const list = data.packages || data.data?.packages || data.data || (Array.isArray(data) ? data : null);
       if (Array.isArray(list)) {
         return list.map((p) => ({
-          id: p.slug || p._id || p.id || (p._doc && p._doc.slug) || String(p.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+          id:
+            p.slug || p._id || p.id || (p._doc && p._doc.slug) ||
+            String(p.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
           title: p.title || p.name || "",
           updatedAt: p.updatedAt || p.updated_at || new Date().toISOString(),
           destination: p.destination || p.location || "",
         }));
       }
+      console.warn("sitemapUtils: packages fetch returned an unexpected shape; falling through to empty list", data);
     }
+
+    // If we reach here, return an empty array so callers can safely iterate.
+    return [];
   } catch (error) {
     console.error("Error fetching packages for sitemap:", error);
+    return [];
   }
 }
 
@@ -69,31 +73,28 @@ export async function getPackageRoutes() {
  */
 export async function fetchGalleryItems() {
   try {
-    // Try to fetch gallery items from the configured backend API.
     const base =
       process.env.NEXT_PUBLIC_BACKEND_URL ||
       (process.env.NODE_ENV === "development"
         ? "http://localhost:5000/api/v1"
         : "https://flyobo.com/api/v1");
 
-    const endpoints = [`${base}/gallery`, `${base}/galleries`, `${base}/gallery-items`, `${base}/galleryitems`];
-    let response = null;
+    const endpoints = [`${base}/gallery`, `${base}/galleries`, `${base}/gallery-items`, `${base}/galleryitems`, `${base}/gallery/get-gallery`];
     let data = null;
 
     for (const ep of endpoints) {
       try {
-        response = await fetch(ep, { method: "GET" });
-        if (!response.ok) continue;
-        data = await response.json();
+        const res = await fetch(ep, { method: "GET" });
+        if (!res || !res.ok) continue;
+        data = await res.json();
         break;
       } catch (e) {
-        console.warn(`sitemapUtils: failed to fetch gallery from ${ep}:`, e.message || e);
+        console.warn(`sitemapUtils: failed to fetch gallery from ${ep}:`, e?.message || e);
         continue;
       }
     }
 
     if (data) {
-      // Normalize shapes: { items: [...] } or { data: [...] } or direct array
       const list = data.items || data.galleries || data.data?.items || data.data || (Array.isArray(data) ? data : null);
       if (Array.isArray(list)) {
         return list.map((p) => ({
@@ -102,10 +103,13 @@ export async function fetchGalleryItems() {
           updatedAt: p.updatedAt || p.updated_at || new Date().toISOString(),
         }));
       }
+      console.warn("sitemapUtils: gallery fetch returned unexpected shape; returning empty list", data);
     }
 
+    return [];
   } catch (error) {
     console.error('Error fetching gallery items for sitemap:', error);
+    return [];
   }
 }
 
