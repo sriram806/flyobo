@@ -33,7 +33,7 @@ export default function Page() {
   const [maxDays, setMaxDays] = useState(30);
   const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(1);
-  const pageSize = 9;
+  const pageSize = 8;
 
   const resetFilters = () => {
     setSearch("");

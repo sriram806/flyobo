@@ -62,10 +62,10 @@ export default function Hero() {
 
           {/* Search Panel */}
           <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 border border-gray-100 dark:border-gray-700">
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4" role="search" aria-label="Search packages">
               <div className="md:col-span-3 relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <FiMapPin />
+                  <FiMapPin aria-hidden="true" />
                 </span>
                 <input
                   value={searchQuery}
@@ -77,6 +77,7 @@ export default function Hero() {
                       ? "Enter city or hotel name"
                       : "Enter route / city"
                   }
+                  aria-label="Search packages or destinations"
                   className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sky-500 outline-none"
                 />
               </div>
@@ -84,13 +85,14 @@ export default function Hero() {
               <button
                 type="submit"
                 className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-4 py-3 font-semibold shadow-md transition"
+                aria-label="Search"
               >
                 Search
               </button>
             </form>
 
             {/* Quick Chips */}
-            <div className="mt-4 flex flex-wrap gap-2 text-sm">
+            <div className="mt-4 flex flex-wrap gap-2 text-sm" aria-label="Quick destinations">
               {quickDestinations.map((place) => (
                 <button
                   key={place}
@@ -103,6 +105,22 @@ export default function Hero() {
                   {place}
                 </button>
               ))}
+            </div>
+
+            {/* Primary CTA */}
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                onClick={() => router.push('/packages')}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-semibold shadow-md"
+              >
+                Explore Packages
+              </button>
+              <a
+                href="#how-it-works"
+                className="text-sm text-gray-600 dark:text-gray-300 hover:underline"
+              >
+                How it works
+              </a>
             </div>
           </div>
 

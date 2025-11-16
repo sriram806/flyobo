@@ -16,7 +16,8 @@ import { WebsiteStructuredData, OrganizationStructuredData } from './components/
 import FeaturedPackages from './components/Home/FeaturedPackages';
 import Testimonials from './components/Home/Testimonials';
 import TravelBlog from './components/Home/TravelBlog';
-import SpecialOffers from './components/Home/SpecialOffers';
+// SpecialOffers removed as per redesign request
+import HomeStats from './components/Home/HomeStats';
 
 const Home = () => {
   const [open, setOpen] = useState(false);
@@ -49,15 +50,40 @@ const Home = () => {
             route={route}
           />
           <Hero />
-          <SpecialOffers />
-          <FeaturedPackages />
-          <TopDestinations />
+
+          {/* Key metrics */}
+          <HomeStats />
+
+          {/* Main content: Featured packages + Top destinations */}
+          <main className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <section aria-labelledby="featured-packages">
+                  <h2 id="featured-packages" className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Featured Packages</h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">Handpicked travel experiences, curated for every traveler.</p>
+                  <FeaturedPackages />
+                </section>
+              </div>
+
+              <aside className="lg:col-span-1">
+                <section aria-labelledby="top-destinations" className="sticky top-24">
+                  <h3 id="top-destinations" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Destinations</h3>
+                  <TopDestinations />
+                </section>
+              </aside>
+            </div>
+          </main>
+
+          {/* Offers and showcases */}
           <BoldShowcase />
+
           <Testimonials />
           <TravelBlog />
+
           <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
             <ReferralBanner />
           </div>
+
           <Newsletter />
           <Footer />
           <WhatsApp />

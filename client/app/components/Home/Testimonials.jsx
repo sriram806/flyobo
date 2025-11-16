@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { FiStar, FiMessageSquare } from "react-icons/fi";
 
@@ -102,30 +102,54 @@ const TestimonialCard = ({ testimonial, isActive }) => {
 
 const Testimonials = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef(null);
+
+  const scrollToIndex = (index) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const card = container.children[index];
+    if (!card) return;
+    container.scrollTo({ left: card.offsetLeft - 16, behavior: "smooth" });
+    setActiveIndex(index);
+  };
+
+  const next = () => scrollToIndex((activeIndex + 1) % testimonials.length);
+  const prev = () => scrollToIndex((activeIndex - 1 + testimonials.length) % testimonials.length);
 
   return (
     <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What Our Travelers Say</h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Don't just take our word for it - hear from travelers who've experienced Flyobo
-          </p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What Our Travelers Say</h2>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
+              Don't just take our word for it - hear from travelers who've experienced Flyobo
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={prev} aria-label="Previous testimonials" className="p-2 rounded-md bg-white dark:bg-gray-800 shadow">
+              ◀
+            </button>
+            <button onClick={next} aria-label="Next testimonials" className="p-2 rounded-md bg-white dark:bg-gray-800 shadow">
+              ▶
+            </button>
+          </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div ref={containerRef} className="flex gap-6 overflow-x-auto pb-4" role="list" aria-label="Customer testimonials">
           {testimonials.map((testimonial, index) => (
-            <TestimonialCard 
-              key={testimonial.id} 
-              testimonial={testimonial} 
-              isActive={index === activeIndex}
-            />
+            <div key={testimonial.id} style={{ minWidth: 320 }} role="listitem">
+              <TestimonialCard 
+                testimonial={testimonial} 
+                isActive={index === activeIndex}
+              />
+            </div>
           ))}
         </div>
-        
-        <div className="mt-12 text-center">
+
+        <div className="mt-6 text-center">
           <button 
-            onClick={() => setActiveIndex((prev) => (prev + 1) % testimonials.length)}
+            onClick={() => next()}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             Read More Reviews

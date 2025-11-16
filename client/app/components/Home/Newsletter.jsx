@@ -63,7 +63,7 @@ export default function Newsletter() {
         </form>
         <p className="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">{content?.newsletter?.privacy}</p>
         {status.message && (
-          <div className={`mt-3 text-center text-sm ${status.type === "error" ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+          <div role="status" aria-live="polite" className={`mt-3 text-center text-sm ${status.type === "error" ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
             {status.message}
           </div>
         )}
