@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Heading from "../../components/MetaData/Heading";
 import axios from "axios";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import { NEXT_PUBLIC_BACKEND_URL, NEXT_PUBLIC_SITE_URL } from "@/app/config/env";
 import { FaShareAlt } from "react-icons/fa";
 import Hero from "../../components/Packages/Slug/Hero";
 import Tabs from "../../components/Packages/Slug/Tabs";
@@ -14,8 +14,17 @@ import Header from "@/app/components/Layout/Header";
 import Footer from "@/app/components/Layout/Footer";
 
 export default function PackageDetailPage({ params }) {
-  const paramsObj = typeof React.use === "function" ? React.use(params) : params;
-  const { slug } = paramsObj || {};
+  const [resolvedParams, setResolvedParams] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.resolve(params)
+      .then((p) => !cancelled && setResolvedParams(p || null))
+      .catch(() => !cancelled && setResolvedParams(null));
+    return () => (cancelled = true);
+  }, [params]);
+
+  const slug = resolvedParams?.slug || null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pkg, setPkg] = useState(null);
@@ -31,14 +40,20 @@ export default function PackageDetailPage({ params }) {
 
         const { data } = await axios.get(`${base}/package/${slug}`, { withCredentials: true });
         if (!cancelled) {
-          const p = data?.foundPackage || data?.package || data?.data?.package || data?.data || data || null;
+          const p =
+            data?.foundPackage ||
+            data?.package ||
+            data?.data?.package ||
+            data?.data ||
+            data ||
+            null;
           setPkg(p);
         }
       } catch (err) {
         console.error(err);
         if (!cancelled) setError("Unable to load package");
       } finally {
-        if (!cancelled) setLoading(false);
+        !cancelled && setLoading(false);
       }
     };
     if (slug) load();
@@ -47,59 +62,84 @@ export default function PackageDetailPage({ params }) {
 
   const title = pkg?.title || "Package";
   const destination = pkg?.destination || pkg?.location || "";
+  const category = pkg?.category || pkg?.type || "";
   const duration = pkg?.duration ?? pkg?.days ?? 0;
+
   const image =
     pkg?.images ||
     pkg?.image ||
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop";
 
-  const url =
-    typeof window !== "undefined" ? window.location.href : `https://flyobo.com/packages/${slug}`;
+  const siteBase = (
+    NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "https://flyobo.com")
+  ).replace(/\/$/, "");
+
+  const url = `${siteBase}/packages/${slug}`;
 
   const price = Number(pkg?.price || 0);
   const mrp = Number(pkg?.estimatedPrice || 0);
   const hasDiscount = mrp > price;
   const discountPct = hasDiscount ? Math.round(((mrp - price) / mrp) * 100) : 0;
 
+  /** Hashtags Builder */
+  const hashTags = [
+    "#Flyobo",
+    "#TravelIndia",
+    destination && `#${destination.replace(/\s+/g, "")}`,
+    category && `#${category.replace(/\s+/g, "")}`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  /** Enhanced Share Handler (Option B Template) */
   const handleShare = async (platform) => {
-    const shareUrl = encodeURIComponent(url);
-    const shareText = encodeURIComponent(`Check out this package: ${title}`);
+    const shareText = `🌍 *${title}*
+${destination ? `📍 Destination: ${destination}\n` : ""}
+${duration ? `⏳ Duration: ${duration} Days\n` : ""}
+${price ? `💰 Price: ₹${price.toLocaleString()}\n` : ""}
+🔥 Check this package before it's gone!
+${hashTags}
+`;
+
+    const encodedText = encodeURIComponent(`${shareText}\n${url}`);
 
     const mappings = {
-      whatsapp: `https://wa.me/?text=${shareText}%20${shareUrl}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
-      twitter: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
+      whatsapp: `https://wa.me/?text=${encodedText}`,
+      telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
     };
 
     if (platform === "native") {
       if (navigator?.share) {
-        return await navigator.share({ title, text: shareText, url });
+        return await navigator.share({
+          title,
+          text: shareText,
+          url,
+        });
       }
       return setShowShare(true);
     }
 
     if (platform === "copy") {
-      await navigator.clipboard.writeText(url);
-      return alert("Link copied to clipboard ✅");
+      await navigator.clipboard.writeText(`${shareText}\n${url}`);
+      return alert("🔗 Package details copied!");
     }
 
-    if (mappings[platform]) window.open(mappings[platform], "_blank");
+    if (mappings[platform]) return window.open(mappings[platform], "_blank");
   };
 
   return (
     <>
-      <Heading
-        title={`${title} - Flyobo`}
-        description={pkg?.subtitle || destination || "Travel package"}
-      />
+      <Heading title={`${title} - Flyobo`} description={pkg?.subtitle || destination || "Travel package"} />
 
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
 
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-10">
 
-          {/* LOADING SKELETON */}
           {loading && (
             <div className="animate-pulse space-y-6">
               <div className="h-[360px] rounded-2xl bg-gray-200 dark:bg-gray-800" />
@@ -110,22 +150,16 @@ export default function PackageDetailPage({ params }) {
             </div>
           )}
 
-          {/* ERROR */}
           {!loading && error && (
             <div className="rounded-xl border border-gray-300 dark:border-gray-700 p-6 text-center text-rose-500 dark:text-rose-400">
               {error}
             </div>
           )}
 
-          {/* NOT FOUND */}
           {!loading && !error && !pkg && (
             <div className="rounded-xl border border-gray-300 dark:border-gray-700 p-10 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Package not available
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">
-                It may have been removed or the link is incorrect.
-              </p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Package not available</h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">It may have been removed or the link is incorrect.</p>
               <div className="mt-5 flex justify-center gap-3">
                 <Link href="/packages" className="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm">
                   Browse Packages
@@ -137,11 +171,9 @@ export default function PackageDetailPage({ params }) {
             </div>
           )}
 
-          {/* MAIN UI */}
           {!loading && pkg && (
             <div className="space-y-10">
 
-              {/* HERO */}
               <Hero
                 title={title}
                 image={image}
@@ -151,14 +183,11 @@ export default function PackageDetailPage({ params }) {
                 onShare={handleShare}
               />
 
-              {/* CONTENT LAYOUT */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* TABS SECTION */}
                 <div className="lg:col-span-2">
                   <Tabs activeTab={activeTab} setActiveTab={setActiveTab} pkg={pkg} title={title} />
                 </div>
 
-                {/* SIDEBAR */}
                 <Sidebar
                   price={price}
                   mrp={mrp}
@@ -167,6 +196,7 @@ export default function PackageDetailPage({ params }) {
                   title={title}
                   slug={slug}
                   url={url}
+                  onShare={handleShare}
                 />
               </div>
 
