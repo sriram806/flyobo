@@ -92,8 +92,8 @@ export default function GalleryPage() {
             categories={categories}
           />
 
-          {/* Masonry */}
-          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6">
+          {/* Masonry (2 columns on small devices) */}
+          <div className="columns-2 sm:columns-2 md:columns-3 lg:columns-4 gap-6">
             {items.map((it, idx) => (
               <GalleryCard
                 key={idx}

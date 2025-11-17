@@ -57,7 +57,7 @@ export default function Page() {
     if (qp.maxDays) setMaxDays(Number(qp.maxDays));
     if (qp.cats) setCategories(qp.cats.split(",").filter(Boolean));
     if (qp.page) setPage(Math.max(1, Number(qp.page)));
-  }, []);
+  }, [params]);
 
   useEffect(() => {
     const qp = new URLSearchParams();
@@ -408,7 +408,8 @@ export default function Page() {
                 <PaginationBar
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  setPage={setPage}
+                  onPrev={() => setPage(Math.max(1, currentPage - 1))}
+                  onNext={() => setPage(Math.min(totalPages, currentPage + 1))}
                 />
               </>
             )}

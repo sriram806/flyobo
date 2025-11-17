@@ -10,7 +10,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#0b1220] dark:bg-[#0b1220] text-gray-300 pt-8 pb-8 mt-0 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3">

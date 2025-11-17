@@ -25,6 +25,14 @@ export default function PackageDetailPage({ params }) {
   }, [params]);
 
   const slug = resolvedParams?.slug || null;
+  // Ensure page loads scrolled to top when viewing a package detail.
+  // Some browsers or SPA navigation can restore previous scroll position
+  // (which can leave the user at the footer). Force top on slug changes.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // run on next tick to override any framework scroll restoration
+    setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }), 0);
+  }, [slug]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pkg, setPkg] = useState(null);
