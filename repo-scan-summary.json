@@ -1,0 +1,180 @@
+{
+  "totalFiles": 255,
+  "byLang": {
+    "unknown": 4,
+    "example": 2,
+    "javascript": 194,
+    "css": 1,
+    "json": 5,
+    "png": 13,
+    "ico": 2,
+    "svg": 5,
+    "txt": 1,
+    "xml": 3,
+    "markdown": 2,
+    "ejs": 15,
+    "html": 1,
+    "jpg": 3,
+    "webp": 2,
+    "jpeg": 2
+  },
+  "binaryCount": 22,
+  "todoFiles": [
+    {
+      "path": "scripts\\repo-scan.js",
+      "todos": 5
+    },
+    {
+      "path": "client\\app\\api\\subscribe\\route.js",
+      "todos": 1
+    }
+  ],
+  "biggest": [
+    {
+      "path": "server\\uploads\\packages\\image-1760591076880-643223373.png",
+      "size": 1059399,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\packages\\images-1760543794789-865766149.png",
+      "size": 1059399,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\packages\\image-1760591149569-833105658.png",
+      "size": 811116,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\packages\\image-1760591675928-580152097.png",
+      "size": 811116,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\gallery\\image-1761579595595-668502723.png",
+      "size": 801435,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\gallery\\image-1761579609595-589273859.png",
+      "size": 801435,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\gallery\\image-1762065374624-212363050.webp",
+      "size": 460738,
+      "language": "webp",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\gallery\\image-1761580055290-481801060.jpg",
+      "size": 341486,
+      "language": "jpg",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "server\\uploads\\packages\\image-1761580234661-212564267.jpg",
+      "size": 341486,
+      "language": "jpg",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "client\\package-lock.json",
+      "size": 264702,
+      "language": "json",
+      "totalLines": 7479,
+      "previewLines": [
+        "{",
+        "  \"name\": \"client\",",
+        "  \"version\": \"0.1.0\",",
+        "  \"lockfileVersion\": 3,",
+        "  \"requires\": true,",
+        "  \"packages\": {",
+        "    \"\": {",
+        "      \"name\": \"client\",",
+        "      \"version\": \"0.1.0\",",
+        "      \"dependencies\": {"
+      ],
+      "todoCount": 0,
+      "isBinary": false
+    },
+    {
+      "path": "server\\uploads\\gallery\\image-1762074948658-487780005.png",
+      "size": 246098,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "client\\public\\apple-touch-icon.png",
+      "size": 204839,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "client\\public\\favicon-16x16.png",
+      "size": 204839,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "client\\public\\favicon-32x32.png",
+      "size": 204839,
+      "language": "png",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    },
+    {
+      "path": "client\\public\\favicon.ico",
+      "size": 204839,
+      "language": "ico",
+      "totalLines": null,
+      "previewLines": [],
+      "todoCount": 0,
+      "isBinary": true
+    }
+  ]
+}

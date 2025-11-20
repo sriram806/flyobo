@@ -1,7 +1,9 @@
 import express from 'express';
 import {
   registration, login, logout, VerifyOTP,
-  ResendOTP, forgotPassword, resetPassword
+  ResendOTP, forgotPassword, resetPassword,
+  googleRedirect, googleCallback,
+  githubRedirect, githubCallback
 } from "../controllers/auth.controller.js";
 import isAuthenticated from '../middleware/isAuthenticated.js';
 
@@ -16,5 +18,11 @@ authRoute.post('/login', login);
 authRoute.post('/logout', logout);
 authRoute.post('/forgot-password', forgotPassword);
 authRoute.post('/reset-password', resetPassword);
+
+// Server-side OAuth endpoints handled in controller
+authRoute.get('/oauth/google', googleRedirect);
+authRoute.get('/oauth/google/callback', googleCallback);
+authRoute.get('/oauth/github', githubRedirect);
+authRoute.get('/oauth/github/callback', githubCallback);
 
 export default authRoute;

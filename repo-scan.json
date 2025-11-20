@@ -1,0 +1,4770 @@
+[
+  {
+    "path": "client\\.env",
+    "size": 56,
+    "language": "unknown",
+    "totalLines": 2,
+    "previewLines": [
+      "NEXT_PUBLIC_BACKEND_URL=\"http://localhost:5000/api/v1\"",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\.env.example",
+    "size": 662,
+    "language": "example",
+    "totalLines": 15,
+    "previewLines": [
+      "# Flyobo Client Environment Configuration",
+      "# Copy this file to .env.local for local development",
+      "# Update URLs for production deployment",
+      "",
+      "# Development Configuration",
+      "NEXT_PUBLIC_BACKEND_URL=\"http://localhost:5000/api/v1\"",
+      "",
+      "# Production Configuration (uncomment and update for deployment)",
+      "# NEXT_PUBLIC_BACKEND_URL=\"https://your-production-api-domain.com/api/v1\"",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\.gitignore",
+    "size": 480,
+    "language": "unknown",
+    "totalLines": 42,
+    "previewLines": [
+      "# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.",
+      "",
+      "# dependencies",
+      "/node_modules",
+      "/.pnp",
+      ".pnp.*",
+      ".yarn/*",
+      "!.yarn/patches",
+      "!.yarn/plugins",
+      "!.yarn/releases"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\about\\page.jsx",
+    "size": 11799,
+    "language": "javascript",
+    "totalLines": 311,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState } from \"react\";",
+      "import { motion } from \"framer-motion\";",
+      "import Heading from \"../components/MetaData/Heading\";",
+      "import Header from \"../components/Layout/Header\";",
+      "import Footer from \"../components/Layout/Footer\";",
+      "import SEO from \"../components/MetaData/SEO\";",
+      "import {",
+      "  WebsiteStructuredData,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\analytics\\bookings\\page.jsx",
+    "size": 548,
+    "language": "javascript",
+    "totalLines": 20,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import AdvancedBookingAnalytics from \"@/app/components/Admin/AdvancedBookingAnalytics\";",
+      "",
+      "const BookingsAnalyticsPage = () => {",
+      "  return (",
+      "    <div className=\"space-y-6\">",
+      "      <div className=\"bg-white p-6 rounded-lg border\">",
+      "        <h2 className=\"text-xl font-bold\">Bookings Analytics</h2>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\analytics\\packages\\page.jsx",
+    "size": 4136,
+    "language": "javascript",
+    "totalLines": 122,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import {",
+      "  BarChart,",
+      "  Bar,",
+      "  LineChart,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\analytics\\page.jsx",
+    "size": 1969,
+    "language": "javascript",
+    "totalLines": 50,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import AdminProtected from \"../../hooks/adminProtected\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import { Wrench } from \"lucide-react\";",
+      "",
+      "export default function AdminAnalyticsPage() {",
+      "  const router = useRouter();",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\analytics\\users\\page.jsx",
+    "size": 4472,
+    "language": "javascript",
+    "totalLines": 128,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import {",
+      "  LineChart,",
+      "  Line,",
+      "  BarChart,",
+      "  Bar,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\bookings\\create\\page.jsx",
+    "size": 3656,
+    "language": "javascript",
+    "totalLines": 94,
+    "previewLines": [
+      "\"use client\";",
+      "import { useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import Link from \"next/link\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "",
+      "export default function AdminCreateBookingPage() {",
+      "  const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\bookings\\page.jsx",
+    "size": 172,
+    "language": "javascript",
+    "totalLines": 10,
+    "previewLines": [
+      "import React from 'react'",
+      "import AdminBookings from '@/app/components/Admin/AdminBookings'",
+      "",
+      "const page = () => {",
+      "  return (",
+      "    <AdminBookings />",
+      "  )",
+      "}",
+      "",
+      "export default page"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\contacts\\page.jsx",
+    "size": 183,
+    "language": "javascript",
+    "totalLines": 11,
+    "previewLines": [
+      "import React from 'react'",
+      "import AdminContacts from '@/app/components/Admin/AdminContacts'",
+      "",
+      "const page = () => {",
+      "  return (",
+      "    <AdminContacts />",
+      "  )",
+      "}",
+      "",
+      "export default page"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\gallery\\page.jsx",
+    "size": 361,
+    "language": "javascript",
+    "totalLines": 14,
+    "previewLines": [
+      "\"use client\";",
+      "import React from \"react\";",
+      "import AdminProtected from \"@/app/hooks/adminProtected\";",
+      "import AdminGallery from \"@/app/components/Admin/AdminGallery\";",
+      "",
+      "export default function AdminGalleryPage() {",
+      "  return (",
+      "    <AdminProtected>",
+      "      <div className=\"min-h-screen px-4 py-6 lg:px-8\">",
+      "        <AdminGallery />"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\home\\adminEditInner.jsx",
+    "size": 11226,
+    "language": "javascript",
+    "totalLines": 193,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from \"react\";",
+      "import { useHomeContent } from '@/app/context/HomeContentContext';",
+      "import Loading from \"@/app/components/LoadingScreen/Loading\";",
+      "",
+      "export default function AdminEditInner() {",
+      "  const { content, save } = useHomeContent();",
+      "  const [local, setLocal] = useState(content || {});",
+      "  const [status, setStatus] = useState(null);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\home\\page.jsx",
+    "size": 315,
+    "language": "javascript",
+    "totalLines": 15,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import { HomeContentProvider } from '@/app/context/HomeContentContext';",
+      "",
+      "import AdminEditInner from './adminEditInner';",
+      "",
+      "export default function AdminEditHome() {",
+      "  return (",
+      "    <HomeContentProvider>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\layout.jsx",
+    "size": 3008,
+    "language": "javascript",
+    "totalLines": 93,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState, useEffect, Suspense } from \"react\";",
+      "import { useRouter, useSearchParams } from \"next/navigation\";",
+      "import { useDispatch } from \"react-redux\";",
+      "import { performLogout } from \"@/redux/authSlice\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import Heading from \"../components/MetaData/Heading\";",
+      "import Header from \"../components/Layout/Header\";",
+      "import Footer from \"../components/Layout/Footer\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\packages\\create\\page.jsx",
+    "size": 8695,
+    "language": "javascript",
+    "totalLines": 222,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import PackageImageUploader from \"@/app/components/Packages/PackageImageUploader\";",
+      "import authRequest from \"@/app/utils/authRequest\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\packages\\edit\\page.jsx",
+    "size": 20515,
+    "language": "javascript",
+    "totalLines": 383,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useMemo, useState } from \"react\";",
+      "import { useRouter, useSearchParams } from \"next/navigation\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import PackageImageUploader from \"@/app/components/Packages/PackageImageUploader\";",
+      "",
+      "const emptyForm = {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\packages\\page.jsx",
+    "size": 212,
+    "language": "javascript",
+    "totalLines": 12,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import AdminPackages from \"@/app/components/Admin/AdminPackages\";",
+      "",
+      "export default function Page() {",
+      "  return (",
+      "    <section className=\"lg:col-span-3\">",
+      "      <AdminPackages />",
+      "    </section>",
+      "  );"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\page.jsx",
+    "size": 9435,
+    "language": "javascript",
+    "totalLines": 234,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { Suspense, useEffect, useState } from \"react\";",
+      "import { useSearchParams } from \"next/navigation\";",
+      "import axios from \"axios\";",
+      "import {",
+      "  LineChart,",
+      "  Line,",
+      "  BarChart,",
+      "  Bar,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\referrals\\advanced.jsx",
+    "size": 31052,
+    "language": "javascript",
+    "totalLines": 727,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import {",
+      "  Users,",
+      "  Gift,",
+      "  TrendingUp,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\referrals\\page.jsx",
+    "size": 2108,
+    "language": "javascript",
+    "totalLines": 56,
+    "previewLines": [
+      "'use client'",
+      "",
+      "import React, { useState } from 'react'",
+      "import ReferralOverview from './ReferralOverview'",
+      "import ReferralLeaderboard from './ReferralLeaderboard'",
+      "import ReferralRewardsManagement from './ReferralRewardsManagement'",
+      "",
+      "export default function ReferralPage() {",
+      "  const [activeTab, setActiveTab] = useState('overview') // 'overview', 'leaderboard', or 'rewards'",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\referrals\\ReferralLeaderboard.jsx",
+    "size": 9947,
+    "language": "javascript",
+    "totalLines": 241,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import {",
+      "  Trophy,",
+      "  Medal,",
+      "  Crown,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\referrals\\ReferralOverview.jsx",
+    "size": 16376,
+    "language": "javascript",
+    "totalLines": 403,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import {",
+      "  Users,",
+      "  Gift,",
+      "  TrendingUp,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\referrals\\ReferralRewardsManagement.jsx",
+    "size": 8803,
+    "language": "javascript",
+    "totalLines": 210,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { Search, Filter, Plus, DollarSign } from \"lucide-react\";",
+      "",
+      "const ReferralRewardsManagement = () => {",
+      "  const [requests, setRequests] = useState([]);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\referrals\\settings\\page.jsx",
+    "size": 4363,
+    "language": "javascript",
+    "totalLines": 109,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from 'react';",
+      "import axios from 'axios';",
+      "import { NEXT_PUBLIC_BACKEND_URL } from '@/app/config/env';",
+      "import { toast } from 'react-hot-toast';",
+      "",
+      "export default function ReferralSettingsPage() {",
+      "  const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;",
+      "  const [loading, setLoading] = useState(true);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\referrals\\simple.jsx",
+    "size": 19629,
+    "language": "javascript",
+    "totalLines": 464,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import {",
+      "  Users,",
+      "  Gift,",
+      "  TrendingUp,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\reports\\page.jsx",
+    "size": 7910,
+    "language": "javascript",
+    "totalLines": 227,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useMemo, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { saveAs } from \"file-saver\";",
+      "import {",
+      "  LineChart,",
+      "  Line,",
+      "  XAxis,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\admin\\users\\page.jsx",
+    "size": 160,
+    "language": "javascript",
+    "totalLines": 8,
+    "previewLines": [
+      "import AdminUsers from '@/app/components/Admin/AdminUsers'",
+      "import React from 'react'",
+      "",
+      "const page = () => {",
+      "  return <AdminUsers />",
+      "}",
+      "",
+      "export default page"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\api\\subscribe\\route.js",
+    "size": 648,
+    "language": "javascript",
+    "totalLines": 19,
+    "previewLines": [
+      "import { NextResponse } from \"next/server\";",
+      "",
+      "export async function POST(request) {",
+      "  try {",
+      "    const body = await request.json().catch(() => ({}));",
+      "    const email = String(body?.email || \"\").trim();",
+      "    const valid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);",
+      "    if (!valid) {",
+      "      return NextResponse.json({ error: \"Invalid email\" }, { status: 400 });",
+      "    }"
+    ],
+    "todoCount": 1,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdminBookings.jsx",
+    "size": 35285,
+    "language": "javascript",
+    "totalLines": 817,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useMemo, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import {",
+      "  Users,",
+      "  UserPlus,",
+      "  Calendar,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdminContacts.jsx",
+    "size": 12488,
+    "language": "javascript",
+    "totalLines": 250,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useMemo, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { Mail, Eye, Check, Trash2, Loader2 } from \"lucide-react\";",
+      "",
+      "const PageSize = 12;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdminDashboard.jsx",
+    "size": 27092,
+    "language": "javascript",
+    "totalLines": 486,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useState, useMemo } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import Link from \"next/link\";",
+      "",
+      "const StatCard = ({ label, value, trend, series }) => {",
+      "  // simple inline sparkline generator"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdminGallery.jsx",
+    "size": 14319,
+    "language": "javascript",
+    "totalLines": 398,
+    "previewLines": [
+      "\"use client\";",
+      "import React, { useEffect, useMemo, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import toast, { Toaster } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "",
+      "const CATEGORIES = [",
+      "  \"nature\",",
+      "  \"group\",",
+      "  \"city\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdminPackages.jsx",
+    "size": 16827,
+    "language": "javascript",
+    "totalLines": 402,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useMemo, useState } from \"react\";",
+      "import Link from \"next/link\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import authRequest from \"@/app/utils/authRequest\";",
+      "",
+      "const DefaultPageSize = 10;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdminSidebar.jsx",
+    "size": 6150,
+    "language": "javascript",
+    "totalLines": 167,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useState } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import {",
+      "  HiOutlineUser,",
+      "  HiOutlineBookmark,",
+      "  HiOutlineHeart,",
+      "  HiOutlineLogout,",
+      "  HiOutlineBell,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdminUsers.jsx",
+    "size": 9585,
+    "language": "javascript",
+    "totalLines": 206,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useMemo, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { Users, Search, Trash2, Loader2, UserX } from \"lucide-react\";",
+      "",
+      "const PageSize = 10;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Admin\\AdvancedBookingAnalytics.jsx",
+    "size": 1571,
+    "language": "javascript",
+    "totalLines": 34,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "",
+      "export default function AdvancedBookingAnalytics() {",
+      "  return (",
+      "    <div className=\"rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6\">",
+      "      <div className=\"flex items-center justify-between\">",
+      "        <h3 className=\"text-lg font-semibold text-gray-900 dark:text-white\">Advanced Booking Analytics</h3>",
+      "        <div className=\"text-sm text-gray-500\">Updated: just now</div>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Auth\\AuthLoader.jsx",
+    "size": 2620,
+    "language": "javascript",
+    "totalLines": 80,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from \"react\";",
+      "import { useDispatch, useSelector } from \"react-redux\";",
+      "import { setAuthUser } from \"@/redux/authSlice\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "",
+      "const AuthLoader = ({ children }) => {",
+      "  const [loading, setLoading] = useState(true);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Auth\\ReferralInput.jsx",
+    "size": 4730,
+    "language": "javascript",
+    "totalLines": 134,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import { useSearchParams } from \"next/navigation\";",
+      "import { Gift, Check } from \"lucide-react\";",
+      "",
+      "const ReferralInput = ({ onReferralChange, disabled = false }) => {",
+      "  const [referralCode, setReferralCode] = useState(\"\");",
+      "  const [isValidating, setIsValidating] = useState(false);",
+      "  const [isValid, setIsValid] = useState(null);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Debug\\AuthDebugger.jsx",
+    "size": 3049,
+    "language": "javascript",
+    "totalLines": 88,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "",
+      "const AuthDebugger = () => {",
+      "  const user = useSelector((state) => state?.auth?.user);",
+      "  const [debugInfo, setDebugInfo] = useState({});"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Debug\\CssTest.jsx",
+    "size": 659,
+    "language": "javascript",
+    "totalLines": 22,
+    "previewLines": [
+      "\"use client\";",
+      "import { useEffect } from \"react\";",
+      "",
+      "const CssTest = () => {",
+      "  useEffect(() => {",
+      "    // Test CSS variables",
+      "    const testElement = document.createElement('div');",
+      "    testElement.className = 'test-theme-bg test-theme-text';",
+      "    testElement.style.display = 'none';",
+      "    document.body.appendChild(testElement);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Debug\\ThemeChecker.jsx",
+    "size": 2440,
+    "language": "javascript",
+    "totalLines": 70,
+    "previewLines": [
+      "\"use client\";",
+      "import { useEffect, useState } from \"react\";",
+      "import { useTheme } from \"next-themes\";",
+      "",
+      "const ThemeChecker = () => {",
+      "  const { theme, resolvedTheme } = useTheme();",
+      "  const [domInfo, setDomInfo] = useState({});",
+      "",
+      "  useEffect(() => {",
+      "    const checkTheme = () => {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Debug\\ThemeTest.jsx",
+    "size": 2344,
+    "language": "javascript",
+    "totalLines": 69,
+    "previewLines": [
+      "\"use client\";",
+      "import { useTheme } from \"next-themes\";",
+      "import { useEffect } from \"react\";",
+      "",
+      "const ThemeTest = () => {",
+      "  const { theme, setTheme, resolvedTheme } = useTheme();",
+      "",
+      "  useEffect(() => {",
+      "    console.log(\"Theme Test - Current theme:\", theme);",
+      "    console.log(\"Theme Test - Resolved theme:\", resolvedTheme);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Faq\\FaqHero.jsx",
+    "size": 1769,
+    "language": "javascript",
+    "totalLines": 36,
+    "previewLines": [
+      "\"use client\";",
+      "import { motion } from \"framer-motion\";",
+      "",
+      "const FaqHero = () => {",
+      "    return (",
+      "        <div className=\"relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/50 backdrop-blur-xl shadow-xl\">",
+      "            <div className=\"absolute inset-0 pointer-events-none\">",
+      "                <div className=\"absolute top-1 left-0 w-45 h-30 bg-sky-400 blur-3xl rounded-full animate-pulse\" />",
+      "                <div className=\"absolute bottom-0.5 right-1 w-45 h-30 bg-sky-500  blur-3xl rounded-full animate-pulse\" />",
+      "            </div>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Gallery\\GalleryCard.jsx",
+    "size": 3110,
+    "language": "javascript",
+    "totalLines": 91,
+    "previewLines": [
+      "import { Download, Heart, Share2 } from \"lucide-react\";",
+      "import { useState } from \"react\";",
+      "",
+      "const GalleryCard = ({ item, index, onOpen }) => {",
+      "    const [loaded, setLoaded] = useState(false);",
+      "",
+      "    const downloadImage = (e) => {",
+      "        e.stopPropagation();",
+      "        const link = document.createElement(\"a\");",
+      "        link.href = item.image;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Gallery\\GalleryFilters.jsx",
+    "size": 3537,
+    "language": "javascript",
+    "totalLines": 74,
+    "previewLines": [
+      "\"use client\";",
+      "import { Search, Calendar, ChevronDown } from \"lucide-react\";",
+      "",
+      "const GalleryFilters = ({",
+      "    search,",
+      "    setSearch,",
+      "    year,",
+      "    setYear,",
+      "    years,",
+      "    category,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Gallery\\GalleryHero.jsx",
+    "size": 3506,
+    "language": "javascript",
+    "totalLines": 82,
+    "previewLines": [
+      "\"use client\";",
+      "import { motion } from \"framer-motion\";",
+      "",
+      "const GalleryHero = ({ stats }) => {",
+      "  return (",
+      "    <div className=\"relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/50 backdrop-blur-xl shadow-xl\">",
+      "      <div className=\"absolute inset-0 pointer-events-none\">",
+      "        <div className=\"absolute top-1 left-0 w-80 h-52 bg-sky-400 blur-3xl rounded-full animate-pulse\" />",
+      "        <div className=\"absolute bottom-0.5 right-1 w-70 h-60 bg-sky-500  blur-3xl rounded-full animate-pulse\" />",
+      "      </div>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\BoldShowcase.jsx",
+    "size": 3437,
+    "language": "javascript",
+    "totalLines": 86,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import Link from \"next/link\";",
+      "import Image from \"next/image\";",
+      "",
+      "const highlights = [",
+      "  { heading: \"Curated & Trusted\", sub: \"Handpicked stays and experiences\", icon: \"✨\" },",
+      "  { heading: \"Transparent Pricing\", sub: \"No hidden fees, ever\", icon: \"₹\" },",
+      "  { heading: \"24/7 Support\", sub: \"We're with you, anywhere\", icon: \"🛟\" },",
+      "  { heading: \"Price Match\", sub: \"Best rates guaranteed\", icon: \"💰\" },"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\FeaturedPackages.jsx",
+    "size": 4572,
+    "language": "javascript",
+    "totalLines": 144,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState, useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import Link from \"next/link\";",
+      "import Image from \"next/image\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "",
+      "const Card = ({ pkg }) => {",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\Hero.jsx",
+    "size": 4649,
+    "language": "javascript",
+    "totalLines": 115,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { FiMapPin } from \"react-icons/fi\";",
+      "import { useState } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import Image from \"next/image\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import { useHomeContent } from \"@/app/context/HomeContentContext\";",
+      "",
+      "export default function Hero() {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\Newsletter.jsx",
+    "size": 4277,
+    "language": "javascript",
+    "totalLines": 123,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState } from \"react\";",
+      "import { FiMail } from \"react-icons/fi\";",
+      "import { useHomeContent } from \"@/app/context/HomeContentContext\";",
+      "import { motion } from \"framer-motion\";",
+      "",
+      "export default function Newsletter() {",
+      "  const [email, setEmail] = useState(\"\");",
+      "  const [status, setStatus] = useState({ type: \"idle\", message: \"\" });"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\ReferralBanner.jsx",
+    "size": 3923,
+    "language": "javascript",
+    "totalLines": 90,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import Link from \"next/link\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { Gift, Users, Star, DollarSign } from \"lucide-react\";",
+      "import { useHomeContent } from '@/app/context/HomeContentContext';",
+      "",
+      "const ReferralBanner = () => {",
+      "  const user = useSelector((state) => state?.auth?.user);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\SpecialOffers.jsx",
+    "size": 5136,
+    "language": "javascript",
+    "totalLines": 150,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState, useEffect } from \"react\";",
+      "import { motion } from \"framer-motion\";",
+      "import { FiClock, FiTag, FiAward, FiPercent } from \"react-icons/fi\";",
+      "import Link from \"next/link\";",
+      "",
+      "const offers = [",
+      "  {",
+      "    id: 1,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\Testimonials.jsx",
+    "size": 10286,
+    "language": "javascript",
+    "totalLines": 297,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useRef, useState } from \"react\";",
+      "import { motion } from \"framer-motion\";",
+      "import { FiStar, FiMessageSquare, FiMapPin, FiChevronLeft, FiChevronRight } from \"react-icons/fi\";",
+      "",
+      "/**",
+      " * Testimonials data: Indian + global mix.",
+      " * Some entries include light Telugu/Hinglish slang for authenticity.",
+      " */"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\TopDestinations.jsx",
+    "size": 2112,
+    "language": "javascript",
+    "totalLines": 59,
+    "previewLines": [
+      "\"use client\";",
+      "import Image from \"next/image\";",
+      "",
+      "const destinations = [",
+      "  {",
+      "    name: \"Jaipur, Rajasthan\",",
+      "    img: \"https://images.unsplash.com/photo-1603262110263-fb0112e7cc33?auto=format&fit=crop&w=900&q=80\"",
+      "  },",
+      "  {",
+      "    name: \"Manali, Himachal Pradesh\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\TravelBlog.jsx",
+    "size": 4546,
+    "language": "javascript",
+    "totalLines": 122,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { FiCalendar, FiUser, FiTag, FiArrowRight } from \"react-icons/fi\";",
+      "import Link from \"next/link\";",
+      "",
+      "const blogPosts = [",
+      "  {",
+      "    id: 1,",
+      "    title: \"10 Hidden Gems in Southeast Asia You Haven't Heard Of\",",
+      "    excerpt: \"Discover breathtaking destinations off the beaten path that will take your breath away with their untouched beauty and authentic experiences.\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Home\\WhyChooseUs.jsx",
+    "size": 5402,
+    "language": "javascript",
+    "totalLines": 136,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { FiCheckCircle, FiShield, FiHeart, FiGlobe, FiHeadphones, FiAward } from \"react-icons/fi\";",
+      "import { motion } from \"framer-motion\";",
+      "",
+      "const features = [",
+      "  {",
+      "    id: 1,",
+      "    icon: FiCheckCircle,",
+      "    title: \"Verified & Trusted\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Layout\\Footer.jsx",
+    "size": 4127,
+    "language": "javascript",
+    "totalLines": 86,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import Link from \"next/link\";",
+      "import Image from \"next/image\";",
+      "import { FiFacebook, FiInstagram, FiTwitter, FiMapPin, FiPhone, FiMail } from \"react-icons/fi\";",
+      "import React from 'react';",
+      "import { useHomeContent } from '@/app/context/HomeContentContext';",
+      "",
+      "export default function Footer() {",
+      "  return ("
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Layout\\Header.jsx",
+    "size": 27690,
+    "language": "javascript",
+    "totalLines": 514,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import Link from \"next/link\";",
+      "import Image from \"next/image\";",
+      "import React, { useEffect, useRef, useState } from \"react\";",
+      "import ThemeSwitcher from \"../../utils/ThemeSwitcher\";",
+      "import {",
+      "    HiOutlineMenuAlt3,",
+      "    HiOutlineUserCircle,",
+      "    HiOutlineBell,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\LoadingScreen\\Loading.jsx",
+    "size": 447,
+    "language": "javascript",
+    "totalLines": 16,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "",
+      "const Loading = () => {",
+      "  return (",
+      "    <div className=\"min-h-screen flex items-center justify-center bg-white dark:bg-gray-900\">",
+      "      <div className=\"flex flex-col items-center\">",
+      "        <div className=\"animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mb-4\"></div>",
+      "        <p className=\"text-gray-600 dark:text-gray-400\">Loading...</p>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\MetaData\\Heading.jsx",
+    "size": 1667,
+    "language": "javascript",
+    "totalLines": 48,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "",
+      "const Heading = ({",
+      "  title,",
+      "  description,",
+      "  keywords,",
+      "  url,",
+      "  author = \"Flyobo\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\MetaData\\SEO.jsx",
+    "size": 3473,
+    "language": "javascript",
+    "totalLines": 87,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import Head from \"next/head\";",
+      "",
+      "const SEO = ({",
+      "  title,",
+      "  description,",
+      "  keywords,",
+      "  url,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\MetaData\\StructuredData.jsx",
+    "size": 3991,
+    "language": "javascript",
+    "totalLines": 173,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import Head from \"next/head\";",
+      "",
+      "/**",
+      " * Generate JSON-LD structured data for SEO",
+      " */",
+      "const StructuredData = ({ data }) => {",
+      "  return ("
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Navbar\\Navitems.jsx",
+    "size": 2053,
+    "language": "javascript",
+    "totalLines": 63,
+    "previewLines": [
+      "\"use client\";",
+      "import Link from \"next/link\";",
+      "import React from \"react\";",
+      "",
+      "export const navItemsData = [",
+      "  { name: \"Home\", url: \"/\" },",
+      "  { name: \"Packages\", url: \"/packages\" },",
+      "  { name: \"About\", url: \"/about\" },",
+      "  { name: \"Gallery\", url: \"/gallery\" },",
+      "  { name: \"FAQ\", url: \"/faq\" },"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Navbar\\Portal.jsx",
+    "size": 393,
+    "language": "javascript",
+    "totalLines": 18,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useState } from \"react\";",
+      "import { createPortal } from \"react-dom\";",
+      "",
+      "export default function Portal({ children }) {",
+      "  const [container, setContainer] = useState(null);",
+      "",
+      "  useEffect(() => {",
+      "    if (typeof window !== \"undefined\") {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Navbar\\UserMenu.jsx",
+    "size": 4861,
+    "language": "javascript",
+    "totalLines": 150,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useRef, useState } from \"react\";",
+      "import { HiOutlineChevronDown } from \"react-icons/hi\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import Portal from \"./Portal\";",
+      "",
+      "export default function UserMenu({ user, onLogout, variant = \"desktop\" }) {",
+      "  const [open, setOpen] = useState(false);",
+      "  const buttonRef = useRef(null);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\EmptyState.jsx",
+    "size": 1787,
+    "language": "javascript",
+    "totalLines": 55,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { SearchX, RotateCcw } from \"lucide-react\";",
+      "",
+      "export default function EmptyState({",
+      "  title = \"No results found\",",
+      "  message = \"Try adjusting your filters or search terms.\",",
+      "  onReset,",
+      "}) {",
+      "  return ("
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\FiltersPanel.jsx",
+    "size": 7845,
+    "language": "javascript",
+    "totalLines": 222,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import {",
+      "  Search,",
+      "  DollarSign,",
+      "  Star,",
+      "  Clock,",
+      "  Grid,",
+      "  RotateCcw,",
+      "  Tag,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Layout\\PackageDetailsPanel.jsx",
+    "size": 914,
+    "language": "javascript",
+    "totalLines": 20,
+    "previewLines": [
+      "\"use client\";",
+      "import React from \"react\";",
+      "",
+      "export default function PackageDetailsPanel({ pkg }) {",
+      "  if (!pkg) return null;",
+      "  return (",
+      "    <div className=\"rounded-lg border border-gray-100 dark:border-gray-800 p-4\">",
+      "      <div className=\"text-sm text-gray-600 dark:text-gray-300\">Package Highlights</div>",
+      "      <h3 className=\"mt-2 text-lg font-semibold text-gray-900 dark:text-white\">{pkg.title}</h3>",
+      "      <p className=\"mt-1 text-sm text-gray-600 dark:text-gray-300\">{pkg.shortDescription || pkg.description || pkg.destination}</p>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\PackageCard.jsx",
+    "size": 10374,
+    "language": "javascript",
+    "totalLines": 240,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import Link from \"next/link\";",
+      "import { useEffect, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { Heart, MapPin, Calendar, Users, Star, TrendingUp, Sparkles, Clock } from \"lucide-react\";",
+      "import { HiOutlineChevronRight } from \"react-icons/hi\";",
+      "",
+      "export default function PackageCard({ pkg, loading }) {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\PackageGallery.jsx",
+    "size": 5957,
+    "language": "javascript",
+    "totalLines": 157,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState } from \"react\";",
+      "import { ",
+      "  HiOutlineX, ",
+      "  HiOutlineChevronLeft, ",
+      "  HiOutlineChevronRight,",
+      "  HiOutlinePhotograph",
+      "} from \"react-icons/hi\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\PackageImageUpload.jsx",
+    "size": 7291,
+    "language": "javascript",
+    "totalLines": 217,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState, useCallback } from \"react\";",
+      "import { ",
+      "  HiOutlinePhotograph, ",
+      "  HiOutlineTrash, ",
+      "  HiOutlinePlus,",
+      "  HiOutlineEye",
+      "} from \"react-icons/hi\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\PackageImageUploader.jsx",
+    "size": 7406,
+    "language": "javascript",
+    "totalLines": 225,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState, useCallback } from \"react\";",
+      "import { ",
+      "  HiOutlinePhotograph, ",
+      "  HiOutlineTrash,",
+      "  HiOutlineEye",
+      "} from \"react-icons/hi\";",
+      "",
+      "const PackageImageUploader = ({ "
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\PackageListItem.jsx",
+    "size": 8304,
+    "language": "javascript",
+    "totalLines": 166,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import Link from \"next/link\";",
+      "import { MapPin, Star, Tag, Calendar, Users, TrendingUp, Award, Shield, Clock } from \"lucide-react\";",
+      "",
+      "export default function PackageListItem({ pkg, loading }) {",
+      "  const imgSrc =",
+      "    pkg?.images?.url ||",
+      "    pkg?.image ||",
+      "    \"https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80&auto=format&fit=crop\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\PaginationBar.jsx",
+    "size": 1535,
+    "language": "javascript",
+    "totalLines": 36,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { FiChevronLeft, FiChevronRight } from \"react-icons/fi\";",
+      "",
+      "export default function PaginationBar({ currentPage, totalPages, onPrev, onNext }) {",
+      "  if (totalPages <= 1) return null;",
+      "",
+      "  return (",
+      "    <div className=\"mt-8 flex items-center justify-center gap-6\">",
+      "      <button"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\ResultsToolbar.jsx",
+    "size": 3402,
+    "language": "javascript",
+    "totalLines": 80,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { Grid, List, ChevronDown } from \"lucide-react\";",
+      "",
+      "export default function ResultsToolbar({ filteredCount, sortBy, setSortBy, view, setView }) {",
+      "  return (",
+      "    <div",
+      "      className=\"mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ",
+      "      rounded border border-gray-200 dark:border-gray-800 ",
+      "      bg-gradient-to-br from-gray-50 via-white to-gray-100 "
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Slug\\Hero.jsx",
+    "size": 3875,
+    "language": "javascript",
+    "totalLines": 136,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import Link from \"next/link\";",
+      "import {",
+      "  MapPin,",
+      "  Calendar,",
+      "  Users,",
+      "  Star,",
+      "  Share2,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Slug\\ShareModal.jsx",
+    "size": 1906,
+    "language": "javascript",
+    "totalLines": 38,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import { FaWhatsapp, FaFacebook, FaTwitter, FaLinkedin, FaCopy } from \"react-icons/fa\";",
+      "",
+      "export default function ShareModal({ onClose, onShare }) {",
+      "  return (",
+      "    <div className=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50\">",
+      "      <div className=\"bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg w-80\">",
+      "        <h3 className=\"text-lg font-semibold text-gray-900 dark:text-white mb-4\">Share this package</h3>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Slug\\Sidebar.jsx",
+    "size": 1495,
+    "language": "javascript",
+    "totalLines": 29,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import CTAButton from \"./ui/CTAButton\";",
+      "import Price from \"./ui/Price\";",
+      "",
+      "export default function Sidebar({ price, mrp, hasDiscount, discountPct, title, slug, url }) {",
+      "  return (",
+      "    <aside className=\"w-full lg:w-auto lg:sticky lg:top-24 lg:self-start\">",
+      "      <div className=\"rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-5 shadow-sm space-y-4\">"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Slug\\Tabs.jsx",
+    "size": 6855,
+    "language": "javascript",
+    "totalLines": 137,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import Badge from \"./ui/Badge\";",
+      "",
+      "export default function Tabs({ activeTab, setActiveTab, pkg, title }) {",
+      "  return (",
+      "    <div className=\"rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md\">",
+      "      <div className=\"flex flex-wrap gap-2 p-4 border-b border-gray-200 dark:border-gray-800\">",
+      "        {[\"Overview\", \"Gallery\", \"Inclusions\", \"Itinerary\", \"Policies\"].map((tab) => ("
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Slug\\ui\\Badge.jsx",
+    "size": 338,
+    "language": "javascript",
+    "totalLines": 14,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "",
+      "export default function Badge({ children, className = \"\" }) {",
+      "  return (",
+      "    <span",
+      "      className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300 ${className}`}",
+      "    >",
+      "      {children}"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Slug\\ui\\CTAButton.jsx",
+    "size": 1035,
+    "language": "javascript",
+    "totalLines": 28,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import Link from \"next/link\";",
+      "",
+      "export default function CTAButton({ href, onClick, children, variant = \"primary\", className = \"\" }) {",
+      "  const base = \"inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors\";",
+      "  const styles = {",
+      "    primary: \"bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600\",",
+      "    secondary: \"bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Packages\\Slug\\ui\\Price.jsx",
+    "size": 873,
+    "language": "javascript",
+    "totalLines": 22,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "",
+      "export default function Price({ price = 0, mrp = 0, hasDiscount = false, discountPct = 0 }) {",
+      "  return (",
+      "    <div>",
+      "      <div className=\"text-sm text-gray-600 dark:text-gray-400\">Flyobo Price</div>",
+      "      <div className=\"flex items-baseline gap-3 mt-1\">",
+      "        <div className=\"text-2xl font-semibold text-gray-900 dark:text-white\">₹{Number(price).toLocaleString('en-IN')}</div>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\BankDetails.jsx",
+    "size": 9628,
+    "language": "javascript",
+    "totalLines": 255,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { CreditCard, CheckCircle, AlertCircle } from \"lucide-react\";",
+      "import { HiOutlineRefresh } from \"react-icons/hi\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\BNotifications.jsx",
+    "size": 11259,
+    "language": "javascript",
+    "totalLines": 299,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { useDispatch, useSelector } from \"react-redux\";",
+      "import { setAuthUser } from \"@/redux/authSlice\";",
+      "import { formatDistanceToNow } from \"date-fns\";",
+      "import { HiOutlineArrowLeft, HiOutlineArrowRight } from \"react-icons/hi\";",
+      "import { toast } from \"react-hot-toast\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\FavouriteBookings.jsx",
+    "size": 6373,
+    "language": "javascript",
+    "totalLines": 165,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from 'react';",
+      "import axios from 'axios';",
+      "import Link from 'next/link';",
+      "import { toast } from 'react-hot-toast';",
+      "import { Heart, Loader2, HeartOff, Package, List } from 'lucide-react';",
+      "import { NEXT_PUBLIC_BACKEND_URL } from '@/app/config/env';",
+      "import PackageListItem from '@/app/components/Packages/PackageListItem.jsx';",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\ProfileBookings.jsx",
+    "size": 18622,
+    "language": "javascript",
+    "totalLines": 407,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useMemo, useState, useCallback } from \"react\";",
+      "import Link from \"next/link\";",
+      "import Image from \"next/image\";",
+      "import axios from \"axios\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { CheckCircle, Clock, XCircle } from \"lucide-react\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\ProfileInfo.jsx",
+    "size": 6506,
+    "language": "javascript",
+    "totalLines": 157,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import Link from \"next/link\";",
+      "import { HiOutlineMail, HiOutlinePencil, HiOutlineBadgeCheck, HiOutlineCalendar, HiOutlinePhone, } from \"react-icons/hi\";",
+      "import ReferralTier from \"./ReferralTier\";",
+      "",
+      "const ProfileInfo = () => {",
+      "  const user = useSelector((state) => state?.auth?.user);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\ProfileSetting.jsx",
+    "size": 8829,
+    "language": "javascript",
+    "totalLines": 211,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { useState } from \"react\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import axios from \"axios\";",
+      "import { useSelector, useDispatch } from \"react-redux\";",
+      "import { logout } from \"@/redux/authSlice\";",
+      "",
+      "const ProfileSetting = () => {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\ReferralProgram.jsx",
+    "size": 28190,
+    "language": "javascript",
+    "totalLines": 637,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import {",
+      "  Gift, Share, Trophy, Users, ExternalLink, Star, Check, DollarSign,",
+      "  Copy, Award, TrendingUp, Target, Crown, BarChart3, Shield"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\ReferralTier.jsx",
+    "size": 4990,
+    "language": "javascript",
+    "totalLines": 107,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState, useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { Crown } from \"lucide-react\";",
+      "import { toast } from \"react-hot-toast\";",
+      "",
+      "export default function ReferralTier() {",
+      "    const [loading, setLoading] = useState(true);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\Profile\\SideBarProfile.jsx",
+    "size": 5501,
+    "language": "javascript",
+    "totalLines": 144,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "",
+      "import { User, Bookmark, Heart, Settings, LogOut, Bell, Search, Gift, Trophy, Wallet, CreditCard } from \"lucide-react\";",
+      "import { usePathname } from \"next/navigation\";",
+      "",
+      "const items = [",
+      "  {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\styles\\Banner.jsx",
+    "size": 1660,
+    "language": "javascript",
+    "totalLines": 35,
+    "previewLines": [
+      "import React from 'react'",
+      "",
+      "const Banner = ({title,}) => {",
+      "    return (",
+      "        <section className=\"relative overflow-hidden py-4\">",
+      "        <div className=\"relative mx-auto max-w-7xl\">",
+      "          <div className=\"rounded-3xl bg-gradient-to-r from-sky-100/70 to-blue-100/70 dark:from-sky-900/30 dark:to-blue-900/30 p-10 sm:p-16 text-center shadow-lg backdrop-blur-sm border border-white/40 dark:border-gray-800\">",
+      "            <h1 className=\"text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-sky-600 to-blue-700 bg-clip-text text-transparent dark:from-sky-400 dark:to-blue-300\">",
+      "              Discover Your Perfect Journey",
+      "            </h1>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\styles\\style.jsx",
+    "size": 874,
+    "language": "javascript",
+    "totalLines": 10,
+    "previewLines": [
+      "export const styles = {",
+      "    title: \"text-[25px] text-black dark:text-white font-[500] text-center py-2\",",
+      "    label: \"text-[16px] text-black dark:text-white\",",
+      "    input: \"w-full text-black dark:text-white bg-transparent border rounded h-[48px] px-2 outline-none mt-[10px] border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900\",",
+      "    button: \"w-full h-[48px] rounded-md font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed\",",
+      "    errorText: \"mt-1 text-sm text-red-600\",",
+      "    divider: \"my-5 flex items-center gap-3\",",
+      "    socialButton: \"flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 rounded-md h-[44px] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors\",",
+      "    link: \"text-sm text-blue-600 hover:underline\"",
+      "}"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\components\\styles\\whatsapp.jsx",
+    "size": 882,
+    "language": "javascript",
+    "totalLines": 28,
+    "previewLines": [
+      "\"use client\";",
+      "import { useMemo } from \"react\";",
+      "import { FaWhatsapp } from \"react-icons/fa\";",
+      "",
+      "const WhatsApp = ({ phone = \"+916300146756\", message = \"Hello!\" }) => {",
+      "  const href = useMemo(() => {",
+      "    const base = `https://wa.me/${phone}`;",
+      "    const params = message ? `?text=${encodeURIComponent(message)}` : \"\";",
+      "    return `${base}${params}`;",
+      "  }, [phone, message]);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\config\\env.js",
+    "size": 432,
+    "language": "javascript",
+    "totalLines": 8,
+    "previewLines": [
+      "export const NEXT_PUBLIC_BACKEND_URL = ",
+      "  process.env.NEXT_PUBLIC_BACKEND_URL || ",
+      "  (process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api/v1' : 'https://flyobo.com/api/v1');",
+      "",
+      "// Public site URL used for building canonical links and share URLs.",
+      "export const NEXT_PUBLIC_SITE_URL =",
+      "  process.env.NEXT_PUBLIC_SITE_URL ||",
+      "  (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://flyobo.com');"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\config\\homeContent.js",
+    "size": 1259,
+    "language": "javascript",
+    "totalLines": 37,
+    "previewLines": [
+      "const homeContent = {",
+      "  hero: {",
+      "    title: 'Discover Your Next',",
+      "    highlight: 'Adventure',",
+      "    subtitle: 'Explore the most beautiful places on Earth. Find and book amazing experiences at the best prices.',",
+      "    cta: 'Search',",
+      "  },",
+      "  newsletter: {",
+      "    title: 'Get Exclusive Travel Deals',",
+      "    description: 'Subscribe to our newsletter and be the first to know about special offers, new destinations, and travel tips.',"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\contact\\page.jsx",
+    "size": 7078,
+    "language": "javascript",
+    "totalLines": 180,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import Heading from \"../components/MetaData/Heading\";",
+      "import Header from \"../components/Layout/Header\";",
+      "",
+      "export default function ContactPage() {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\context\\HomeContentContext.jsx",
+    "size": 1263,
+    "language": "javascript",
+    "totalLines": 44,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { createContext, useContext, useMemo, useState, useEffect } from \"react\";",
+      "import defaultContent from \"@/app/config/homeContent\";",
+      "",
+      "const HomeContentContext = createContext(null);",
+      "",
+      "export function HomeContentProvider({ children }) {",
+      "  const [content, setContent] = useState(defaultContent);",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\faq\\page.jsx",
+    "size": 8319,
+    "language": "javascript",
+    "totalLines": 234,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import Heading from \"../components/MetaData/Heading\";",
+      "import Header from \"../components/Layout/Header\";",
+      "import Footer from \"../components/Layout/Footer\";",
+      "import FaqHero from \"../components/Faq/FaqHero\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\gallery\\layout.jsx",
+    "size": 1022,
+    "language": "javascript",
+    "totalLines": 36,
+    "previewLines": [
+      "export const metadata = {",
+      "  title: \"Customer Memories | Flyobo\",",
+      "  description:",
+      "    \"Browse customer memories from Flyobo trips: real photos from adventures across beaches, mountains, cities, and more.\",",
+      "  openGraph: {",
+      "    title: \"Customer Memories | Flyobo\",",
+      "    description:",
+      "      \"Browse customer memories from Flyobo trips: real photos from adventures across beaches, mountains, cities, and more.\",",
+      "    url: \"/gallery\",",
+      "    type: \"website\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\gallery\\page.jsx",
+    "size": 3623,
+    "language": "javascript",
+    "totalLines": 115,
+    "previewLines": [
+      "\"use client\";",
+      "import React, { useMemo, useState, useCallback, useEffect, useRef } from \"react\";",
+      "import Header from \"../components/Layout/Header\";",
+      "import Footer from \"../components/Layout/Footer\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import GalleryFilters from \"../components/Gallery/GalleryFilters\";",
+      "import GalleryHero from \"../components/Gallery/GalleryHero\";",
+      "import GalleryCard from \"../components/Gallery/GalleryCard\"",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\globals.css",
+    "size": 2390,
+    "language": "css",
+    "totalLines": 110,
+    "previewLines": [
+      "@import \"tailwindcss\";",
+      "",
+      "/* CSS Variables for themes */",
+      ":root {",
+      "  --color-bg-primary: #ffffff;",
+      "  --color-bg-secondary: #f8fafc;",
+      "  --color-text-primary: #1e293b;",
+      "  --color-text-secondary: #64748b;",
+      "  --color-border-primary: #e2e8f0;",
+      "}"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\hoc\\ClientProvider.jsx",
+    "size": 2292,
+    "language": "javascript",
+    "totalLines": 57,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect } from \"react\";",
+      "import axios from \"axios\";",
+      "import { Provider } from \"react-redux\";",
+      "import { PersistGate } from \"redux-persist/integration/react\";",
+      "import { store, persistor } from \"@/redux/store\";",
+      "import { logout } from \"@/redux/authSlice\";",
+      "",
+      "const ClientProvider = ({ children }) => {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\hooks\\adminProtected.jsx",
+    "size": 662,
+    "language": "javascript",
+    "totalLines": 28,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useEffect } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import Loading from \"@/app/components/LoadingScreen/Loading\";",
+      "",
+      "export default function AdminProtected({ children }) {",
+      "  const user = useSelector((state) => state?.auth?.user);",
+      "  const router = useRouter();"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\hooks\\userAuth.jsx",
+    "size": 244,
+    "language": "javascript",
+    "totalLines": 15,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useSelector } from 'react-redux';",
+      "",
+      "const userAuth = () => {",
+      "",
+      "    const user = useSelector((state) => state?.auth?.user);",
+      "    if(user){",
+      "        return true",
+      "    }else{"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\hooks\\userProtected.jsx",
+    "size": 525,
+    "language": "javascript",
+    "totalLines": 24,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import Loading from \"@/app/components/LoadingScreen/Loading\";",
+      "",
+      "export default function UserProtected({ children }) {",
+      "  const user = useSelector((state) => state?.auth?.user);",
+      "  const router = useRouter();"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\layout.js",
+    "size": 926,
+    "language": "javascript",
+    "totalLines": 30,
+    "previewLines": [
+      "import { Nunito } from \"next/font/google\";",
+      "import \"./globals.css\";",
+      "import ThemeProvider from \"./utils/Theme-Provider\";",
+      "import ClientProvider from \"./hoc/ClientProvider\";",
+      "import AuthLoader from \"./components/Auth/AuthLoader\";",
+      "import { Toaster } from \"react-hot-toast\";",
+      "import { GoogleAnalytics } from '@next/third-parties/google'",
+      "",
+      "const nunito = Nunito({",
+      "  variable: \"--font-nunito\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\packages\\checkout\\page.jsx",
+    "size": 26952,
+    "language": "javascript",
+    "totalLines": 533,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useMemo, useState, Suspense, lazy } from \"react\";",
+      "import { useSearchParams, useRouter } from \"next/navigation\";",
+      "import Heading from \"../../components/MetaData/Heading\";",
+      "import Link from \"next/link\";",
+      "import Header from \"@/app/components/Layout/Header\";",
+      "import { useSelector } from \"react-redux\";",
+      "import PackageDetailsPanel from \"@/app/components/Packages/Layout/PackageDetailsPanel\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\packages\\page.jsx",
+    "size": 17824,
+    "language": "javascript",
+    "totalLines": 424,
+    "previewLines": [
+      "\"use client\";",
+      "import { useEffect, useMemo, useState } from \"react\";",
+      "import { useRouter, useSearchParams } from \"next/navigation\";",
+      "import Heading from \"../components/MetaData/Heading\";",
+      "import Header from \"../components/Layout/Header\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import PackageListItem from \"../components/Packages/PackageListItem\";",
+      "import PaginationBar from \"../components/Packages/PaginationBar\";",
+      "import FiltersPanel from \"../components/Packages/FiltersPanel\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\packages\\[slug]\\page.jsx",
+    "size": 8006,
+    "language": "javascript",
+    "totalLines": 221,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useState } from \"react\";",
+      "import Link from \"next/link\";",
+      "import Heading from \"../../components/MetaData/Heading\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL, NEXT_PUBLIC_SITE_URL } from \"@/app/config/env\";",
+      "import { FaShareAlt } from \"react-icons/fa\";",
+      "import Hero from \"../../components/Packages/Slug/Hero\";",
+      "import Tabs from \"../../components/Packages/Slug/Tabs\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\page.js",
+    "size": 3130,
+    "language": "javascript",
+    "totalLines": 71,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState } from 'react';",
+      "import Heading from './components/MetaData/Heading';",
+      "import Header from './components/Layout/Header';",
+      "import { HomeContentProvider } from './context/HomeContentContext';",
+      "import Hero from './components/Home/Hero';",
+      "import TopDestinations from './components/Home/TopDestinations';",
+      "import BoldShowcase from './components/Home/BoldShowcase';",
+      "import ReferralBanner from './components/Home/ReferralBanner';"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\profile\\edit\\page.jsx",
+    "size": 6216,
+    "language": "javascript",
+    "totalLines": 151,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState } from \"react\";",
+      "import { useSelector } from \"react-redux\";",
+      "import { useRouter } from \"next/navigation\";",
+      "import UserProtected from \"../../hooks/userProtected\";",
+      "import Heading from \"../../components/MetaData/Heading\";",
+      "import Header from \"../../components/Layout/Header\";",
+      "import SideBarProfile from \"../../components/Profile/SideBarProfile\";",
+      "import { toast } from \"react-hot-toast\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\profile\\page.jsx",
+    "size": 3692,
+    "language": "javascript",
+    "totalLines": 97,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState, useEffect, Suspense } from \"react\";",
+      "import { useRouter, useSearchParams } from \"next/navigation\";",
+      "import UserProtected from \"../hooks/userProtected\";",
+      "import Heading from \"../components/MetaData/Heading\";",
+      "import { useDispatch } from \"react-redux\";",
+      "import { performLogout } from \"@/redux/authSlice\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import SideBarProfile from \"../components/Profile/SideBarProfile\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\theme-test\\page.jsx",
+    "size": 2031,
+    "language": "javascript",
+    "totalLines": 53,
+    "previewLines": [
+      "\"use client\";",
+      "import { useTheme } from \"next-themes\";",
+      "import { useEffect } from \"react\";",
+      "",
+      "export default function ThemeTestPage() {",
+      "  const { theme, setTheme, resolvedTheme } = useTheme();",
+      "",
+      "  useEffect(() => {",
+      "    console.log(\"Theme Test Page - Current theme:\", theme);",
+      "    console.log(\"Theme Test Page - Resolved theme:\", resolvedTheme);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\authRequest.js",
+    "size": 7808,
+    "language": "javascript",
+    "totalLines": 251,
+    "previewLines": [
+      "import axios from 'axios';",
+      "import { toast } from 'react-hot-toast';",
+      "import { NEXT_PUBLIC_BACKEND_URL } from '@/app/config/env';",
+      "",
+      "// Lazy-load Redux to avoid circular dependency",
+      "const getRedux = () => {",
+      "  const { store } = require('@/redux/store');",
+      "  const { logout } = require('@/redux/authSlice');",
+      "  return { store, logout };",
+      "};"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\authTest.js",
+    "size": 2495,
+    "language": "javascript",
+    "totalLines": 77,
+    "previewLines": [
+      "/**",
+      " * Authentication Test Script",
+      " * ",
+      " * Run this to test the authentication flow from the browser console.",
+      " * This will help identify where the authentication is failing.",
+      " */",
+      "",
+      "const testAuthentication = async () => {",
+      "  console.log(\"🔄 Starting authentication test...\");",
+      "  "
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Models\\Auth\\Login.jsx",
+    "size": 8334,
+    "language": "javascript",
+    "totalLines": 223,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import { useState } from \"react\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { AiOutlineEye, AiOutlineEyeInvisible, AiFillGithub } from \"react-icons/ai\";",
+      "import { FcGoogle } from \"react-icons/fc\";",
+      "import { useDispatch } from \"react-redux\";",
+      "import { setAuthUser } from \"@/redux/authSlice\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Models\\Auth\\SignUp.jsx",
+    "size": 11591,
+    "language": "javascript",
+    "totalLines": 324,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState } from \"react\";",
+      "import { AiOutlineEye, AiOutlineEyeInvisible } from \"react-icons/ai\";",
+      "import { FcGoogle } from \"react-icons/fc\";",
+      "import { AiFillGithub } from \"react-icons/ai\";",
+      "import { HiOutlineUser } from \"react-icons/hi\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { useDispatch } from \"react-redux\";",
+      "import { setAuthUser } from \"@/redux/authSlice\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Models\\Auth\\Verification.jsx",
+    "size": 7763,
+    "language": "javascript",
+    "totalLines": 222,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useMemo, useRef, useState } from \"react\";",
+      "import { toast } from 'react-hot-toast';",
+      "import { HiOutlineShieldCheck } from 'react-icons/hi';",
+      "import { styles } from \"../../../components/styles/style\";",
+      "import axios from \"axios\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from '@/app/config/env';",
+      "import ModalHeader from \"../components/ModalHeader\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Models\\components\\ModalHeader.jsx",
+    "size": 480,
+    "language": "javascript",
+    "totalLines": 19,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React from \"react\";",
+      "import { styles } from \"../../../components/styles/style\";",
+      "",
+      "export default function ModalHeader({",
+      "  title,",
+      "  description",
+      "}) {",
+      "  return ("
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Models\\CustomModel.jsx",
+    "size": 2406,
+    "language": "javascript",
+    "totalLines": 49,
+    "previewLines": [
+      "import { Box, Modal } from \"@mui/material\"",
+      "",
+      "",
+      "const CustomModel = ({ open, setOpen, activeItem, component: Component, setRoute }) => {",
+      "    return (",
+      "        <Modal",
+      "            open={open}",
+      "            onClose={() => setOpen(false)}",
+      "            aria-labelledby=\"modal-modal-title\"",
+      "            aria-describedby=\"modal-modal-description\""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Models\\User\\ForgetPassword.jsx",
+    "size": 4566,
+    "language": "javascript",
+    "totalLines": 125,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { styles } from \"../../../components/styles/style\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { HiOutlineLockClosed } from \"react-icons/hi\";",
+      "import ModalHeader from \"../components/ModalHeader\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Models\\User\\ResetPassword.jsx",
+    "size": 12706,
+    "language": "javascript",
+    "totalLines": 314,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import React, { useEffect, useMemo, useRef, useState } from \"react\";",
+      "import axios from \"axios\";",
+      "import { toast } from \"react-hot-toast\";",
+      "import { styles } from \"../../../components/styles/style\";",
+      "import { NEXT_PUBLIC_BACKEND_URL } from \"@/app/config/env\";",
+      "import { HiOutlineKey } from \"react-icons/hi\";",
+      "import { AiOutlineEye, AiOutlineEyeInvisible } from \"react-icons/ai\";",
+      "import ModalHeader from \"../components/ModalHeader\";"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\sitemapUtils.mjs",
+    "size": 4670,
+    "language": "javascript",
+    "totalLines": 140,
+    "previewLines": [
+      "// Utility functions for generating dynamic sitemap entries",
+      "",
+      "/**",
+      " * Fetch all packages from the API",
+      " * @returns {Promise<Array>} Array of package objects",
+      " */",
+      "export async function fetchPackages() {",
+      "  // Always return an array (possibly empty). This prevents consumers like",
+      "  // `getPackageRoutes` from throwing when calling `.map` on undefined.",
+      "  try {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\Theme-Provider.jsx",
+    "size": 777,
+    "language": "javascript",
+    "totalLines": 36,
+    "previewLines": [
+      "\"use client\";",
+      "",
+      "import * as React from \"react\";",
+      "import { ThemeProvider as NextThemesProvider } from \"next-themes\";",
+      "",
+      "const ThemeProvider = ({ children, ...props }) => {",
+      "  const [mounted, setMounted] = React.useState(false);",
+      "",
+      "  React.useEffect(() => {",
+      "    setMounted(true);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\app\\utils\\ThemeSwitcher.jsx",
+    "size": 1616,
+    "language": "javascript",
+    "totalLines": 51,
+    "previewLines": [
+      "\"use client\";",
+      "import { useEffect, useState } from \"react\";",
+      "import { useTheme } from \"next-themes\";",
+      "import { BiMoon, BiSun } from \"react-icons/bi\";",
+      "",
+      "const ThemeSwitcher = () => {",
+      "  console.log('ThemeSwitcher component rendering');",
+      "  const { theme, setTheme } = useTheme();",
+      "  const [mounted, setMounted] = useState(false);",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\eslint.config.mjs",
+    "size": 505,
+    "language": "javascript",
+    "totalLines": 26,
+    "previewLines": [
+      "import { dirname } from \"path\";",
+      "import { fileURLToPath } from \"url\";",
+      "import { FlatCompat } from \"@eslint/eslintrc\";",
+      "",
+      "const __filename = fileURLToPath(import.meta.url);",
+      "const __dirname = dirname(__filename);",
+      "",
+      "const compat = new FlatCompat({",
+      "  baseDirectory: __dirname,",
+      "});"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\jsconfig.json",
+    "size": 73,
+    "language": "json",
+    "totalLines": 8,
+    "previewLines": [
+      "{",
+      "  \"compilerOptions\": {",
+      "    \"paths\": {",
+      "      \"@/*\": [\"./*\"]",
+      "    }",
+      "  }",
+      "}",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\next-sitemap.config.js",
+    "size": 2320,
+    "language": "javascript",
+    "totalLines": 89,
+    "previewLines": [
+      "/** @type {import('next-sitemap').IConfig} */",
+      "",
+      "module.exports = {",
+      "  siteUrl: process.env.SITE_URL || 'https://www.flyobo.com',",
+      "  generateRobotsTxt: true,",
+      "  exclude: [",
+      "    '/admin/*',",
+      "    '/profile/*',",
+      "    '/api/*',",
+      "    '/_next/*',"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\next.config.mjs",
+    "size": 1399,
+    "language": "javascript",
+    "totalLines": 61,
+    "previewLines": [
+      "/** @type {import('next').NextConfig} */",
+      "const nextConfig = {",
+      "  images: {",
+      "    remotePatterns: [",
+      "      {",
+      "        protocol: 'https',",
+      "        hostname: 'images.unsplash.com',",
+      "      },",
+      "      {",
+      "        protocol: 'https',"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\package-lock.json",
+    "size": 264702,
+    "language": "json",
+    "totalLines": 7479,
+    "previewLines": [
+      "{",
+      "  \"name\": \"client\",",
+      "  \"version\": \"0.1.0\",",
+      "  \"lockfileVersion\": 3,",
+      "  \"requires\": true,",
+      "  \"packages\": {",
+      "    \"\": {",
+      "      \"name\": \"client\",",
+      "      \"version\": \"0.1.0\",",
+      "      \"dependencies\": {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\package.json",
+    "size": 1158,
+    "language": "json",
+    "totalLines": 46,
+    "previewLines": [
+      "{",
+      "  \"name\": \"client\",",
+      "  \"version\": \"0.1.0\",",
+      "  \"private\": true,",
+      "  \"scripts\": {",
+      "    \"dev\": \"next dev --turbopack\",",
+      "    \"build\": \"next build --turbopack\",",
+      "    \"start\": \"next start\",",
+      "    \"lint\": \"eslint\",",
+      "    \"postbuild\": \"next-sitemap\""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\postcss.config.mjs",
+    "size": 81,
+    "language": "javascript",
+    "totalLines": 6,
+    "previewLines": [
+      "const config = {",
+      "  plugins: [\"@tailwindcss/postcss\"],",
+      "};",
+      "",
+      "export default config;",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\apple-touch-icon.png",
+    "size": 204839,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "client\\public\\favicon-16x16.png",
+    "size": 204839,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "client\\public\\favicon-32x32.png",
+    "size": 204839,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "client\\public\\favicon.ico",
+    "size": 204839,
+    "language": "ico",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "client\\public\\file.svg",
+    "size": 391,
+    "language": "svg",
+    "totalLines": 1,
+    "previewLines": [
+      "<svg fill=\"none\" viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z\" clip-rule=\"evenodd\" fill=\"#666\" fill-rule=\"evenodd\"/></svg>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\globe.svg",
+    "size": 1035,
+    "language": "svg",
+    "totalLines": 1,
+    "previewLines": [
+      "<svg fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\"><g clip-path=\"url(#a)\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1\" fill=\"#666\"/></g><defs><clipPath id=\"a\"><path fill=\"#fff\" d=\"M0 0h16v16H0z\"/></clipPath></defs></svg>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\images\\banner.png",
+    "size": 139990,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "client\\public\\images\\icon.png",
+    "size": 204839,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "client\\public\\images\\logo.png",
+    "size": 110682,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "client\\public\\next.svg",
+    "size": 1375,
+    "language": "svg",
+    "totalLines": 1,
+    "previewLines": [
+      "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 394 80\"><path fill=\"#000\" d=\"M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z\"/><path fill=\"#000\" d=\"M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z\"/></svg>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\robots.txt",
+    "size": 282,
+    "language": "txt",
+    "totalLines": 17,
+    "previewLines": [
+      "# *",
+      "User-agent: *",
+      "Allow: /",
+      "",
+      "# *",
+      "User-agent: *",
+      "Disallow: /admin/",
+      "Disallow: /profile/",
+      "",
+      "# Host"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\sitemap-0.xml",
+    "size": 2749,
+    "language": "xml",
+    "totalLines": 18,
+    "previewLines": [
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+      "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\" xmlns:mobile=\"http://www.google.com/schemas/sitemap-mobile/1.0\" xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" xmlns:video=\"http://www.google.com/schemas/sitemap-video/1.1\">",
+      "<url><loc>https://www.flyobo.com/contact</loc><lastmod>2025-11-15T12:35:14.494Z</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>",
+      "<url><loc>https://www.flyobo.com/packages</loc><lastmod>2025-11-15T12:35:14.495Z</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>",
+      "<url><loc>https://www.flyobo.com/about</loc><lastmod>2025-11-15T12:35:14.495Z</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>",
+      "<url><loc>https://www.flyobo.com/faq</loc><lastmod>2025-11-15T12:35:14.495Z</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>",
+      "<url><loc>https://www.flyobo.com/admin</loc><lastmod>2025-11-15T12:35:14.495Z</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>",
+      "<url><loc>https://www.flyobo.com</loc><lastmod>2025-11-15T12:35:14.495Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>",
+      "<url><loc>https://www.flyobo.com/profile</loc><lastmod>2025-11-15T12:35:14.495Z</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>",
+      "<url><loc>https://www.flyobo.com/gallery</loc><lastmod>2025-11-15T12:35:14.495Z</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\sitemap-index.xml",
+    "size": 479,
+    "language": "xml",
+    "totalLines": 15,
+    "previewLines": [
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+      "<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">",
+      "  <sitemap>",
+      "    <loc>https://www.flyobo.com/sitemap.xml</loc>",
+      "    <lastmod>2025-10-27</lastmod>",
+      "  </sitemap>",
+      "  <sitemap>",
+      "    <loc>https://www.flyobo.com/sitemap-packages.xml</loc>",
+      "    <lastmod>2025-10-27</lastmod>",
+      "  </sitemap>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\sitemap.xml",
+    "size": 400,
+    "language": "xml",
+    "totalLines": 7,
+    "previewLines": [
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+      "<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">",
+      "<sitemap><loc>https://www.flyobo.com/sitemap-0.xml</loc></sitemap>",
+      "<sitemap><loc>https://www.flyobo.com/sitemap.xml</loc></sitemap>",
+      "<sitemap><loc>https://www.flyobo.com/sitemap-packages.xml</loc></sitemap>",
+      "<sitemap><loc>https://www.flyobo.com/sitemap-gallery.xml</loc></sitemap>",
+      "</sitemapindex>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\vercel.svg",
+    "size": 128,
+    "language": "svg",
+    "totalLines": 1,
+    "previewLines": [
+      "<svg fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1155 1000\"><path d=\"m577.3 0 577.4 1000H0z\" fill=\"#fff\"/></svg>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\public\\window.svg",
+    "size": 385,
+    "language": "svg",
+    "totalLines": 1,
+    "previewLines": [
+      "<svg fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5\" fill=\"#666\"/></svg>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\README.md",
+    "size": 1458,
+    "language": "markdown",
+    "totalLines": 37,
+    "previewLines": [
+      "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).",
+      "",
+      "## Getting Started",
+      "",
+      "First, run the development server:",
+      "",
+      "```bash",
+      "npm run dev",
+      "# or",
+      "yarn dev"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\redux\\authSlice.js",
+    "size": 4360,
+    "language": "javascript",
+    "totalLines": 137,
+    "previewLines": [
+      "import { createSlice, createAsyncThunk } from \"@reduxjs/toolkit\";",
+      "import { logoutUser as apiLogoutUser } from '@/app/utils/authRequest';",
+      "",
+      "const initialState = {",
+      "  user: null,",
+      "  // Forgot password flow state",
+      "  forgot: {",
+      "    loading: false,",
+      "    error: null,",
+      "    message: null,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\redux\\store.js",
+    "size": 1251,
+    "language": "javascript",
+    "totalLines": 57,
+    "previewLines": [
+      "import { configureStore, combineReducers } from \"@reduxjs/toolkit\";",
+      "import {",
+      "  persistReducer,",
+      "  persistStore,",
+      "  FLUSH,",
+      "  REHYDRATE,",
+      "  PAUSE,",
+      "  PERSIST,",
+      "  PURGE,",
+      "  REGISTER,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\SEO-README.md",
+    "size": 5233,
+    "language": "markdown",
+    "totalLines": 180,
+    "previewLines": [
+      "# SEO Configuration and Sitemap Generation",
+      "",
+      "This document explains the SEO configuration and sitemap generation setup for the Flyobo website.",
+      "",
+      "## Overview",
+      "",
+      "The SEO implementation includes:",
+      "1. Dynamic sitemap generation using `next-sitemap`",
+      "2. Structured data (JSON-LD) for rich search results",
+      "3. Meta tags for social media sharing"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "client\\tailwind.config.js",
+    "size": 1412,
+    "language": "javascript",
+    "totalLines": 54,
+    "previewLines": [
+      "/** @type {import('tailwindcss').Config} */",
+      "module.exports = {",
+      "  darkMode: ['class'],",
+      "  content: [",
+      "    './app/**/*.{js,jsx,ts,tsx,mdx}',",
+      "    './components/**/*.{js,jsx,ts,tsx,mdx}',",
+      "    './pages/**/*.{js,jsx,ts,tsx,mdx}',",
+      "  ],",
+      "  theme: {",
+      "    extend: {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "scripts\\repo-scan.js",
+    "size": 2762,
+    "language": "javascript",
+    "totalLines": 87,
+    "previewLines": [
+      "const fs = require('fs');",
+      "const path = require('path');",
+      "",
+      "const IGNORES = new Set(['node_modules', '.git', '.next', 'dist', 'build', 'venv']);",
+      "const MAX_PREVIEW_LINES = 10;",
+      "",
+      "function isIgnored(name) {",
+      "  return IGNORES.has(name);",
+      "}",
+      ""
+    ],
+    "todoCount": 5,
+    "isBinary": false
+  },
+  {
+    "path": "server\\.env",
+    "size": 640,
+    "language": "unknown",
+    "totalLines": 32,
+    "previewLines": [
+      "PORT = \"5000\"",
+      "",
+      "NODE_ENV = \"development\"",
+      "",
+      "MONGO_URI = \"mongodb://localhost:27017/flyobo\"",
+      "",
+      "CLOUD_NAME = 'dxjvnohxn'",
+      "CLOUD_API_KEY = '135954225661344'",
+      "CLOUD_SECRET_KEY = 'ZaLDnJ9b7mVvrsSBWPs3PSjy_5c'",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\.env.example",
+    "size": 1593,
+    "language": "example",
+    "totalLines": 48,
+    "previewLines": [
+      "# Flyobo Server Environment Configuration",
+      "# Copy this file to .env for deployment",
+      "",
+      "# Server Configuration",
+      "PORT=5000",
+      "NODE_ENV=\"production\"  # Change to \"production\" for live deployment",
+      "",
+      "# Database",
+      "MONGO_URI=\"mongodb://localhost:27017/flyobo\"  # Update with your production MongoDB URL",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\.gitignore",
+    "size": 480,
+    "language": "unknown",
+    "totalLines": 42,
+    "previewLines": [
+      "# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.",
+      "",
+      "# dependencies",
+      "/node_modules",
+      "/.pnp",
+      ".pnp.*",
+      ".yarn/*",
+      "!.yarn/patches",
+      "!.yarn/plugins",
+      "!.yarn/releases"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\app.js",
+    "size": 5546,
+    "language": "javascript",
+    "totalLines": 196,
+    "previewLines": [
+      "import express from \"express\";",
+      "import cors from \"cors\";",
+      "import \"dotenv/config\";",
+      "import cookieParser from \"cookie-parser\";",
+      "import http from \"http\";",
+      "import { Server } from \"socket.io\";",
+      "import {",
+      "  CLOUD_API_KEY,",
+      "  CLOUD_NAME,",
+      "  CLOUD_SECRET_KEY,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\config\\env.js",
+    "size": 1321,
+    "language": "javascript",
+    "totalLines": 60,
+    "previewLines": [
+      "import { config } from \"dotenv\";",
+      "import fs from \"fs\";",
+      "import path from \"path\";",
+      "import { fileURLToPath } from 'url';",
+      "",
+      "// Get __dirname equivalent in ES modules",
+      "const __filename = fileURLToPath(import.meta.url);",
+      "const __dirname = path.dirname(__filename);",
+      "",
+      "// Robust .env loading with sensible fallbacks"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\config\\nodemailer.js",
+    "size": 1081,
+    "language": "javascript",
+    "totalLines": 40,
+    "previewLines": [
+      "import nodemailer from 'nodemailer';",
+      "import ejs from 'ejs';",
+      "import path from 'path';",
+      "import { fileURLToPath } from 'url';",
+      "",
+      "import { SMTP_HOST, SMTP_PASS, SMTP_PORT, SMTP_SERVICE, SMTP_EMAIL } from './env.js';",
+      "",
+      "const __filename = fileURLToPath(import.meta.url);",
+      "const __dirname = path.dirname(__filename);",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\analytics.controller.js",
+    "size": 4726,
+    "language": "javascript",
+    "totalLines": 150,
+    "previewLines": [
+      "import Booking from \"../models/bookings.model.js\";",
+      "import Package from \"../models/package.model.js\";",
+      "import User from \"../models/user.model.js\";",
+      "import Referral from \"../models/referal.model.js\";",
+      "import { ",
+      "  generateLast12MonthsData, ",
+      "  getAdvancedBookingAnalytics,",
+      "  getAdvancedReferralAnalytics,",
+      "  getUserDepartmentBreakdown,",
+      "  getAdvancedUserAnalytics,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\auth.controller.js",
+    "size": 9100,
+    "language": "javascript",
+    "totalLines": 278,
+    "previewLines": [
+      "import User from \"../models/user.model.js\";",
+      "import bcrypt from \"bcryptjs\";",
+      "import sendMail from \"../config/nodemailer.js\";",
+      "import { generateOTP } from \"../services/otp.services.js\";",
+      "import { createSendToken } from \"../services/auth.services.js\";",
+      "import { NODE_ENV, FRONTEND_URL } from \"../config/env.js\";",
+      "",
+      "// 1. Registration",
+      "export const registration = async (req, res) => {",
+      "  let createdUser;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\bookings.controllers.js",
+    "size": 28220,
+    "language": "javascript",
+    "totalLines": 777,
+    "previewLines": [
+      "import Booking from \"../models/bookings.model.js\";",
+      "import User from \"../models/user.model.js\";",
+      "import Notification from \"../models/notification.model.js\";",
+      "import sendMail from \"../config/nodemailer.js\";",
+      "import Package from \"../models/package.model.js\";",
+      "import mongoose from 'mongoose';",
+      "import { getAllBookingsServices, newBooking, processReferralReward } from \"../services/booking.services.js\";",
+      "import catchAsyncErrors from \"../middleware/catchAsyncErrors.js\";",
+      "",
+      "// Helper: compute total amount with add-ons and discounts"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\contact.admin.controller.js",
+    "size": 1912,
+    "language": "javascript",
+    "totalLines": 51,
+    "previewLines": [
+      "import Contact from \"../models/contact.model.js\";",
+      "",
+      "export const listContacts = async (req, res) => {",
+      "  try {",
+      "    const { page = 1, limit = 20 } = req.query;",
+      "    const skip = (Math.max(1, Number(page)) - 1) * Number(limit);",
+      "    const contacts = await Contact.find().sort({ createdAt: -1 }).skip(skip).limit(Number(limit));",
+      "    const total = await Contact.countDocuments();",
+      "    return res.status(200).json({ success: true, data: contacts, pagination: { total, page: Number(page), limit: Number(limit) } });",
+      "  } catch (err) {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\contact.controller.js",
+    "size": 1383,
+    "language": "javascript",
+    "totalLines": 39,
+    "previewLines": [
+      "import { SMTP_EMAIL } from \"../config/env.js\";",
+      "import sendMail from \"../config/nodemailer.js\";",
+      "import Contact from \"../models/contact.model.js\";",
+      "",
+      "export const handleContact = async (req, res) => {",
+      "  try {",
+      "    const { name, email, subject, message, phone } = req.body || {};",
+      "",
+      "    if (!name || !email || !message) {",
+      "      return res.status(400).json({ success: false, message: \"Please provide name, email and message.\" });"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\gallery.controller.js",
+    "size": 3593,
+    "language": "javascript",
+    "totalLines": 114,
+    "previewLines": [
+      "import Gallery from \"../models/gallery.model.js\";",
+      "import { getFileUrl, deleteFile, getFilenameFromUrl } from '../middleware/multerConfig.js';",
+      "import path from 'path';",
+      "",
+      "export const getGalleryItems = async (req, res) => {",
+      "  try {",
+      "    const { category, tag, search } = req.query;",
+      "    const query = {};",
+      "",
+      "    if (category) query.category = category.toLowerCase();"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\layout.controller.js",
+    "size": 9625,
+    "language": "javascript",
+    "totalLines": 314,
+    "previewLines": [
+      "import cloudinary from \"cloudinary\";",
+      "import Layout from \"../models/layout.model.js\";",
+      "",
+      "// Create Layout",
+      "export const createLayout = async (req, res) => {",
+      "    try {",
+      "        const { type } = req.body;",
+      "",
+      "        if (!type) {",
+      "            return res.status(400).json({ success: false, message: \"Type is required\" });"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\notification.controller.js",
+    "size": 3304,
+    "language": "javascript",
+    "totalLines": 121,
+    "previewLines": [
+      "import Notification from \"../models/notification.model.js\";",
+      "import cron from 'node-cron';",
+      "import { ",
+      "    getUnreadNotificationsCount, ",
+      "    markAllNotificationsAsRead,",
+      "    getNotificationsWithPagination",
+      "} from \"../services/notification.services.js\";",
+      "",
+      "// Get Notifications",
+      "export const getNotification = async (req, res) => {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\package.controller.js",
+    "size": 12347,
+    "language": "javascript",
+    "totalLines": 406,
+    "previewLines": [
+      "import Package from '../models/package.model.js';",
+      "import { createPackage, getAllPackagesServices } from '../services/package.services.js';",
+      "import { getFileUrl, deleteFile, getFilenameFromUrl } from '../middleware/multerConfig.js';",
+      "import mongoose from 'mongoose';",
+      "import path from 'path';",
+      "import xlsx from 'xlsx';",
+      "import fs from 'fs';",
+      "",
+      "// simple slug generator: lowercase, replace non-alphanum with hyphens, collapse hyphens",
+      "function slugify(text = '') {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\referal.controller.js",
+    "size": 2277,
+    "language": "javascript",
+    "totalLines": 83,
+    "previewLines": [
+      "import Referral from '../models/referal.model.js'",
+      "import User from '../models/user.model.js';",
+      "",
+      "export const generateReferralCode = async (req, res) => {",
+      "  try {",
+      "    const referral = new Referral({",
+      "      referrer: req.user._id,",
+      "      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now",
+      "    });",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\referral.admin.controller.js",
+    "size": 16688,
+    "language": "javascript",
+    "totalLines": 482,
+    "previewLines": [
+      "import User from \"../models/user.model.js\";",
+      "import Booking from \"../models/bookings.model.js\";",
+      "",
+      "// Get all pending referral rewards",
+      "export const getPendingReferralRewards = async (req, res) => {",
+      "    try {",
+      "        // Find all users with pending referral rewards",
+      "        const users = await User.find({",
+      "            'referral.rewardHistory.status': 'pending'",
+      "        }).select('name email referral.rewardHistory bankDetails');"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\referralSettings.controller.js",
+    "size": 2040,
+    "language": "javascript",
+    "totalLines": 50,
+    "previewLines": [
+      "import ReferralSettings from '../models/referralSettings.model.js';",
+      "",
+      "// Helper to get or create default settings",
+      "const getOrCreateSettings = async () => {",
+      "  let settings = await ReferralSettings.findOne({}).lean();",
+      "  if (!settings) {",
+      "    const created = await ReferralSettings.create({});",
+      "    settings = created.toObject();",
+      "  }",
+      "  return settings;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\controllers\\user.controller.js",
+    "size": 34191,
+    "language": "javascript",
+    "totalLines": 1037,
+    "previewLines": [
+      "import User from \"../models/user.model.js\";",
+      "import Package from '../models/package.model.js';",
+      "import mongoose from 'mongoose';",
+      "import { ",
+      "  trackSocialShare, ",
+      "  getUserReferralAnalytics, ",
+      "  generateCustomReferralUrl,",
+      "  getReferralLeaderboard as getReferralLeaderboardService",
+      "} from \"../services/referral.services.js\";",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\database\\mongodb.js",
+    "size": 1149,
+    "language": "javascript",
+    "totalLines": 32,
+    "previewLines": [
+      "import \"dotenv/config\"; // Load dotenv configuration first",
+      "import mongoose from \"mongoose\";",
+      "",
+      "const connecttoDatabase = async ()=>{",
+      "    try{",
+      "        const MONGO_URI = process.env.MONGO_URI;",
+      "        const NODE_ENV = process.env.NODE_ENV;",
+      "        ",
+      "        console.log(\"Attempting to connect to MongoDB with URI:\", MONGO_URI);",
+      "        console.log(\"NODE_ENV:\", NODE_ENV);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\ecosystem.config.js",
+    "size": 327,
+    "language": "javascript",
+    "totalLines": 18,
+    "previewLines": [
+      "module.exports = {",
+      "  apps: [",
+      "    {",
+      "      name: 'flyobo-server',",
+      "      script: 'app.js',",
+      "      instances: 'max',",
+      "      exec_mode: 'cluster',",
+      "      env: {",
+      "        NODE_ENV: 'production',",
+      "        PORT: 5000"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\activation.ejs",
+    "size": 4708,
+    "language": "ejs",
+    "totalLines": 193,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "  <head>",
+      "    <meta charset=\"UTF-8\" />",
+      "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />",
+      "    <title>Verify Your Flyobo Travel Account</title>",
+      "    <style>",
+      "      body {",
+      "        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
+      "        background-color: #f4f6f8;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\anniversary.ejs",
+    "size": 2654,
+    "language": "ejs",
+    "totalLines": 52,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html>",
+      "<head>",
+      "    <meta charset=\"UTF-8\">",
+      "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "    <title>Happy Anniversary - Flyobo Travel</title>",
+      "</head>",
+      "<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;\">",
+      "    <div style=\"background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;\">",
+      "        <h1 style=\"margin: 0; font-size: 32px;\">🎉 Happy Anniversary!</h1>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\birthday.ejs",
+    "size": 2587,
+    "language": "ejs",
+    "totalLines": 52,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html>",
+      "<head>",
+      "    <meta charset=\"UTF-8\">",
+      "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "    <title>Happy Birthday - Flyobo Travel</title>",
+      "</head>",
+      "<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;\">",
+      "    <div style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;\">",
+      "        <h1 style=\"margin: 0; font-size: 32px;\">🎂 Happy Birthday!</h1>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\conformbooking.ejs",
+    "size": 3707,
+    "language": "ejs",
+    "totalLines": 159,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\">",
+      "  <title>Booking Confirmation</title>",
+      "  <style>",
+      "    body {",
+      "      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
+      "      background: #f4f6f8;",
+      "      margin: 0;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\contact-ack.ejs",
+    "size": 1203,
+    "language": "ejs",
+    "totalLines": 29,
+    "previewLines": [
+      "<!doctype html>",
+      "<html>",
+      "  <head>",
+      "    <meta charset=\"utf-8\" />",
+      "    <title>Thanks for contacting Flyobo</title>",
+      "    <style>",
+      "      body { font-family: Arial, sans-serif; color: #111; }",
+      "      .container { padding: 20px; max-width: 600px; margin: 0 auto; }",
+      "      .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }",
+      "      .btn { display: inline-block; padding: 10px 16px; background: #0ea5e9; color: #fff; border-radius: 6px; text-decoration: none; }"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\contact.ejs",
+    "size": 1132,
+    "language": "ejs",
+    "totalLines": 38,
+    "previewLines": [
+      "<!doctype html>",
+      "<html>",
+      "  <head>",
+      "    <meta charset=\"utf-8\" />",
+      "    <title>New Contact Message</title>",
+      "    <style>",
+      "      body { font-family: Arial, sans-serif; color: #111; }",
+      "      .container { padding: 16px; }",
+      "      .meta { margin-bottom: 12px; }",
+      "      .label { font-weight: 600; }"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\milestone-achievement.ejs",
+    "size": 3273,
+    "language": "ejs",
+    "totalLines": 123,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\">",
+      "  <title>Milestone Achieved - Flyobo Travel</title>",
+      "  <style>",
+      "    body {",
+      "      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
+      "      background: #f4f6f8;",
+      "      margin: 0;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\promotion.ejs",
+    "size": 2639,
+    "language": "ejs",
+    "totalLines": 54,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html>",
+      "<head>",
+      "    <meta charset=\"UTF-8\">",
+      "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "    <title><%= promotionTitle %> - Flyobo Travel</title>",
+      "</head>",
+      "<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;\">",
+      "    <div style=\"background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;\">",
+      "        <h1 style=\"margin: 0; font-size: 32px;\">🎁 Special Offer Just For You!</h1>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\referral-reward.ejs",
+    "size": 3316,
+    "language": "ejs",
+    "totalLines": 120,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\">",
+      "  <title>Referral Reward Earned - Flyobo Travel</title>",
+      "  <style>",
+      "    body {",
+      "      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
+      "      background: #f4f6f8;",
+      "      margin: 0;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\registration.ejs",
+    "size": 4133,
+    "language": "ejs",
+    "totalLines": 150,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\" />",
+      "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>",
+      "  <title>Welcome to Flyobo Travel</title>",
+      "  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap\" rel=\"stylesheet\">",
+      "  <style>",
+      "    body {",
+      "      margin: 0;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\reminder.ejs",
+    "size": 2327,
+    "language": "ejs",
+    "totalLines": 49,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html>",
+      "<head>",
+      "    <meta charset=\"UTF-8\">",
+      "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "    <title><%= reminderTitle %> - Flyobo Travel</title>",
+      "</head>",
+      "<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;\">",
+      "    <div style=\"background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;\">",
+      "        <h1 style=\"margin: 0; font-size: 32px;\">🔔 Reminder</h1>"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\reset-password.ejs",
+    "size": 3628,
+    "language": "ejs",
+    "totalLines": 156,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\" />",
+      "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>",
+      "  <title>Reset Your Flyobo Travel Password</title>",
+      "  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap\" rel=\"stylesheet\">",
+      "  <style>",
+      "    body {",
+      "      font-family: 'Poppins', sans-serif;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\reward-redemption.ejs",
+    "size": 3134,
+    "language": "ejs",
+    "totalLines": 117,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\">",
+      "  <title>Reward Redeemed - Flyobo Travel</title>",
+      "  <style>",
+      "    body {",
+      "      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
+      "      background: #f4f6f8;",
+      "      margin: 0;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\tier-upgrade.ejs",
+    "size": 3538,
+    "language": "ejs",
+    "totalLines": 133,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\">",
+      "  <title>Referral Tier Upgraded - Flyobo Travel</title>",
+      "  <style>",
+      "    body {",
+      "      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
+      "      background: #f4f6f8;",
+      "      margin: 0;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\mails\\verification.ejs",
+    "size": 4305,
+    "language": "ejs",
+    "totalLines": 139,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "    <meta charset=\"UTF-8\">",
+      "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "    <title>Verify Your Flyobo Travel Account</title>",
+      "    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap\" rel=\"stylesheet\">",
+      "    <style>",
+      "        body {",
+      "            font-family: 'Poppins', sans-serif;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\middleware\\catchAsyncErrors.js",
+    "size": 156,
+    "language": "javascript",
+    "totalLines": 5,
+    "previewLines": [
+      "const catchAsyncError = (thefunc) => (req, res, next) => {",
+      "    Promise.resolve(thefunc(req, res, next)).catch(next);",
+      "};",
+      "",
+      "export default catchAsyncError;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\middleware\\isAdmin.js",
+    "size": 532,
+    "language": "javascript",
+    "totalLines": 18,
+    "previewLines": [
+      "import catchAsyncErrors from \"./catchAsyncErrors.js\";",
+      "",
+      "const isAdmin = catchAsyncErrors(async (req, res, next) => {",
+      "  try {",
+      "    if (!req?.user) {",
+      "      return res.status(401).json({ success: false, message: \"Unauthorized\" });",
+      "    }",
+      "    if ((req.user.role || \"user\") !== \"admin\") {",
+      "      return res.status(403).json({ success: false, message: \"Admin access required\" });",
+      "    }"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\middleware\\isAuthenticated.js",
+    "size": 2482,
+    "language": "javascript",
+    "totalLines": 70,
+    "previewLines": [
+      "import jwt from \"jsonwebtoken\";",
+      "import { JWT_SECRET } from \"../config/env.js\";",
+      "import catchAsyncErrors from \"./catchAsyncErrors.js\";",
+      "import User from \"../models/user.model.js\";",
+      "",
+      "const isAuthenticated = catchAsyncErrors(async (req, res, next) => {",
+      "    try {",
+      "        let token = null;",
+      "",
+      "        // Accept multiple cookie names to tolerate inconsistencies across codepaths"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\middleware\\multerConfig.js",
+    "size": 3613,
+    "language": "javascript",
+    "totalLines": 128,
+    "previewLines": [
+      "import multer from 'multer';",
+      "import path from 'path';",
+      "import fs from 'fs';",
+      "",
+      "// Ensure upload directory exists",
+      "const ensureDir = (dirPath) => {",
+      "  if (!fs.existsSync(dirPath)) {",
+      "    fs.mkdirSync(dirPath, { recursive: true });",
+      "  }",
+      "};"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\bookings.model.js",
+    "size": 1891,
+    "language": "javascript",
+    "totalLines": 64,
+    "previewLines": [
+      "import mongoose from 'mongoose';",
+      "",
+      "const bookingSchema = new mongoose.Schema({",
+      "  packageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Package', required: true },",
+      "  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },",
+      "",
+      "  // Booking details",
+      "  travelers: { type: Number, required: true, min: 1 },",
+      "  startDate: { type: Date, required: true },",
+      "  endDate: { type: Date },"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\contact.model.js",
+    "size": 458,
+    "language": "javascript",
+    "totalLines": 14,
+    "previewLines": [
+      "import mongoose from 'mongoose';",
+      "",
+      "const contactSchema = new mongoose.Schema({",
+      "  name: { type: String, required: true },",
+      "  email: { type: String, required: true },",
+      "  subject: { type: String },",
+      "  message: { type: String, required: true },",
+      "  phone: { type: String },",
+      "  isRead: { type: Boolean, default: false },",
+      "}, { timestamps: true });"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\gallery.model.js",
+    "size": 1308,
+    "language": "javascript",
+    "totalLines": 51,
+    "previewLines": [
+      "import mongoose from \"mongoose\";",
+      "",
+      "const gallerySchema = new mongoose.Schema(",
+      "    {",
+      "        title: {",
+      "            type: String,",
+      "            required: [true, \"Title is required\"],",
+      "            trim: true,",
+      "            minlength: [3, \"Title must be at least 3 characters long\"],",
+      "        },"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\layout.model.js",
+    "size": 738,
+    "language": "javascript",
+    "totalLines": 30,
+    "previewLines": [
+      "import mongoose from \"mongoose\";",
+      "",
+      "const faqSchema = new mongoose.Schema({",
+      "    question: { type: String, required: true },",
+      "    answer: { type: String, required: true },",
+      "});",
+      "",
+      "const categorySchema = new mongoose.Schema({",
+      "    title: { type: String, required: true },",
+      "});"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\notification.model.js",
+    "size": 794,
+    "language": "javascript",
+    "totalLines": 32,
+    "previewLines": [
+      "import mongoose, { Schema } from \"mongoose\"",
+      "",
+      "const notificationSchema = new Schema({",
+      "    user: {",
+      "        type: mongoose.Schema.Types.ObjectId,",
+      "        ref: 'User',",
+      "        required: true",
+      "    },",
+      "    // The actor/source user who triggered this notification (optional)",
+      "    actor: {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\package.model.js",
+    "size": 1884,
+    "language": "javascript",
+    "totalLines": 101,
+    "previewLines": [
+      "import mongoose from 'mongoose';",
+      "",
+      "function parseReviewDate(val) {",
+      "  if (!val) return val;",
+      "  if (val instanceof Date) return val;",
+      "  if (typeof val === 'number') return new Date(val);",
+      "  if (typeof val === 'string') {",
+      "    const native = new Date(val);",
+      "    if (!isNaN(native.getTime())) return native;",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\referal.model.js",
+    "size": 1356,
+    "language": "javascript",
+    "totalLines": 63,
+    "previewLines": [
+      "import mongoose from 'mongoose';",
+      "",
+      "const referralSchema = new mongoose.Schema({",
+      "  code: {",
+      "    type: String,",
+      "    required: true,",
+      "    unique: true,",
+      "  },",
+      "  referrer: {",
+      "    type: mongoose.Schema.Types.ObjectId,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\referralSettings.model.js",
+    "size": 713,
+    "language": "javascript",
+    "totalLines": 15,
+    "previewLines": [
+      "import mongoose from 'mongoose';",
+      "",
+      "const ReferralSettingsSchema = new mongoose.Schema({",
+      "  enabled: { type: Boolean, default: true },",
+      "  referralBonus: { type: Number, default: 100 }, // amount given to referrer when someone signs up with their code",
+      "  signupBonus: { type: Number, default: 50 }, // amount given to new user on signup via referral",
+      "  minRedeemAmount: { type: Number, default: 50 },",
+      "  maxRedeemAmount: { type: Number, default: 10000 },",
+      "  currency: { type: String, default: 'INR' },",
+      "  updatedAt: { type: Date, default: Date.now }"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\models\\user.model.js",
+    "size": 8619,
+    "language": "javascript",
+    "totalLines": 376,
+    "previewLines": [
+      "import mongoose from 'mongoose';",
+      "import validator from 'validator';",
+      "",
+      "const userSchema = new mongoose.Schema({",
+      "  name: {",
+      "    type: String,",
+      "    required: [true, 'Name is required'],",
+      "    trim: true,",
+      "    minlength: [3, 'Name must be at least 3 characters long'],",
+      "  },"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\package-lock.json",
+    "size": 143810,
+    "language": "json",
+    "totalLines": 3793,
+    "previewLines": [
+      "{",
+      "  \"name\": \"server\",",
+      "  \"version\": \"0.0.0\",",
+      "  \"lockfileVersion\": 3,",
+      "  \"requires\": true,",
+      "  \"packages\": {",
+      "    \"\": {",
+      "      \"name\": \"server\",",
+      "      \"version\": \"0.0.0\",",
+      "      \"dependencies\": {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\package.json",
+    "size": 1185,
+    "language": "json",
+    "totalLines": 44,
+    "previewLines": [
+      "{",
+      "  \"name\": \"server\",",
+      "  \"version\": \"0.0.0\",",
+      "  \"private\": true,",
+      "  \"type\": \"module\",",
+      "  \"scripts\": {",
+      "    \"start\": \"node app.js\",",
+      "    \"dev\": \"nodemon app.js\",",
+      "    \"maintenance:enable\": \"node scripts/maintenance.js enable\",",
+      "    \"maintenance:disable\": \"node scripts/maintenance.js disable\","
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\public\\favicon.ico",
+    "size": 15406,
+    "language": "ico",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\public\\maintenance.html",
+    "size": 3689,
+    "language": "html",
+    "totalLines": 137,
+    "previewLines": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "    <meta charset=\"UTF-8\">",
+      "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "    <title>Maintenance - Flyobo</title>",
+      "    <style>",
+      "        * {",
+      "            margin: 0;",
+      "            padding: 0;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\analytics.route.js",
+    "size": 1013,
+    "language": "javascript",
+    "totalLines": 24,
+    "previewLines": [
+      "import express from 'express';",
+      "import isAuthenticated from '../middleware/isAuthenticated.js';",
+      "import { ",
+      "  getBookingsAnalytics, ",
+      "  getPackageAnalytics, ",
+      "  getUserAnalytics,",
+      "  getAdvancedBookingsAnalytics,",
+      "  getAdvancedReferralAnalyticsData,",
+      "  getAdvancedUsersAnalytics,",
+      "  getAdvancedPackagesAnalytics,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\auth.route.js",
+    "size": 801,
+    "language": "javascript",
+    "totalLines": 21,
+    "previewLines": [
+      "import express from 'express';",
+      "import {",
+      "  registration, login, logout, VerifyOTP,",
+      "  ResendOTP, forgotPassword, resetPassword",
+      "} from \"../controllers/auth.controller.js\";",
+      "import isAuthenticated from '../middleware/isAuthenticated.js';",
+      "",
+      "const authRoute = express.Router();",
+      "",
+      "authRoute.post('/register', registration);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\bookings.route.js",
+    "size": 1152,
+    "language": "javascript",
+    "totalLines": 31,
+    "previewLines": [
+      "import express from 'express';",
+      "import isAuthenticated from '../middleware/isAuthenticated.js';",
+      "import isAdmin from '../middleware/isAdmin.js';",
+      "import { ",
+      "  createBooking, ",
+      "  getAllBookings, ",
+      "  adminCreateBooking, ",
+      "  getUserBookings,",
+      "  getBookingAnalytics,",
+      "  getBookingTrends,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\contact.admin.route.js",
+    "size": 571,
+    "language": "javascript",
+    "totalLines": 14,
+    "previewLines": [
+      "import express from \"express\";",
+      "import isAuthenticated from \"../middleware/isAuthenticated.js\";",
+      "import isAdmin from \"../middleware/isAdmin.js\";",
+      "import { listContacts, getContact, deleteContact, markAsRead } from \"../controllers/contact.admin.controller.js\";",
+      "",
+      "const router = express.Router();",
+      "",
+      "router.get(\"/\", isAuthenticated, isAdmin, listContacts);",
+      "router.get(\"/:id\", isAuthenticated, isAdmin, getContact);",
+      "router.put(\"/:id/read\", isAuthenticated, isAdmin, markAsRead);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\contact.route.js",
+    "size": 229,
+    "language": "javascript",
+    "totalLines": 10,
+    "previewLines": [
+      "import express from \"express\";",
+      "import { handleContact } from \"../controllers/contact.controller.js\";",
+      "",
+      "const router = express.Router();",
+      "",
+      "// Public contact endpoint",
+      "router.post(\"/\", handleContact);",
+      "",
+      "export default router;",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\gallery.route.js",
+    "size": 617,
+    "language": "javascript",
+    "totalLines": 15,
+    "previewLines": [
+      "import express from \"express\";",
+      "import isAuthenticated from \"../middleware/isAuthenticated.js\";",
+      "import { getGalleryItems, uploadGalleryItem, deleteGalleryItem, updateGalleryItem } from \"../controllers/gallery.controller.js\";",
+      "import { uploadGalleryImage } from '../middleware/multerConfig.js';",
+      "",
+      "const Galleryrouter = express.Router();",
+      "",
+      "Galleryrouter.get(\"/\", getGalleryItems);",
+      "Galleryrouter.post(\"/\", isAuthenticated, uploadGalleryImage, uploadGalleryItem);",
+      "Galleryrouter.delete(\"/:id\", isAuthenticated, deleteGalleryItem);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\layout.route.js",
+    "size": 475,
+    "language": "javascript",
+    "totalLines": 13,
+    "previewLines": [
+      "import express from 'express';",
+      "import { createLayout, deleteLayout, editLayout, getLayout } from '../controllers/layout.controller.js';",
+      "import isAuthenticated from '../middleware/isAuthenticated.js';",
+      "",
+      "const layoutRoute = express.Router();",
+      "",
+      "layoutRoute.get('/', getLayout);",
+      "layoutRoute.post('/', isAuthenticated, createLayout);",
+      "layoutRoute.put('/', isAuthenticated, editLayout);",
+      "layoutRoute.delete('/', isAuthenticated, deleteLayout);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\notification.route.js",
+    "size": 591,
+    "language": "javascript",
+    "totalLines": 12,
+    "previewLines": [
+      "import express from 'express';",
+      "import { getNotification, UpdateNotification, getUnreadCount, markAllAsRead } from '../controllers/notification.controller.js';",
+      "import isAuthenticated from '../middleware/isAuthenticated.js';",
+      "",
+      "const notificationRoute = express.Router();",
+      "",
+      "notificationRoute.get('/', isAuthenticated, getNotification);",
+      "notificationRoute.put('/:id', isAuthenticated, UpdateNotification);",
+      "notificationRoute.get('/unread-count', isAuthenticated, getUnreadCount);",
+      "notificationRoute.post('/mark-all-read', isAuthenticated, markAllAsRead);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\package.route.js",
+    "size": 1348,
+    "language": "javascript",
+    "totalLines": 29,
+    "previewLines": [
+      "import express from 'express';",
+      "import {",
+      "  uploadPackage,",
+      "  EditPackage,",
+      "  getSinglePackage,",
+      "  addReview,",
+      "  deletePackage,",
+      "  getPackagebyUser,",
+      "  getAllPackages,",
+      "  getPackageLocations,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\referal.route.js",
+    "size": 581,
+    "language": "javascript",
+    "totalLines": 18,
+    "previewLines": [
+      "import express from 'express';",
+      "import {",
+      "  generateReferralCode,",
+      "  getUserReferrals,",
+      "  applyReferralCode,",
+      "  getReferralStats,",
+      "} from '../controllers/referal.controller.js';",
+      "import isAuthenticated from '../middleware/isAuthenticated.js';",
+      "",
+      "const referalRoute = express.Router();"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\referral.admin.route.js",
+    "size": 2256,
+    "language": "javascript",
+    "totalLines": 66,
+    "previewLines": [
+      "import express from 'express';",
+      "import isAuthenticated from '../middleware/isAuthenticated.js';",
+      "import isAdmin from '../middleware/isAdmin.js';",
+      "import {",
+      "  getReferralSettings,",
+      "  updateReferralSettings",
+      "} from '../controllers/referralSettings.controller.js';",
+      "import {",
+      "  getPendingReferralRewards,",
+      "  approveReferralReward,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\upload.route.js",
+    "size": 1962,
+    "language": "javascript",
+    "totalLines": 77,
+    "previewLines": [
+      "import express from 'express';",
+      "import { uploadGalleryImage } from '../middleware/multerConfig.js';",
+      "import { getFileUrl } from '../middleware/multerConfig.js';",
+      "import fs from 'fs';",
+      "import path from 'path';",
+      "",
+      "const uploadRouter = express.Router();",
+      "",
+      "// Test upload endpoint",
+      "uploadRouter.post('/test', uploadGalleryImage, (req, res) => {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\routes\\user.route.js",
+    "size": 2767,
+    "language": "javascript",
+    "totalLines": 69,
+    "previewLines": [
+      "import express from 'express';",
+      "import {",
+      "    getProfile, updateProfile,",
+      "    deleteUserAccount,",
+      "    getAllUsers,",
+      "    getUserBookings,",
+      "    addFavouritePackage,",
+      "    removeFavouritePackage,",
+      "    changePassword,",
+      "    updateAvatar,"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\scripts\\generate-package-slugs.js",
+    "size": 1230,
+    "language": "javascript",
+    "totalLines": 39,
+    "previewLines": [
+      "import mongoose from 'mongoose';",
+      "import Package from '../models/package.model.js';",
+      "import dotenv from 'dotenv';",
+      "",
+      "dotenv.config({ path: './server/.env' });",
+      "",
+      "function slugify(text = '') {",
+      "  return String(text)",
+      "    .toLowerCase()",
+      "    .trim()"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\scripts\\maintenance.js",
+    "size": 2080,
+    "language": "javascript",
+    "totalLines": 55,
+    "previewLines": [
+      "#!/usr/bin/env node",
+      "",
+      "// Script to enable/disable maintenance mode",
+      "import fs from 'fs';",
+      "import path from 'path';",
+      "import { fileURLToPath } from 'url';",
+      "",
+      "// Get __dirname equivalent in ES modules",
+      "const __filename = fileURLToPath(import.meta.url);",
+      "const __dirname = path.dirname(__filename);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\analytics.services.js",
+    "size": 17995,
+    "language": "javascript",
+    "totalLines": 585,
+    "previewLines": [
+      "import Booking from \"../models/bookings.model.js\";",
+      "import Referral from \"../models/referal.model.js\";",
+      "import User from \"../models/user.model.js\";",
+      "",
+      "export const generateLast12MonthsData = async (model, options = {}) => {",
+      "  const { filter = {}, dateField = \"createdAt\", months = 12 } = options;",
+      "",
+      "  const now = new Date();",
+      "",
+      "  const monthPromises = Array.from({ length: months }, (_, i) => {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\auth.services.js",
+    "size": 3230,
+    "language": "javascript",
+    "totalLines": 96,
+    "previewLines": [
+      "import jwt from \"jsonwebtoken\";",
+      "import { JWT_SECRET, JWT_EXPIRES_IN, NODE_ENV, FRONTEND_URL } from \"../config/env.js\";",
+      "",
+      "export const parseExpiryToMs = (expiresIn) => {",
+      "    const match = expiresIn.match(/^(\\d+)([smhd])$/);",
+      "    if (!match) return 7 * 24 * 60 * 60 * 1000;",
+      "",
+      "    const [_, value, unit] = match;",
+      "    const num = parseInt(value, 10);",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\booking.services.js",
+    "size": 943,
+    "language": "javascript",
+    "totalLines": 25,
+    "previewLines": [
+      "import Booking from \"../models/bookings.model.js\"",
+      "import User from \"../models/user.model.js\"",
+      "import { processAutomaticReferralReward } from \"./referral.services.js\"",
+      "",
+      "export const newBooking = async (data, req, res) => {",
+      "    const booking = await Booking.create(data);",
+      "    return booking;",
+      "}",
+      "",
+      "export const getAllBookingsServices = async () => {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\notification.services.js",
+    "size": 14372,
+    "language": "javascript",
+    "totalLines": 384,
+    "previewLines": [
+      "import Notification from \"../models/notification.model.js\";",
+      "import User from \"../models/user.model.js\";",
+      "import sendMail from \"../config/nodemailer.js\";",
+      "",
+      "// Send referral notification to referrer",
+      "export const sendReferralNotification = async (referrerId, referredUserName, rewardAmount, bookingAmount, actor = null) => {",
+      "    try {",
+      "        const referrer = await User.findById(referrerId);",
+      "        if (!referrer) {",
+      "            throw new Error('Referrer not found');"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\otp.services.js",
+    "size": 103,
+    "language": "javascript",
+    "totalLines": 3,
+    "previewLines": [
+      "export const generateOTP = () => {",
+      "    return (Math.floor(1000 + Math.random() * 9000)).toString();",
+      "}"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\package.services.js",
+    "size": 2921,
+    "language": "javascript",
+    "totalLines": 106,
+    "previewLines": [
+      "import Package from \"../models/package.model.js\";",
+      "",
+      "// Try to parse various string date formats, return Date or null",
+      "function parseFlexibleDate(input) {",
+      "  if (!input) return null;",
+      "  if (input instanceof Date) return isNaN(input.getTime()) ? null : input;",
+      "  if (typeof input !== \"string\") return null;",
+      "  const m = input.match(/^\\s*(\\d{1,2})[-\\/](\\d{1,2})[-\\/](\\d{4})\\s*$/);",
+      "  if (m) {",
+      "    const d = Number(m[1]);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\referral.services.js",
+    "size": 17374,
+    "language": "javascript",
+    "totalLines": 451,
+    "previewLines": [
+      "import User from \"../models/user.model.js\";",
+      "import Booking from \"../models/bookings.model.js\";",
+      "import { sendReferralNotification, sendMilestoneNotification, sendTierUpgradeNotification } from \"./notification.services.js\";",
+      "",
+      "// Process referral rewards automatically when a booking is completed",
+      "export const processAutomaticReferralReward = async (bookingId) => {",
+      "    try {",
+      "        // Find the booking with populated user data",
+      "        const booking = await Booking.findById(bookingId).populate('userId');",
+      "        if (!booking) {"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\scheduled.notifications.service.js",
+    "size": 3661,
+    "language": "javascript",
+    "totalLines": 98,
+    "previewLines": [
+      "import User from \"../models/user.model.js\";",
+      "import { sendBirthdayNotification, sendAnniversaryNotification } from \"./notification.services.js\";",
+      "import cron from 'node-cron';",
+      "",
+      "// Send birthday notifications",
+      "export const sendBirthdayNotifications = async () => {",
+      "    try {",
+      "        // Get users whose birthday is today",
+      "        const today = new Date();",
+      "        const month = today.getMonth() + 1; // getMonth() is zero-indexed"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\services\\user.services.js",
+    "size": 969,
+    "language": "javascript",
+    "totalLines": 25,
+    "previewLines": [
+      "import User from \"../models/user.model.js\";",
+      "",
+      "export const getUserById = async (id, res) => {",
+      "    const user = await User.findById(id).select('-password -otp -otpExpireAt -resetPasswordOtp -resetPasswordOtpExpireAt -__v');",
+      "    if (!user) {",
+      "        return res.status(404).json({ success: false, message: 'User not found' });",
+      "    }",
+      "    return res.status(200).json({ success: true, user });",
+      "};",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\test\\advanced.referral.test.js",
+    "size": 4909,
+    "language": "javascript",
+    "totalLines": 136,
+    "previewLines": [
+      "// Test file for advanced referral features",
+      "import { getReferralLeaderboard, trackSocialShare, getUserReferralAnalytics, generateCustomReferralUrl } from \"../services/referral.services.js\";",
+      "import { getTopReferrals, depositReferralReward, getUserReferralHistory } from \"../controllers/referral.admin.controller.js\";",
+      "",
+      "// Test referral leaderboard",
+      "export const testReferralLeaderboard = async (limit = 10) => {",
+      "    console.log(\"Testing referral leaderboard...\");",
+      "    ",
+      "    try {",
+      "        const result = await getReferralLeaderboard(limit);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\test\\referral.notifications.test.js",
+    "size": 3777,
+    "language": "javascript",
+    "totalLines": 110,
+    "previewLines": [
+      "// Test file for referral and notification features",
+      "import { trackSocialShare, getUserReferralAnalytics, generateCustomReferralUrl } from \"../services/referral.services.js\";",
+      "import { sendBirthdayNotification, sendAnniversaryNotification, sendPromotionalNotification } from \"../services/notification.services.js\";",
+      "",
+      "// Test social sharing tracking",
+      "export const testSocialShareTracking = async (userId) => {",
+      "    console.log(\"Testing social share tracking...\");",
+      "    ",
+      "    try {",
+      "        const platforms = ['facebook', 'twitter', 'whatsapp', 'email'];"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\test-connection.js",
+    "size": 521,
+    "language": "javascript",
+    "totalLines": 18,
+    "previewLines": [
+      "import express from \"express\";",
+      "import \"dotenv/config\";",
+      "import { PORT } from \"./config/env.js\";",
+      "",
+      "const app = express();",
+      "",
+      "app.get(\"/\", (req, res) => {",
+      "  res.json({ message: \"Server is running\", port: PORT });",
+      "});",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\test-dotenv.js",
+    "size": 123,
+    "language": "javascript",
+    "totalLines": 3,
+    "previewLines": [
+      "import \"dotenv/config\";",
+      "console.log(\"All env variables:\", process.env);",
+      "console.log(\"MONGO_URI:\", process.env.MONGO_URI);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\test-env.js",
+    "size": 197,
+    "language": "javascript",
+    "totalLines": 5,
+    "previewLines": [
+      "import \"dotenv/config\";",
+      "import { MONGO_URI } from \"./config/env.js\";",
+      "",
+      "console.log(\"MONGO_URI from config/env.js:\", MONGO_URI);",
+      "console.log(\"MONGO_URI from process.env:\", process.env.MONGO_URI);"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1761579595595-668502723.png",
+    "size": 801435,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1761579609595-589273859.png",
+    "size": 801435,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1761580055290-481801060.jpg",
+    "size": 341486,
+    "language": "jpg",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1761991758345-208345665.jpg",
+    "size": 41736,
+    "language": "jpg",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1762065374624-212363050.webp",
+    "size": 460738,
+    "language": "webp",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1762065394472-917656836.jpeg",
+    "size": 98336,
+    "language": "jpeg",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1762065537341-302401015.jpeg",
+    "size": 98336,
+    "language": "jpeg",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1762074948658-487780005.png",
+    "size": 246098,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\gallery\\image-1763140382223-843773720.webp",
+    "size": 83804,
+    "language": "webp",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\packages\\image-1760591076880-643223373.png",
+    "size": 1059399,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\packages\\image-1760591149569-833105658.png",
+    "size": 811116,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\packages\\image-1760591675928-580152097.png",
+    "size": 811116,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\packages\\image-1761580234661-212564267.jpg",
+    "size": 341486,
+    "language": "jpg",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\uploads\\packages\\images-1760543794789-865766149.png",
+    "size": 1059399,
+    "language": "png",
+    "totalLines": null,
+    "previewLines": [],
+    "todoCount": 0,
+    "isBinary": true
+  },
+  {
+    "path": "server\\utils\\Analytics.generator.js",
+    "size": 855,
+    "language": "javascript",
+    "totalLines": 37,
+    "previewLines": [
+      "export const generateLast12MonthsData = async (model) => {",
+      "  const last12Months = [];",
+      "  const currentDate = new Date();",
+      "  currentDate.setDate(currentDate.getDate() + 1);",
+      "",
+      "  for (let i = 11; i >= 0; i--) {",
+      "    const endDate = new Date(",
+      "      currentDate.getFullYear(),",
+      "      currentDate.getMonth(),",
+      "      currentDate.getDate() - i * 28"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\utils\\ErrorHandler.js",
+    "size": 237,
+    "language": "javascript",
+    "totalLines": 10,
+    "previewLines": [
+      "class ErrorHandler extends Error {",
+      "    constructor(message,statusCode){",
+      "        super(message);",
+      "        this.statusCode = statusCode;",
+      "",
+      "        Error.captureStackTrace(this,this.constructor);",
+      "    }",
+      "}",
+      "",
+      "export default ErrorHandler;"
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  },
+  {
+    "path": "server\\utils\\jwt.js",
+    "size": 1219,
+    "language": "javascript",
+    "totalLines": 48,
+    "previewLines": [
+      "import {",
+      "  ACCESS_TOKEN_EXPIRES_IN,",
+      "  REFRESH_TOKEN_EXPIRES_IN,",
+      "  NODE_ENV,",
+      "} from \"../config/env.js\";",
+      "import redisClient from \"../database/redis.js\";",
+      "",
+      "export const refreshTokenExpire = parseInt(REFRESH_TOKEN_EXPIRES_IN);",
+      "export const accessTokenExpire = parseInt(ACCESS_TOKEN_EXPIRES_IN);",
+      ""
+    ],
+    "todoCount": 0,
+    "isBinary": false
+  }
+]

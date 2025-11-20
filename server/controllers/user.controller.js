@@ -455,15 +455,28 @@ export const redeemRewards = async (req, res) => {
       amount: amount,
       description: `Redeem request for ₹${amount}`,
       status: 'pending',
-      requestedAt: new Date()
+      requestedAt: new Date(),
+      // Snapshot user's bank details so admin sees the details at time of request
+      bankDetails: {
+        accountHolderName: user.bankDetails?.accountHolderName || null,
+        accountNumber: user.bankDetails?.accountNumber || null,
+        bankName: user.bankDetails?.bankName || null,
+        ifscCode: user.bankDetails?.ifscCode || null
+      }
     };
 
     user.referral.rewardHistory.push(historyEntry);
 
     await user.save();
 
-    // Notify admins or user (implement sendRewardRedemptionNotification to inform admins if desired)
-    await sendRewardRedemptionNotification(user._id, amount);
+    // Notify admins or user (don't await — run async so request returns quickly)
+    sendRewardRedemptionNotification(user._id, amount)
+      .then(() => {
+        // notification sent (no-op)
+      })
+      .catch((err) => {
+        console.error('Reward redemption notification error:', err);
+      });
 
     res.status(200).json({
       success: true,
@@ -477,62 +490,151 @@ export const redeemRewards = async (req, res) => {
   }
 };
 
-// Admin: list pending redeem requests across users
+// ===============================
+// GET ALL REDEEM REQUESTS (ADMIN)
+// ===============================
 export const getRedeemRequests = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admins only."
+      });
     }
 
-    // Find users that have pending redeem entries
-    const users = await User.find({ 'referral.rewardHistory.status': 'pending' })
-      .select('name email referral')
-      .lean();
+    const { status = "pending", type = "redeem", page = 1, limit = 50 } = req.query;
 
-    const requests = [];
-    users.forEach((u) => {
-      const pending = (u.referral?.rewardHistory || []).filter((h) => h.status === 'pending');
-      pending.forEach((h) => {
-        requests.push({
-          userId: u._id,
-          name: u.name,
-          email: u.email,
-          amount: h.amount,
-          description: h.description,
-          requestedAt: h.requestedAt || h.createdAt || null,
-          historyId: h._id,
-        });
-      });
+    const pageNum = Math.max(parseInt(page) || 1, 1);
+    const limitNum = Math.max(parseInt(limit) || 50, 1);
+    const skip = (pageNum - 1) * limitNum;
+
+    // AGGREGATION PIPELINE
+    const pipeline = [
+      { $unwind: { path: "$referral.rewardHistory", preserveNullAndEmptyArrays: false } }
+    ];
+
+    const match = {};
+    if (status !== "all") match["referral.rewardHistory.status"] = status;
+    if (type !== "all") match["referral.rewardHistory.type"] = type;
+
+    if (Object.keys(match).length > 0) pipeline.push({ $match: match });
+
+    pipeline.push(
+      {
+        $project: {
+          _id: 0,
+          userId: "$_id",
+          name: "$name",
+          email: "$email",
+          bankDetails: "$bankDetails",
+          history: "$referral.rewardHistory"
+        }
+      },
+      {
+        $sort: {
+          "history.requestedAt": -1,
+          "history.createdAt": -1
+        }
+      }
+    );
+
+    // Count
+    const countPipeline = [...pipeline, { $count: "total" }];
+    const countResult = await User.aggregate(countPipeline);
+    const total = countResult[0]?.total || 0;
+
+    // Pagination
+    pipeline.push({ $skip: skip }, { $limit: limitNum });
+
+    const rows = await User.aggregate(pipeline);
+
+    const requests = rows.map((r) => ({
+      userId: r.userId,
+      name: r.name,
+      email: r.email,
+      amount: r.history.amount,
+      type: r.history.type,
+      description: r.history.description,
+      status: r.history.status,
+      requestedAt: r.history.requestedAt || r.history.createdAt || null,
+      historyId: r.history._id,
+      bankDetails: r.history.bankDetails || r.bankDetails || null,
+      processedAt: r.history.processedAt || null,
+      processedBy: r.history.processedBy || null,
+      depositReference: r.history.depositReference || null,
+      adminNote: r.history.adminNote || null
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: requests,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
     });
-
-    res.status(200).json({ success: true, data: requests });
   } catch (error) {
-    console.error('Get redeem requests error:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    console.error("Get redeem requests error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
   }
 };
 
-// Admin: process a redeem request (approve or reject)
+// =======================================
+// PROCESS REDEEM REQUEST (ADMIN)
+// action = approve | reject
+// =======================================
 export const processRedeemRequest = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admins only."
+      });
     }
 
     const { userId, historyId, action, depositReference, adminNote } = req.body;
+
     if (!userId || !historyId || !action) {
-      return res.status(400).json({ success: false, message: 'userId, historyId and action are required' });
+      return res.status(400).json({
+        success: false,
+        message: "userId, historyId and action are required"
+      });
     }
 
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
 
     const entry = user.referral?.rewardHistory?.id(historyId);
-    if (!entry) return res.status(404).json({ success: false, message: 'Redeem request not found' });
-    if (entry.status !== 'pending') return res.status(400).json({ success: false, message: 'Request already processed' });
+    if (!entry) {
+      return res.status(404).json({
+        success: false,
+        message: "Redeem request not found"
+      });
+    }
 
-    if (action === 'approve') {
-      entry.status = 'paid';
+    if (entry.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "This request is already processed"
+      });
+    }
+
+    // =============================
+    // APPROVE
+    // =============================
+    if (action === "approve") {
+      entry.status = "paid";
       entry.processedAt = new Date();
       entry.processedBy = req.user._id;
       entry.depositReference = depositReference || null;
@@ -540,35 +642,49 @@ export const processRedeemRequest = async (req, res) => {
 
       await user.save();
 
-      // Optionally notify user about payment
-      // await sendPaymentProcessedNotification(user._id, entry.amount);
-
-      return res.status(200).json({ success: true, message: 'Redeem request approved and marked as paid', entry });
+      return res.status(200).json({
+        success: true,
+        message: "Redeem request approved and marked as paid",
+        entry
+      });
     }
 
-    if (action === 'reject') {
-      entry.status = 'rejected';
+    // =============================
+    // REJECT
+    // =============================
+    if (action === "reject") {
+      entry.status = "rejected";
       entry.processedAt = new Date();
       entry.processedBy = req.user._id;
       entry.adminNote = adminNote || null;
 
-      // Return amount back to user's availableRewards
-      user.referral.availableRewards = (user.referral.availableRewards || 0) + (entry.amount || 0);
+      user.referral.availableRewards =
+        (user.referral.availableRewards || 0) + (entry.amount || 0);
 
       await user.save();
 
-      // Optionally notify user about rejection
-      // await sendPaymentRejectedNotification(user._id, entry.amount);
-
-      return res.status(200).json({ success: true, message: 'Redeem request rejected and amount returned to user', entry, availableRewards: user.referral.availableRewards });
+      return res.status(200).json({
+        success: true,
+        message: "Redeem request rejected, amount refunded to user",
+        entry,
+        availableRewards: user.referral.availableRewards
+      });
     }
 
-    return res.status(400).json({ success: false, message: 'Invalid action' });
+    return res.status(400).json({
+      success: false,
+      message: "Invalid action. Use approve or reject."
+    });
   } catch (error) {
-    console.error('Process redeem request error:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    console.error("Process redeem request error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
   }
 };
+
 
 // Get referral leaderboard
 export const getReferralLeaderboard = async (req, res) => {
@@ -950,7 +1066,6 @@ export const generateCustomReferralUrlController = async (req, res) => {
 
 
 // Bank details sairam!
-// Update user bank details
 export const updateBankDetails = async (req, res) => {
   try {
     const { accountHolderName, accountNumber, bankName, ifscCode } = req.body;

@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
     select: false,
     minlength: [6, 'Password must be at least 6 characters long'],
   },
@@ -101,7 +100,6 @@ const userSchema = new mongoose.Schema({
       default: []
     }
   },
-  // Bank details for reward redemption
   bankDetails: {
     accountHolderName: {
       type: String,
@@ -177,7 +175,7 @@ const userSchema = new mongoose.Schema({
     rewardHistory: [{
       type: {
         type: String,
-        enum: ['referral_bonus', 'signup_bonus', 'booking_bonus', 'milestone_bonus', 'tier_bonus'],
+        enum: ['referral_bonus', 'signup_bonus', 'booking_bonus', 'milestone_bonus', 'tier_bonus', 'redeem'],
       },
       amount: Number,
       description: String,
@@ -187,12 +185,39 @@ const userSchema = new mongoose.Schema({
       },
       status: {
         type: String,
-        enum: ['pending', 'credited', 'used', 'expired'],
+        enum: ['pending', 'credited', 'used', 'expired', 'paid', 'rejected'],
         default: 'pending',
       },
       expiryDate: {
         type: Date,
         default: null
+      },
+      requestedAt: {
+        type: Date,
+        default: null
+      },
+      processedAt: {
+        type: Date,
+        default: null
+      },
+      processedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+      },
+      depositReference: {
+        type: String,
+        default: null
+      },
+      adminNote: {
+        type: String,
+        default: null
+      },
+      bankDetails: {
+        accountHolderName: { type: String, default: null },
+        accountNumber: { type: String, default: null },
+        bankName: { type: String, default: null },
+        ifscCode: { type: String, default: null }
       }
     }],
     // Advanced Referral Features

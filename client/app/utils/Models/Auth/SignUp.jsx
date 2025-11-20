@@ -26,6 +26,44 @@ export default function SignUp({ setOpen, setRoute }) {
   const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [errors, setErrors] = useState({});
+  const API_URL = NEXT_PUBLIC_BACKEND_URL || (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BACKEND_URL) || '';
+
+  const openOAuthPopup = (url) => {
+    try {
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2.5;
+      const popup = window.open(url, 'oauth', `width=${width},height=${height},left=${left},top=${top}`);
+      if (!popup) {
+        toast.error('Popup blocked. Allow popups and try again.');
+        return;
+      }
+
+      const listener = (e) => {
+        try {
+          const expectedOrigin = new URL(API_URL).origin;
+          if (e.origin !== expectedOrigin && e.origin !== window.location.origin) return;
+        } catch (err) {}
+        const payload = e.data || {};
+        const token = payload.token;
+        const user = payload.user;
+        if (token) {
+          localStorage.setItem('auth_token', token);
+          // set default axios header if axios is used elsewhere
+          try { window.axios && (window.axios.defaults.headers.common['Authorization'] = `Bearer ${token}`); } catch(e) {}
+        }
+        if (user) dispatch(setAuthUser(user));
+        if (setOpen) setOpen(false);
+        toast.success('Login successful');
+        window.removeEventListener('message', listener);
+      };
+
+      window.addEventListener('message', listener, false);
+    } catch (err) {
+      toast.error('OAuth failed');
+    }
+  };
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -295,12 +333,14 @@ export default function SignUp({ setOpen, setRoute }) {
       <div className="grid grid-cols-2 gap-3 mt-4">
         <button
           type="button"
+          onClick={() => openOAuthPopup(`${API_URL}/auth/oauth/google`)}
           className="flex items-center justify-center gap-2 border-2 border-gray-300 dark:border-gray-700 rounded-xl py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
         >
           <FcGoogle size={20} /> Google
         </button>
         <button
           type="button"
+          onClick={() => openOAuthPopup(`${API_URL}/auth/oauth/github`)}
           className="flex items-center justify-center gap-2 border-2 border-gray-300 dark:border-gray-700 rounded-xl py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
         >
           <AiFillGithub size={20} /> GitHub
