@@ -34,10 +34,36 @@ const buildCookieForToken = (res, token) => {
 };
 
 // Helper to respond with a small HTML page that posts token+user back to opener, then closes
+// The script will attempt to use the opener's actual origin (when readable) to avoid
+// target-origin mismatches (e.g. when FRONTEND_URL was left as localhost in prod).
 const postMessageAndClose = (res, frontendUrl, payload) => {
   const safe = JSON.stringify(payload).replace(/</g, '\\u003c');
-  const origin = frontendUrl || '*';
-  const html = `<!doctype html><html><head><meta charset="utf-8"></head><body><script>\n    try{ window.opener.postMessage(${safe}, '${origin}'); }catch(e){}\n    try{ window.close(); } catch(e){}\n  </script></body></html>`;
+  // Render a small page that determines the correct target origin at runtime.
+  // Priority: use opener.location.origin (if accessible), otherwise use the configured
+  // frontendUrl, and finally fall back to '*'. This prevents the browser error
+  // "Failed to execute 'postMessage'... target origin does not match" when origins differ.
+  const configured = frontendUrl || '';
+  const html = `<!doctype html><html><head><meta charset="utf-8"></head><body><script>
+    (function(){
+      try{
+        var payload = ${safe};
+        var target = '';
+        try {
+          if (window.opener && window.opener.location && window.opener.location.origin) {
+            target = window.opener.location.origin;
+          }
+        } catch(e) {
+          // Accessing window.opener.location may throw if cross-origin — silently ignore.
+        }
+        if (!target) {
+          target = ${configured ? `'${configured.replace(/'/g, "\\'")}'` : "''"};
+        }
+        if (!target) target = '*';
+        try { window.opener.postMessage(payload, target); } catch(e) { /* ignore */ }
+      } catch(e) {}
+      try{ window.close(); } catch(e){}
+    })();
+  </script></body></html>`;
   res.send(html);
 }
 
