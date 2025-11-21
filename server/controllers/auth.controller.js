@@ -24,8 +24,8 @@ const buildCookieForToken = (res, token) => {
 
   const cookieOptions = {
     httpOnly: true,
-    secure: _NODE_ENV === "production",
-    sameSite: _NODE_ENV === "production" ? "none" : "lax",
+    secure: NODE_ENV === "production",
+    sameSite: NODE_ENV === "production" ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
     ...(cookieDomain ? { domain: cookieDomain } : {}),
