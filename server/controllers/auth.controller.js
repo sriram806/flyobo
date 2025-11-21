@@ -32,40 +32,41 @@ const buildCookieForToken = (res, token) => {
   };
   res.cookie('token', token, cookieOptions);
 };
-
-// Helper to respond with a small HTML page that posts token+user back to opener, then closes
-// The script will attempt to use the opener's actual origin (when readable) to avoid
-// target-origin mismatches (e.g. when FRONTEND_URL was left as localhost in prod).
 const postMessageAndClose = (res, frontendUrl, payload) => {
   const safe = JSON.stringify(payload).replace(/</g, '\\u003c');
-  // Render a small page that determines the correct target origin at runtime.
-  // Priority: use opener.location.origin (if accessible), otherwise use the configured
-  // frontendUrl, and finally fall back to '*'. This prevents the browser error
-  // "Failed to execute 'postMessage'... target origin does not match" when origins differ.
   const configured = frontendUrl || '';
   const html = `<!doctype html><html><head><meta charset="utf-8"></head><body><script>
     (function(){
       try{
         var payload = ${safe};
-        var target = '';
-        var openerAccessible = false;
+        var openerAvailable = false;
         try {
-          if (window.opener && window.opener.location && window.opener.location.origin) {
-            target = window.opener.location.origin;
-            openerAccessible = true;
+          if (window.opener) openerAvailable = true;
+        } catch(e) { openerAvailable = false; }
+
+        if (openerAvailable) {
+          // If the popup was opened by the frontend, try to postMessage and close.
+          var target = '*';
+          try {
+            if (window.opener && window.opener.location && window.opener.location.origin) {
+              target = window.opener.location.origin;
+            }
+          } catch(e) {
+            // ignore cross-origin access errors and fall back to '*'
           }
-        } catch(e) {
-          // Accessing window.opener.location may throw if cross-origin — silently ignore.
+          try { window.opener.postMessage(payload, target); } catch(e) { /* ignore */ }
+          try{ window.close(); } catch(e){}
+        } else {
+          // No opener (e.g. in-app browser). Redirect to frontend with payload in fragment.
+          try {
+            var base = ${configured ? `'${configured.replace(/'/g, "\\'")}'` : "''"};
+            if (!base) base = '/';
+            if (base.endsWith('/')) base = base.slice(0, -1);
+            var redirectUrl = base + '/auth/oauth-redirect#payload=' + encodeURIComponent(JSON.stringify(payload));
+            window.location.href = redirectUrl;
+          } catch(e) { /* ignore */ }
         }
-        // If we could not read the opener's origin (cross-origin), avoid falling back
-        // to a configured origin that might be stale (e.g., localhost). Use '*' to
-        // ensure the message is delivered to the opener window.
-        if (!openerAccessible) {
-          target = '*';
-        }
-        try { window.opener.postMessage(payload, target); } catch(e) { /* ignore */ }
       } catch(e) {}
-      try{ window.close(); } catch(e){}
     })();
   </script></body></html>`;
   res.send(html);
@@ -116,7 +117,6 @@ export const registration = async (req, res) => {
         await applyReferralCode(referralCode.trim().toUpperCase(), createdUser._id);
       } catch (referralError) {
         console.error("Referral application error:", referralError);
-        // Continue with registration even if referral fails
       }
     }
 
