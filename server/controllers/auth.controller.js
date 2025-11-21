@@ -48,17 +48,21 @@ const postMessageAndClose = (res, frontendUrl, payload) => {
       try{
         var payload = ${safe};
         var target = '';
+        var openerAccessible = false;
         try {
           if (window.opener && window.opener.location && window.opener.location.origin) {
             target = window.opener.location.origin;
+            openerAccessible = true;
           }
         } catch(e) {
           // Accessing window.opener.location may throw if cross-origin — silently ignore.
         }
-        if (!target) {
-          target = ${configured ? `'${configured.replace(/'/g, "\\'")}'` : "''"};
+        // If we could not read the opener's origin (cross-origin), avoid falling back
+        // to a configured origin that might be stale (e.g., localhost). Use '*' to
+        // ensure the message is delivered to the opener window.
+        if (!openerAccessible) {
+          target = '*';
         }
-        if (!target) target = '*';
         try { window.opener.postMessage(payload, target); } catch(e) { /* ignore */ }
       } catch(e) {}
       try{ window.close(); } catch(e){}
