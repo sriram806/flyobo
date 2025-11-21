@@ -248,7 +248,6 @@ export const login = async (req, res) => {
 // 5. Logout
 export const logout = async (req, res) => {
   try {
-    // Mirror domain logic from createSendToken so the cookie cleared matches the domain it was set on
     let cookieDomain;
     try {
       const raw = process.env.COOKIE_DOMAIN || FRONTEND_URL;
@@ -466,6 +465,41 @@ export const githubCallback = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).send('OAuth Error');
+  }
+};
+
+// Debugging endpoint to inspect computed cookie options and relevant envs
+export const debugCookieInfo = (req, res) => {
+  try {
+    const raw = process.env.COOKIE_DOMAIN || FRONTEND_URL || '';
+    let cookieDomain;
+    try {
+      if (raw) {
+        const host = raw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
+        cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+      }
+    } catch (e) {
+      cookieDomain = undefined;
+    }
+
+    const info = {
+      NODE_ENV: NODE_ENV || process.env.NODE_ENV || 'unknown',
+      FRONTEND_URL: FRONTEND_URL || process.env.FRONTEND_URL || null,
+      COOKIE_DOMAIN_RAW: process.env.COOKIE_DOMAIN || null,
+      computedCookieDomain: cookieDomain || null,
+      cookieOptionsPreview: {
+        httpOnly: true,
+        secure: (NODE_ENV === 'production') || (process.env.NODE_ENV === 'production'),
+        sameSite: (NODE_ENV === 'production') ? 'none' : 'lax',
+        path: '/',
+        domain: cookieDomain || null,
+      }
+    };
+
+    return res.status(200).json({ success: true, info });
+  } catch (err) {
+    console.error('debugCookieInfo error', err);
+    return res.status(500).json({ success: false, message: 'Could not compute cookie info', error: err.message });
   }
 };
 
