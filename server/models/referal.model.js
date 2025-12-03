@@ -1,63 +1,85 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import crypto from "crypto";
 
-const referralSchema = new mongoose.Schema({
-  code: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  referrer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  referred: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'completed', 'expired'],
-    default: 'pending',
-  },
-  reward: {
-    type: Number,
-    default: 0,
-  },
-  expiryDate: {
-    type: Date,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+const referralSchema = new mongoose.Schema(
+  {
+    code: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
 
-referralSchema.pre('save', async function (next) {
-  if (!this.code) {
-    const generateCode = () => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return code;
-    };
+    referrer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
 
-    let code;
-    let isUnique = false;
-    while (!isUnique) {
-      code = generateCode();
-      const existingReferral = await this.constructor.findOne({ code });
-      if (!existingReferral) {
-        isUnique = true;
-      }
-    }
-    this.code = code;
+    referred: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    status: {
+      type: String,
+      enum: ["pending", "completed", "expired"],
+      default: "pending",
+    },
+
+    reward: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    expiryDate: {
+      type: Date,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
   }
+);
+
+// Generate unique referral code
+async function generateUniqueCode(model) {
+  let code;
+  let exists = true;
+
+  while (exists) {
+    code = crypto.randomBytes(4).toString("hex").toUpperCase();
+    exists = await model.findOne({ code });
+  }
+  return code;
+}
+
+// Pre-save hook
+referralSchema.pre("save", async function (next) {
+  if (!this.code) {
+    this.code = await generateUniqueCode(this.constructor);
+  }
+
+  // Auto-expire (if date passed)
+  if (this.expiryDate < new Date() && this.status === "pending") {
+    this.status = "expired";
+  }
+
   next();
 });
 
-const Referral = mongoose.model('Referral', referralSchema);
+// Virtuals
+referralSchema.virtual("isExpired").get(function () {
+  return this.expiryDate < new Date();
+});
+
+referralSchema.virtual("rewardInRupees").get(function () {
+  return `₹${this.reward}`;
+});
+
+const Referral = mongoose.model("Referral", referralSchema);
+
 export default Referral;

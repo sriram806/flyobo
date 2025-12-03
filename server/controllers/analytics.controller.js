@@ -1,38 +1,33 @@
 import Booking from "../models/bookings.model.js";
-import Package from "../models/package.model.js";
 import User from "../models/user.model.js";
-import Referral from "../models/referal.model.js";
-import { 
-  generateLast12MonthsData, 
+import {
   getAdvancedBookingAnalytics,
   getAdvancedReferralAnalytics,
-  getUserDepartmentBreakdown,
   getAdvancedUserAnalytics,
-  getAdvancedPackageAnalytics,
+  getBasicModelAnalytics,
+  getCompletePackageAnalytics,
 } from "../services/analytics.services.js";
 
 export const getUserAnalytics = async (req, res) => {
   try {
-    const last12MonthsData = await generateLast12MonthsData(User, { filter: { status: "active" } });
+    const userBasic = await getBasicModelAnalytics(User, { filter: { status: "active" } });
 
-    const totalUsers = await User.countDocuments();
+    const topUsers = await User.aggregate([
+      { $project: { name: 1, email: 1, totalBookings: { $ifNull: ["$stats.totalBookings", 0] }, totalSpent: { $ifNull: ["$stats.totalSpent", 0] } } },
+      { $sort: { totalBookings: -1, totalSpent: -1 } },
+      { $limit: 10 },
+    ]);
 
-    // Department / role breakdown (if department field exists, grouped by it; otherwise by role)
-    let departments = [];
-    try {
-      departments = await getUserDepartmentBreakdown();
-    } catch (err) {
-      console.warn('Could not compute department breakdown:', err.message || err);
-      departments = [];
-    }
+    const roleDist = await User.aggregate([{ $group: { _id: "$role", count: { $sum: 1 } } }]);
 
     res.status(200).json({
       success: true,
       message: "User analytics fetched successfully",
       data: {
-        last12MonthsData: last12MonthsData.last12Months,
-        total: totalUsers,
-        departments,
+        last12MonthsData: userBasic.last12Months,
+        total: userBasic.total,
+        topUsers,
+        roleDistribution: roleDist,
       },
     });
   } catch (error) {
@@ -44,41 +39,37 @@ export const getUserAnalytics = async (req, res) => {
   }
 };
 
+
 export const getPackageAnalytics = async (req, res) => {
   try {
-    const last12MonthsData = await generateLast12MonthsData(Package);
-
-    const totalPackages = await Package.countDocuments();
+    const analytics = await getCompletePackageAnalytics();
 
     res.status(200).json({
       success: true,
-      message: "Package analytics fetched successfully",
-      data: {
-        last12MonthsData: last12MonthsData.last12Months,
-        total: totalPackages,
-      },
+      message: "Complete package analytics fetched successfully",
+      data: analytics,
     });
   } catch (error) {
     console.error("Error generating package analytics:", error);
+
     res.status(500).json({
       success: false,
       message: "Internal server error",
+      error: error.message,
     });
   }
 };
 
+
 export const getBookingsAnalytics = async (req, res) => {
   try {
-    const last12MonthsData = await generateLast12MonthsData(Booking, { filter: { status: "active" } });
-
-    const totalBookings = await Booking.countDocuments();
-
+    const bookingBasic = await getBasicModelAnalytics(Booking, { filter: { status: "active" } });
     res.status(200).json({
       success: true,
       message: "Bookings analytics fetched successfully",
       data: {
-        last12MonthsData: last12MonthsData.last12Months,
-        total: totalBookings,
+        last12MonthsData: bookingBasic.last12Months,
+        total: bookingBasic.total,
       },
     });
   } catch (error) {
@@ -133,14 +124,14 @@ export const getAdvancedReferralAnalyticsData = async (req, res) => {
   try {
     const analytics = await getAdvancedReferralAnalytics();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Advanced referral analytics fetched successfully",
       data: analytics,
     });
   } catch (error) {
     console.error("Error generating advanced referral analytics:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message,

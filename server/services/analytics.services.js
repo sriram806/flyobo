@@ -1,6 +1,7 @@
 import Booking from "../models/bookings.model.js";
 import Referral from "../models/referal.model.js";
 import User from "../models/user.model.js";
+import Package from "../models/package.model.js";
 
 export const generateLast12MonthsData = async (model, options = {}) => {
   const { filter = {}, dateField = "createdAt", months = 12 } = options;
@@ -8,11 +9,9 @@ export const generateLast12MonthsData = async (model, options = {}) => {
   const now = new Date();
 
   const monthPromises = Array.from({ length: months }, (_, i) => {
-    // Go back i months from *current* month
     const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const startOfMonth = new Date(dt.getFullYear(), dt.getMonth(), 1);
 
-    // If it's the current month, end = today+1
     const endOfMonth =
       i === 0
         ? new Date()
@@ -55,6 +54,12 @@ export const generateLast12MonthsData = async (model, options = {}) => {
   });
 
   return { last12Months: results };
+};
+
+export const getBasicModelAnalytics = async (model, options = {}) => {
+  const { last12Months } = await generateLast12MonthsData(model, options);
+  const total = await model.countDocuments(options.filter || {});
+  return { last12Months, total };
 };
 
 export const getAdvancedBookingAnalytics = async () => {
@@ -255,16 +260,150 @@ export const getAdvancedBookingAnalytics = async () => {
   }
 };
 
+
+export const getAdvancedUserAnalytics = async () => {
+  try {
+    const now = new Date();
+    const last12Months = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+
+    const monthlySignups = await User.aggregate([
+      { $match: { createdAt: { $gte: last12Months } } },
+      {
+        $group: {
+          _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    const formattedMonthly = monthlySignups.map((it) => ({
+      month: `${it._id.year}-${String(it._id.month).padStart(2, '0')}`,
+      count: it.count,
+    }));
+    // Top users by number of bookings and total spent
+    const topUsers = await User.aggregate([
+      { $project: { name: 1, email: 1, totalBookings: { $ifNull: ["$stats.totalBookings", 0] }, totalSpent: { $ifNull: ["$stats.totalSpent", 0] } } },
+      { $sort: { totalBookings: -1, totalSpent: -1 } },
+      { $limit: 10 },
+    ]);
+
+    // Role distribution
+    const roleDist = await User.aggregate([
+      { $group: { _id: "$role", count: { $sum: 1 } } },
+    ]);
+
+    return {
+      monthlySignups: formattedMonthly,
+      topUsers,
+      roleDistribution: roleDist.map((r) => ({ role: r._id, count: r.count })),
+    };
+  } catch (error) {
+    console.error('Error in getAdvancedUserAnalytics:', error);
+    throw error;
+  }
+};
+
+export const getCompletePackageAnalytics = async () => {
+  try {
+    const basic = await getBasicModelAnalytics(Package);
+
+    const topByBookings = await Booking.aggregate([
+      {
+        $group: {
+          _id: "$packageId",
+          bookings: { $sum: 1 },
+          revenue: { $sum: "$totalAmount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "packages",
+          localField: "_id",
+          foreignField: "_id",
+          as: "package",
+        },
+      },
+      { $unwind: { path: "$package", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          packageName: { $ifNull: ["$package.title", "Unknown"] },
+          bookings: 1,
+          revenue: 1,
+        },
+      },
+      { $sort: { bookings: -1, revenue: -1 } },
+      { $limit: 20 },
+    ]);
+
+    const priceBuckets = await Booking.aggregate([
+      {
+        $bucket: {
+          groupBy: "$totalAmount",
+          boundaries: [0, 10000, 25000, 50000, 100000, 99999999],
+          default: "Other",
+          output: {
+            count: { $sum: 1 },
+            revenue: { $sum: "$totalAmount" },
+          },
+        },
+      },
+    ]);
+    const byDestination = await Booking.aggregate([
+      {
+        $lookup: {
+          from: "packages",
+          localField: "packageId",
+          foreignField: "_id",
+          as: "package",
+        },
+      },
+      { $unwind: { path: "$package", preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: "$package.destination",
+          bookings: { $sum: 1 },
+          revenue: { $sum: "$totalAmount" },
+        },
+      },
+      { $sort: { bookings: -1 } },
+      { $limit: 20 },
+    ]);
+
+    return {
+      basic: {
+        total: basic.total,
+        last12Months: basic.last12Months,
+      },
+      advanced: {
+        topByBookings,
+        priceBuckets,
+        byDestination,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getCompletePackageAnalytics:", error);
+    throw error;
+  }
+};
+
 export const getAdvancedReferralAnalytics = async () => {
   try {
     const now = new Date();
-    const last12Months = new Date(now.getFullYear(), now.getMonth() - 12, 1);
+    const last12Months = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-    // Monthly trends data for referrals
+    // ---------------------------
+    // MONTHLY AGGREGATION
+    // ---------------------------
     const monthlyData = await Referral.aggregate([
       {
         $match: {
           createdAt: { $gte: last12Months },
+        },
+      },
+      {
+        $addFields: {
+          isExpired: { $lt: ["$expiryDate", new Date()] },
         },
       },
       {
@@ -281,35 +420,39 @@ export const getAdvancedReferralAnalytics = async () => {
             $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] },
           },
           expiredReferrals: {
-            $sum: { $cond: [{ $eq: ["$status", "expired"] }, 1, 0] },
+            $sum: { $cond: ["$isExpired", 1, 0] },
           },
           totalRewards: { $sum: "$reward" },
           avgReward: { $avg: "$reward" },
         },
       },
-      {
-        $sort: { "_id.year": 1, "_id.month": 1 },
-      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
 
-    // Format monthly data
+    // Format month names
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
     const formattedMonthlyData = monthlyData.map((item) => {
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const total = item.totalReferrals || 0;
+      const completed = item.completedReferrals || 0;
+      const pending = item.pendingReferrals || 0;
+
       return {
         month: `${monthNames[item._id.month - 1]} ${item._id.year}`,
-        referrals: item.totalReferrals,
-        completed: item.completedReferrals,
-        pending: item.pendingReferrals,
-        expired: item.expiredReferrals,
-        rewards: parseFloat(item.totalRewards.toFixed(2)),
-        avgReward: parseFloat(item.avgReward.toFixed(2)),
-        conversionRate: item.totalReferrals > 0
-          ? parseFloat(((item.completedReferrals / item.totalReferrals) * 100).toFixed(2))
-          : 0,
+        referrals: total,
+        completed,
+        pending,
+        expired: item.expiredReferrals || 0,
+        rewards: Number(item.totalRewards?.toFixed(2)),
+        avgReward: Number(item.avgReward?.toFixed(2)),
+        conversionRate: total ? Number(((completed / total) * 100).toFixed(2)) : 0,
+        pendToCompleteRatio: completed ? Number((pending / completed).toFixed(2)) : 0,
       };
     });
 
-    // Status distribution
+    // ---------------------------
+    // STATUS DISTRIBUTION
+    // ---------------------------
     const statusDistribution = await Referral.aggregate([
       {
         $group: {
@@ -320,7 +463,9 @@ export const getAdvancedReferralAnalytics = async () => {
       },
     ]);
 
-    // Top referrers
+    // ---------------------------
+    // TOP REFERRERS
+    // ---------------------------
     const topReferrers = await Referral.aggregate([
       {
         $group: {
@@ -330,6 +475,7 @@ export const getAdvancedReferralAnalytics = async () => {
             $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
           },
           totalRewards: { $sum: "$reward" },
+          avgReward: { $avg: "$reward" },
         },
       },
       {
@@ -340,35 +486,40 @@ export const getAdvancedReferralAnalytics = async () => {
           as: "user",
         },
       },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       {
-        $unwind: { path: "$user", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $project: {
+        $addFields: {
           userName: { $ifNull: ["$user.name", "Unknown User"] },
           userEmail: { $ifNull: ["$user.email", "N/A"] },
-          totalReferrals: 1,
-          completedReferrals: 1,
-          totalRewards: 1,
           conversionRate: {
             $cond: [
               { $gt: ["$totalReferrals", 0] },
-              { $multiply: [{ $divide: ["$completedReferrals", "$totalReferrals"] }, 100] },
+              {
+                $multiply: [
+                  { $divide: ["$completedReferrals", "$totalReferrals"] },
+                  100,
+                ],
+              },
+              0,
+            ],
+          },
+          rewardEfficiency: {
+            $cond: [
+              { $gt: ["$completedReferrals", 0] },
+              { $divide: ["$totalRewards", "$completedReferrals"] },
               0,
             ],
           },
         },
       },
-      {
-        $sort: { totalRewards: -1 },
-      },
-      {
-        $limit: 10,
-      },
+      { $sort: { totalRewards: -1 } },
+      { $limit: 10 },
     ]);
 
-    // Summary statistics
-    const totalStats = await Referral.aggregate([
+    // ---------------------------
+    // SUMMARY STATISTICS
+    // ---------------------------
+    const summaryStats = await Referral.aggregate([
       {
         $facet: {
           total: [
@@ -404,7 +555,9 @@ export const getAdvancedReferralAnalytics = async () => {
           currentMonth: [
             {
               $match: {
-                createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) },
+                createdAt: {
+                  $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                },
               },
             },
             {
@@ -419,28 +572,26 @@ export const getAdvancedReferralAnalytics = async () => {
       },
     ]);
 
-    const summary = totalStats[0];
-    const totalData = summary.total[0] || {
+    const totalData = summaryStats[0].total[0] || {
       totalReferrals: 0,
       totalRewards: 0,
       avgReward: 0,
       completedCount: 0,
     };
-    const lastMonthData = summary.lastMonth[0] || { referrals: 0, rewards: 0 };
-    const currentMonthData = summary.currentMonth[0] || { referrals: 0, rewards: 0 };
 
-    // Calculate growth rates
-    const referralGrowth = lastMonthData.referrals > 0
-      ? (((currentMonthData.referrals - lastMonthData.referrals) / lastMonthData.referrals) * 100).toFixed(2)
-      : 0;
+    const lastMonth = summaryStats[0].lastMonth[0] || { referrals: 0, rewards: 0 };
+    const currentMonth = summaryStats[0].currentMonth[0] || { referrals: 0, rewards: 0 };
 
-    const rewardGrowth = lastMonthData.rewards > 0
-      ? (((currentMonthData.rewards - lastMonthData.rewards) / lastMonthData.rewards) * 100).toFixed(2)
-      : 0;
+    // Growth
+    const referralGrowth =
+      lastMonth.referrals > 0
+        ? Number((((currentMonth.referrals - lastMonth.referrals) / lastMonth.referrals) * 100).toFixed(2))
+        : 0;
 
-    const conversionRate = totalData.totalReferrals > 0
-      ? ((totalData.completedCount / totalData.totalReferrals) * 100).toFixed(2)
-      : 0;
+    const rewardGrowth =
+      lastMonth.rewards > 0
+        ? Number((((currentMonth.rewards - lastMonth.rewards) / lastMonth.rewards) * 100).toFixed(2))
+        : 0;
 
     return {
       monthlyTrends: formattedMonthlyData,
@@ -448,14 +599,17 @@ export const getAdvancedReferralAnalytics = async () => {
       topReferrers,
       summary: {
         totalReferrals: totalData.totalReferrals,
-        totalRewards: parseFloat(totalData.totalRewards.toFixed(2)),
-        avgReward: parseFloat(totalData.avgReward.toFixed(2)),
+        totalRewards: Number(totalData.totalRewards.toFixed(2)),
+        avgReward: Number(totalData.avgReward.toFixed(2)),
         completedReferrals: totalData.completedCount,
-        conversionRate: parseFloat(conversionRate),
-        currentMonthReferrals: currentMonthData.referrals,
-        currentMonthRewards: parseFloat(currentMonthData.rewards.toFixed(2)),
-        referralGrowth: parseFloat(referralGrowth),
-        rewardGrowth: parseFloat(rewardGrowth),
+        conversionRate:
+          totalData.totalReferrals > 0
+            ? Number(((totalData.completedCount / totalData.totalReferrals) * 100).toFixed(2))
+            : 0,
+        currentMonthReferrals: currentMonth.referrals,
+        currentMonthRewards: Number(currentMonth.rewards.toFixed(2)),
+        referralGrowth,
+        rewardGrowth,
       },
     };
   } catch (error) {
@@ -464,121 +618,3 @@ export const getAdvancedReferralAnalytics = async () => {
   }
 };
 
-export const getUserDepartmentBreakdown = async () => {
-  try {
-    // Group users by a 'department' field if present, otherwise fallback to 'role'
-    const breakdown = await User.aggregate([
-      {
-        $group: {
-          _id: { $ifNull: ["$department", "$role"] },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-    ]);
-
-    // Normalize results
-    return breakdown.map((b) => ({ name: b._id || 'unknown', count: b.count }));
-  } catch (error) {
-    console.error("Error in getUserDepartmentBreakdown:", error);
-    throw error;
-  }
-};
-
-export const getAdvancedUserAnalytics = async () => {
-  try {
-    // Signups over last 12 months
-    const now = new Date();
-    const last12Months = new Date(now.getFullYear(), now.getMonth() - 11, 1);
-
-    const monthlySignups = await User.aggregate([
-      { $match: { createdAt: { $gte: last12Months } } },
-      {
-        $group: {
-          _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1 } },
-    ]);
-
-    const formattedMonthly = monthlySignups.map((it) => ({
-      month: `${it._id.year}-${String(it._id.month).padStart(2, '0')}`,
-      count: it.count,
-    }));
-
-    // Top users by total bookings (uses user.stats.totalBookings)
-    const topUsers = await User.aggregate([
-      { $project: { name: 1, email: 1, totalBookings: { $ifNull: ["$stats.totalBookings", 0] }, totalSpent: { $ifNull: ["$stats.totalSpent", 0] } } },
-      { $sort: { totalBookings: -1, totalSpent: -1 } },
-      { $limit: 10 },
-    ]);
-
-    // Role distribution
-    const roleDist = await User.aggregate([
-      { $group: { _id: "$role", count: { $sum: 1 } } },
-    ]);
-
-    return {
-      monthlySignups: formattedMonthly,
-      topUsers,
-      roleDistribution: roleDist.map((r) => ({ role: r._id, count: r.count })),
-    };
-  } catch (error) {
-    console.error('Error in getAdvancedUserAnalytics:', error);
-    throw error;
-  }
-};
-
-export const getAdvancedPackageAnalytics = async () => {
-  try {
-    // Top packages by bookings & revenue
-    const topByBookings = await Booking.aggregate([
-      { $group: { _id: "$packageId", bookings: { $sum: 1 }, revenue: { $sum: "$totalAmount" } } },
-      {
-        $lookup: {
-          from: 'packages',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'package',
-        },
-      },
-      { $unwind: { path: '$package', preserveNullAndEmptyArrays: true } },
-      { $project: { packageName: { $ifNull: ["$package.title", 'Unknown'] }, bookings: 1, revenue: 1 } },
-      { $sort: { bookings: -1, revenue: -1 } },
-      { $limit: 20 },
-    ]);
-
-    // Price distribution of packages (buckets)
-    const priceBuckets = await Booking.aggregate([
-      {
-        $bucket: {
-          groupBy: "$totalAmount",
-          boundaries: [0, 10000, 25000, 50000, 100000, 99999999],
-          default: "Other",
-          output: { count: { $sum: 1 }, revenue: { $sum: "$totalAmount" } },
-        },
-      },
-    ]);
-
-    // Destination popularity
-    const byDestination = await Booking.aggregate([
-      {
-        $lookup: { from: 'packages', localField: 'packageId', foreignField: '_id', as: 'package' },
-      },
-      { $unwind: { path: '$package', preserveNullAndEmptyArrays: true } },
-      { $group: { _id: '$package.destination', bookings: { $sum: 1 }, revenue: { $sum: '$totalAmount' } } },
-      { $sort: { bookings: -1 } },
-      { $limit: 20 },
-    ]);
-
-    return {
-      topByBookings,
-      priceBuckets,
-      byDestination,
-    };
-  } catch (error) {
-    console.error('Error in getAdvancedPackageAnalytics:', error);
-    throw error;
-  }
-};

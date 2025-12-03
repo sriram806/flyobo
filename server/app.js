@@ -13,9 +13,6 @@ import {
 } from "./config/env.js";
 import { v2 as cloudinary } from "cloudinary";    
 
-// Maintenance middleware
-
-// Import scheduled notifications service
 import "./services/scheduled.notifications.service.js";
 
 // Routes
@@ -28,16 +25,16 @@ import galleryRoute from "./routes/gallery.route.js";
 import notificationRoute from "./routes/notification.route.js";
 import bookingsRouter from "./routes/bookings.route.js";
 import uploadRouter from "./routes/upload.route.js";
-import referalRoute from "./routes/referal.route.js";
+import referralRoute from "./routes/referral.route.js";
 import referralAdminRoute from "./routes/referral.admin.route.js";
-import contactRoute from "./routes/contact.route.js";
-import contactAdminRoute from "./routes/contact.admin.route.js";
 
 // Initialize Express app
 const app = express();
 
 // Connect to database
 import connecttoDatabase from "./database/mongodb.js";
+import adminRoute from "./routes/admin.route.js";
+import ContactRoute from "./routes/contact.route.js";
 connecttoDatabase();
 
 // Middleware
@@ -58,6 +55,7 @@ const allowedOrigins = [
   "https://www.flyobo.com",
   "http://localhost:5173",
   "http://localhost:3000",
+  "http://localhost:3001",
   "https://flyobo.vercel.app"
 ];
 
@@ -162,10 +160,10 @@ app.use("/api/v1/gallery", galleryRoute);
 app.use("/api/v1/bookings", bookingsRouter);
 app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/upload", uploadRouter);
-app.use("/api/v1/referal", referalRoute);
+app.use("/api/v1/referral", referralRoute);
 app.use("/api/v1/referral-admin", referralAdminRoute);
-app.use("/api/v1/contact", contactRoute);
-app.use("/api/v1/contact-admin", contactAdminRoute);
+app.use("/api/v1/contact", ContactRoute);
+app.use("/api/v1/admin", adminRoute);
 
 // ✅ Serve static files (e.g., uploaded images)
 app.use("/uploads", express.static("uploads"));

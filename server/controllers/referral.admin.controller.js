@@ -1,5 +1,4 @@
 import User from "../models/user.model.js";
-import Booking from "../models/bookings.model.js";
 
 // Get all pending referral rewards
 export const getPendingReferralRewards = async (req, res) => {
@@ -273,8 +272,6 @@ export const exportReferralData = async (req, res) => {
 export const getEnhancedReferralStats = async (req, res) => {
     try {
         const { period = '30d' } = req.query;
-        
-        // Calculate date range
         const now = new Date();
         let startDate = new Date();
         
@@ -302,10 +299,8 @@ export const getEnhancedReferralStats = async (req, res) => {
         const totalReferrals = users.reduce((sum, user) => sum + user.referral.totalReferrals, 0);
         const activeReferrers = users.filter(user => user.referral.totalReferrals > 0).length;
         const totalRewards = users.reduce((sum, user) => sum + user.referral.totalRewards, 0);
-        const totalUsers = users.length;
-        const conversionRate = totalUsers > 0 ? ((totalReferrals / totalUsers) * 100).toFixed(2) : 0;
+        const conversionRate = users.length > 0 ? ((totalReferrals / users.length) * 100).toFixed(2) : 0;
         
-        // Get pending and paid rewards counts
         const allUsers = await User.find({});
         let pendingRewards = 0;
         let paidRewards = 0;
@@ -327,7 +322,6 @@ export const getEnhancedReferralStats = async (req, res) => {
                 activeReferrers,
                 totalRewards,
                 conversionRate: parseFloat(conversionRate),
-                totalUsers,
                 pendingRewards,
                 paidRewards
             }
@@ -479,3 +473,4 @@ export const getUserReferralHistory = async (req, res) => {
         });
     }
 };
+

@@ -1,13 +1,45 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const contactSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  subject: { type: String },
-  message: { type: String, required: true },
-  phone: { type: String },
-  isRead: { type: Boolean, default: false },
-}, { timestamps: true });
+const contactSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      lowercase: true,
+      trim: true,
+    },
+    subject: {
+      type: String,
+      trim: true,
+      default: "No Subject",
+    },
+    message: {
+      type: String,
+      required: [true, "Message is required"],
+      trim: true,
+    },
+    phone: {
+      type: String,
+      trim: true,
+    },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "in-progress", "resolved", "closed"],
+      default: "pending",
+    },
+  },
+  { timestamps: true }
+);
 
-const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
-export default Contact;
+contactSchema.index({ name: "text", email: "text", subject: "text", message: "text" });
+
+export default mongoose.model("Contact", contactSchema);

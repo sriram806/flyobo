@@ -1,6 +1,6 @@
 import Gallery from "../models/gallery.model.js";
 import { getFileUrl, deleteFile, getFilenameFromUrl } from '../middleware/multerConfig.js';
-import path from 'path';
+
 
 export const getGalleryItems = async (req, res) => {
   try {

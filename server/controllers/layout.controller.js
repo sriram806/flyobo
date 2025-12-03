@@ -1,313 +1,278 @@
-import cloudinary from "cloudinary";
+import path from "path";
 import Layout from "../models/layout.model.js";
+import { getFileUrl, deleteFile, getFilenameFromUrl } from "../middleware/multerConfig.js";
 
-// Create Layout
+/* -----------------------------------------------------------
+   CREATE LAYOUT
+------------------------------------------------------------*/
 export const createLayout = async (req, res) => {
-    try {
-        const { type } = req.body;
+  try {
+    const { type } = req.body;
+    if (!type) return res.status(400).json({ success: false, message: "Type is required" });
 
-        if (!type) {
-            return res.status(400).json({ success: false, message: "Type is required" });
-        }
+    let newLayout;
 
-        let newLayout;
+    if (type === "FAQ") {
+      if (!req.user || req.user.role !== "admin") return res.status(403).json({ success: false, message: "Admins only" });
 
-        if (type === "Banner") {
-      // Only admin users are allowed to create banner layouts
-      if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      let { faq } = req.body;
+      if (!faq) return res.status(400).json({ success: false, message: "FAQ items required" });
+
+      if (typeof faq === "string") {
+        try { faq = JSON.parse(faq); } catch { }
       }
+      if (!Array.isArray(faq)) faq = [faq];
 
-      const { image, title, subTitle } = req.body;
-      if (!image) return res.status(400).json({ success: false, message: "Image is required" });
+      const faqData = faq.filter(i => i?.question && i?.answer);
+      if (faqData.length === 0)
+        return res.status(400).json({ success: false, message: "Invalid FAQ items" });
 
-            const uploaded = await cloudinary.v2.uploader.upload(image, { folder: "Layout" });
+      const existing = await Layout.findOne({ type: "FAQ" });
 
-            newLayout = await Layout.create({
-                type: "Banner",
-                image: { public_id: uploaded.public_id, url: uploaded.secure_url },
-                title,
-                subTitle,
-            });
-        }
-
-  if (type === "FAQ") {
-      // Only admin users are allowed to create FAQ layouts
-      if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      if (existing) {
+        existing.faq = [...existing.faq, ...faqData];
+        await existing.save();
+        newLayout = existing;
+      } else {
+        newLayout = await Layout.create({ type: "FAQ", faq: faqData });
       }
-
-      const { faq } = req.body;
-            if (!faq || !Array.isArray(faq) || faq.length === 0) {
-                return res.status(400).json({ success: false, message: "FAQ items are required" });
-            }
-
-            const faqData = faq
-                .map(({ question, answer }) => {
-                    if (!question || !answer) return null;
-                    return { question, answer };
-                })
-                .filter(Boolean);
-
-            newLayout = await Layout.create({ type: "FAQ", faq: faqData });
-        }
-
-  if (type === "Category") {
-            const { categories } = req.body;
-            if (!categories || !Array.isArray(categories) || categories.length === 0) {
-                return res.status(400).json({ success: false, message: "Categories are required" });
-            }
-
-            const categoryData = categories
-                .map(({ title }) => (title ? { title } : null))
-                .filter(Boolean);
-
-            newLayout = await Layout.create({ type: "Category", categories: categoryData });
-        }
-
-        return res.status(201).json({
-            success: true,
-            message: "Layout created successfully",
-            layout: newLayout,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-            error: error.message,
-        });
     }
-};
 
-// Get Layout
-// GET /api/v1/layout?type=FAQ
-export const getLayout = async (req, res) => {
-    try {
-        const { type } = req.query;
+    /* ------------------ HERO ------------------ */
+    else if (type === "Hero") {
+      if (!req.user || req.user.role !== "admin") return res.status(403).json({ success: false, message: "Admins only" });
 
-        let layout;
+      const { destination } = req.body;
+      if (!destination)
+        return res.status(400).json({ success: false, message: "Destination required" });
 
-        if (type) {
-            // Fetch specific layout by type
-            layout = await Layout.findOne({ type }).lean();
+      let imageData = [];
 
-            if (!layout) {
-                return res.status(404).json({
-                    success: false,
-                    message: `${type} layout not found`,
-                });
-            }
-
-            return res.status(200).json({
-                success: true,
-                message: `${type} layout fetched successfully`,
-                layout,
-            });
-        } else {
-            // Fetch all layouts
-            const layouts = await Layout.find({}).lean();
-
-            if (!layouts || layouts.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "No layouts found",
-                });
-            }
-
-            return res.status(200).json({
-                success: true,
-                message: "All layouts fetched successfully",
-                layouts,
-            });
+      if (req.files?.length > 0) {
+        imageData = req.files.map(f => ({ url: getFileUrl(req, f.filename, "hero") }));
+      } else {
+        let images = req.body.images || [];
+        if (typeof images === "string") {
+          try { images = JSON.parse(images); } catch {
+            images = images.split(",").map(s => s.trim());
+          }
         }
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-            error: error.message,
-        });
-    }
-};
+        if (!Array.isArray(images) || images.length === 0)
+          return res.status(400).json({ success: false, message: "Images required" });
 
-// Edit Layout
-export const editLayout = async (req, res) => {
-    try {
-        const { type } = req.body;
-        if (!type) return res.status(400).json({ success: false, message: "Type is required" });
-
-        let updatedLayout;
-
-    if (type === "Banner") {
-      // Only admin users are allowed to edit banner layouts
-      if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+        imageData = images.map(u => ({ url: typeof u === "string" ? u : u.url }));
       }
 
-      const { image, title, subTitle } = req.body;
-
-      const oldBanner = await Layout.findOne({ type: "Banner" });
-      if (oldBanner?.image?.public_id) {
-        await cloudinary.v2.uploader.destroy(oldBanner.image.public_id);
-      }
-
-      const uploaded = await cloudinary.v2.uploader.upload(image, { folder: "Layout" });
-
-      updatedLayout = await Layout.findOneAndUpdate(
-        { type: "Banner" },
+      newLayout = await Layout.findOneAndUpdate(
+        { type: "Hero" },
         {
-          type: "Banner",
-          image: { public_id: uploaded.public_id, url: uploaded.secure_url },
-          title,
-          subTitle,
+          type: "Hero",
+          hero: {
+            images: imageData,
+            destinations: [{ name: destination, slug: "", description: "" }],
+          },
         },
         { new: true, upsert: true }
       );
     }
 
-    if (type === "FAQ") {
-      // Only admin users are allowed to edit FAQ layouts
-      if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
-      }
-
-      const { faq } = req.body;
-      if (!faq || !Array.isArray(faq)) {
-        return res.status(400).json({ success: false, message: "FAQ items are required" });
-      }
-
-            const faqData = faq
-                .map(({ question, answer }) => (question && answer ? { question, answer } : null))
-                .filter(Boolean);
-
-            updatedLayout = await Layout.findOneAndUpdate(
-                { type: "FAQ" },
-                { faq: faqData },
-                { new: true, upsert: true }
-            );
-        }
-
-        if (type === "Category") {
-            const { categories } = req.body;
-            if (!categories || !Array.isArray(categories)) {
-                return res.status(400).json({ success: false, message: "Categories are required" });
-            }
-
-            const categoryData = categories
-                .map(({ title }) => (title ? { title } : null))
-                .filter(Boolean);
-
-            updatedLayout = await Layout.findOneAndUpdate(
-                { type: "Category" },
-                { categories: categoryData },
-                { new: true, upsert: true }
-            );
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: "Layout updated successfully",
-            layout: updatedLayout,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-            error: error.message,
-        });
+    else {
+      return res.status(400).json({ success: false, message: `Invalid type: ${type}` });
     }
+
+    return res.status(201).json({ success: true, message: `${type} created`, layout: newLayout });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal error", error: error.message });
+  }
 };
 
+/* -----------------------------------------------------------
+   GET LAYOUT
+------------------------------------------------------------*/
+export const getLayout = async (req, res) => {
+  try {
+    const { type } = req.query;
+
+    if (type) {
+      const layout = await Layout.findOne({ type }).lean();
+      if (!layout) return res.status(404).json({ success: false, message: `${type} not found` });
+      return res.status(200).json({ success: true, layout });
+    }
+
+    const layouts = await Layout.find({}).lean();
+    return res.status(200).json({ success: true, layouts });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal error" });
+  }
+};
+
+/* -----------------------------------------------------------
+   EDIT LAYOUT
+------------------------------------------------------------*/
+export const editLayout = async (req, res) => {
+  try {
+    const { type } = req.body;
+    if (!type) return res.status(400).json({ success: false, message: "Type required" });
+
+    let updatedLayout;
+
+    /* ------------------ FAQ ------------------ */
+    if (type === "FAQ") {
+      if (req.user.role !== "admin")
+        return res.status(403).json({ success: false, message: "Admins only" });
+
+      const layout = await Layout.findOne({ type: "FAQ" });
+      if (!layout) return res.status(404).json({ success: false, message: "FAQ layout not found" });
+
+      const { id, question, answer } = req.body;
+      if (id || (question && answer && !req.body.faq)) {
+        if (!id) return res.status(400).json({ success: false, message: "FAQ ID required for update" });
+        if (!question || !answer) return res.status(400).json({ success: false, message: "Both question & answer required" });
+
+        const index = layout.faq.findIndex(item => item._id.toString() === id);
+        if (index === -1) return res.status(404).json({ success: false, message: "FAQ item not found" });
+
+        layout.faq[index].question = question;
+        layout.faq[index].answer = answer;
+
+        await layout.save();
+        updatedLayout = layout;
+      } else {
+        // New shape: faq can be object or array
+        let { faq } = req.body;
+        if (!faq) return res.status(400).json({ success: false, message: "FAQ items required" });
+
+        if (typeof faq === 'string') {
+          try { faq = JSON.parse(faq); } catch { }
+        }
+        if (!Array.isArray(faq)) faq = [faq];
+
+        const toUpdate = faq.filter(i => i && (i._id || i.id));
+        const toAppend = faq.filter(i => i && !i._id && !i.id).map(i => ({ question: i.question, answer: i.answer }));
+
+        for (const item of toUpdate) {
+          const fid = item._id || item.id;
+          const idx = layout.faq.findIndex(x => x._id.toString() === fid);
+          if (idx !== -1) {
+            if (item.question) layout.faq[idx].question = item.question;
+            if (item.answer) layout.faq[idx].answer = item.answer;
+          }
+        }
+
+        if (toAppend.length > 0) {
+          const valid = toAppend.filter(i => i.question && i.answer);
+          layout.faq = Array.isArray(layout.faq) ? layout.faq.concat(valid) : valid;
+        }
+
+        await layout.save();
+        updatedLayout = layout;
+      }
+    }
+
+    /* ------------------ HERO ------------------ */
+    else if (type === "Hero") {
+      if (!req.user || req.user.role !== "admin")
+        return res.status(403).json({ success: false, message: "Admins only" });
+
+      const layout = await Layout.findOne({ type: "Hero" });
+      if (!layout) return res.status(404).json({ success: false, message: "Hero not found" });
+
+      // Support JSON updates via `req.body.hero` (images/destinations)
+      if (req.body && req.body.hero) {
+        let { hero } = req.body;
+        if (typeof hero === 'string') {
+          try { hero = JSON.parse(hero); } catch { }
+        }
+
+        const updatedHero = { ...(layout.hero ? layout.hero.toObject ? layout.hero.toObject() : layout.hero : {}) };
+
+        if (hero.images) {
+          let imgs = hero.images;
+          if (typeof imgs === 'string') {
+            try { imgs = JSON.parse(imgs); } catch { imgs = [imgs]; }
+          }
+          if (Array.isArray(imgs)) {
+            updatedHero.images = imgs.map(u => (typeof u === 'string' ? { url: u } : { url: u.url || '' }));
+          }
+        }
+
+        if (hero.destinations) {
+          let dests = hero.destinations;
+          if (typeof dests === 'string') {
+            try { dests = JSON.parse(dests); } catch { dests = [dests]; }
+          }
+          if (Array.isArray(dests)) {
+            updatedHero.destinations = dests.map(d => ({ name: d.name || d, slug: d.slug || '', description: d.description || '' }));
+          }
+        }
+
+        layout.hero = updatedHero;
+        await layout.save();
+        updatedLayout = layout;
+      } else {
+        // File upload flow: replace images with uploaded files
+        let imageData = layout.hero?.images || [];
+        if (req.files?.length > 0) {
+          // remove previous uploaded files
+          (layout.hero?.images || []).forEach(img => {
+            const fname = getFilenameFromUrl(img?.url || '');
+            if (fname) deleteFile(path.join(process.cwd(), 'uploads', 'hero', fname));
+          });
+
+          imageData = req.files.map(f => ({ url: getFileUrl(req, f.filename, 'hero') }));
+        }
+
+        updatedLayout = await Layout.findOneAndUpdate(
+          { type: 'Hero' },
+          { hero: { images: imageData, destinations: layout.hero?.destinations || [] } },
+          { new: true }
+        );
+      }
+    }
+
+    else {
+      return res.status(400).json({ success: false, message: "Invalid type" });
+    }
+
+    return res.status(200).json({ success: true, message: `${type} updated`, layout: updatedLayout });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal error", error: error.message });
+  }
+};
+
+/* -----------------------------------------------------------
+   DELETE LAYOUT
+------------------------------------------------------------*/
 export const deleteLayout = async (req, res) => {
   try {
     const { type, id } = req.query;
-
-    if (!type) {
-      return res.status(400).json({
-        success: false,
-        message: "Layout type is required to delete",
-      });
-    }
+    if (!type) return res.status(400).json({ success: false, message: "Type required" });
 
     const layout = await Layout.findOne({ type });
+    if (!layout) return res.status(404).json({ success: false, message: `${type} not found` });
 
-    if (!layout) {
-      return res.status(404).json({
-        success: false,
-        message: `${type} layout not found`,
+    /* Delete specific FAQ item */
+    if (type === "FAQ" && id) {
+      layout.faq = layout.faq.filter(i => i._id.toString() !== id);
+      await layout.save();
+      return res.status(200).json({ success: true, message: "FAQ item deleted", layout });
+    }
+
+    /* Delete Hero images from server */
+    if (type === "Hero") {
+      layout.hero?.images?.forEach(img => {
+        const fname = getFilenameFromUrl(img.url);
+        if (fname) deleteFile(path.join(process.cwd(), "uploads", "hero", fname));
       });
     }
 
-    // Banner deletion (remove Cloudinary image)
-    if (type === "Banner") {
-      if (layout.image?.public_id) {
-        try {
-          await cloudinary.v2.uploader.destroy(layout.image.public_id);
-        } catch (err) {
-          console.warn("Failed to delete Cloudinary image:", err.message);
-        }
-      }
-      await Layout.deleteOne({ type });
-      return res.status(200).json({
-        success: true,
-        message: "Banner layout deleted successfully",
-      });
-    }
-
-    // FAQ deletion (delete full FAQ or single item if id provided)
-    if (type === "FAQ") {
-      // Only admin users are allowed to delete FAQs
-      if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
-      }
-
-      if (id) {
-        const filteredFaq = layout.faq.filter((item) => item._id.toString() !== id);
-        layout.faq = filteredFaq;
-        await layout.save();
-        return res.status(200).json({
-          success: true,
-          message: "FAQ item deleted successfully",
-          layout,
-        });
-      } else {
-        await Layout.deleteOne({ type });
-        return res.status(200).json({
-          success: true,
-          message: "All FAQ layout deleted successfully",
-        });
-      }
-    }
-
-    // Category deletion (delete full categories or single category by id)
-    if (type === "Category") {
-      if (id) {
-        const filteredCategories = layout.categories.filter((item) => item._id.toString() !== id);
-        layout.categories = filteredCategories;
-        await layout.save();
-        return res.status(200).json({
-          success: true,
-          message: "Category deleted successfully",
-          layout,
-        });
-      } else {
-        await Layout.deleteOne({ type });
-        return res.status(200).json({
-          success: true,
-          message: "All Category layout deleted successfully",
-        });
-      }
-    }
-
-    return res.status(400).json({
-      success: false,
-      message: "Unsupported layout type",
-    });
-
+    await Layout.deleteOne({ type });
+    return res.status(200).json({ success: true, message: `${type} deleted` });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal error", error: error.message });
   }
 };

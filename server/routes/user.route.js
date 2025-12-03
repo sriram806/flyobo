@@ -64,6 +64,7 @@ userRoute.post('/admin/process-redeem', isAuthenticated, processRedeemRequest);
 
 userRoute.get('/referral-leaderboard', getReferralLeaderboard);
 
+// for admin
 userRoute.get('/get-all-users', isAuthenticated, getAllUsers);
 
 export default userRoute;

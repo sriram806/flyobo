@@ -2,6 +2,10 @@ import User from "../models/user.model.js";
 import Booking from "../models/bookings.model.js";
 import { sendReferralNotification, sendMilestoneNotification, sendTierUpgradeNotification } from "./notification.services.js";
 
+export const generateCode = () => {
+    return Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
 // Process referral rewards automatically when a booking is completed
 export const processAutomaticReferralReward = async (bookingId) => {
     try {
@@ -46,10 +50,10 @@ export const processAutomaticReferralReward = async (bookingId) => {
         referrer.referral.referralStats.revenueGenerated += booking.totalAmount;
         referrer.referral.referralStats.totalConversions += 1;
         referrer.referral.referralStats.lastActivityDate = new Date();
-        
+
         // Update conversion rate
         if (referrer.referral.referralStats.totalClicks > 0) {
-            referrer.referral.referralStats.conversionRate = 
+            referrer.referral.referralStats.conversionRate =
                 (referrer.referral.referralStats.totalConversions / referrer.referral.referralStats.totalClicks) * 100;
         }
 
@@ -93,7 +97,7 @@ export const processAutomaticReferralReward = async (bookingId) => {
         // Check for milestone achievements
         const previousMilestones = [...referrer.referral.milestones];
         referrer.checkMilestones();
-        
+
         // Check for tier upgrade
         const previousTier = referrer.referral.referralTier;
         referrer.updateReferralTier();
@@ -126,9 +130,9 @@ export const processAutomaticReferralReward = async (bookingId) => {
 
         // Send notification to referrer
         await sendReferralNotification(
-            referrer._id, 
-            user.name, 
-            rewardAmount, 
+            referrer._id,
+            user.name,
+            rewardAmount,
             booking.totalAmount
         );
 
@@ -136,8 +140,8 @@ export const processAutomaticReferralReward = async (bookingId) => {
         referrer.referral.milestones.forEach((milestone, index) => {
             if (milestone.achieved && !previousMilestones[index]?.achieved) {
                 sendMilestoneNotification(
-                    referrer._id, 
-                    milestone.milestone, 
+                    referrer._id,
+                    milestone.milestone,
                     milestone.reward
                 );
             }
@@ -148,8 +152,8 @@ export const processAutomaticReferralReward = async (bookingId) => {
             sendTierUpgradeNotification(referrer._id, newTier);
         }
 
-        return { 
-            success: true, 
+        return {
+            success: true,
             message: `Referral reward of ₹${rewardAmount} processed successfully`,
             rewardAmount,
             referrerId: referrer._id,
@@ -165,7 +169,7 @@ export const processAutomaticReferralReward = async (bookingId) => {
 export const processBulkReferralRewards = async (bookingIds) => {
     try {
         const results = [];
-        
+
         for (const bookingId of bookingIds) {
             const result = await processAutomaticReferralReward(bookingId);
             results.push({
@@ -173,7 +177,7 @@ export const processBulkReferralRewards = async (bookingIds) => {
                 ...result
             });
         }
-        
+
         return {
             success: true,
             message: `Processed ${results.length} referral rewards`,
@@ -208,9 +212,9 @@ export const getReferralStatistics = async () => {
         const topReferrers = await User.find({
             'referral.totalReferrals': { $gt: 0 }
         })
-        .select('name email referral')
-        .sort({ 'referral.totalReferrals': -1 })
-        .limit(10);
+            .select('name email referral')
+            .sort({ 'referral.totalReferrals': -1 })
+            .limit(10);
 
         // Get recent conversions
         const recentConversions = await User.aggregate([
@@ -309,14 +313,14 @@ export const trackSocialShare = async (userId, platform) => {
 
         // Update total clicks
         user.referral.referralStats.totalClicks += 1;
-        
+
         // Update last activity date
         user.referral.referralStats.lastActivityDate = new Date();
 
         await user.save();
 
-        return { 
-            success: true, 
+        return {
+            success: true,
             message: `Social share tracked for ${platform}`,
             data: user.referral.socialSharing
         };
@@ -343,9 +347,9 @@ export const getUserReferralAnalytics = async (userId) => {
         const totalConversions = user.referral.referredUsers.filter(
             ref => ref.conversionStatus === 'converted'
         ).length;
-        
+
         const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
-        const avgRewardPerConversion = totalConversions > 0 ? 
+        const avgRewardPerConversion = totalConversions > 0 ?
             user.referral.totalRewards / totalConversions : 0;
 
         return {
@@ -418,9 +422,9 @@ export const getReferralLeaderboard = async (limit = 10) => {
         const leaderboard = await User.find({
             'referral.totalReferrals': { $gt: 0 }
         })
-        .select('name referral.totalReferrals referral.totalRewards referral.referralTier avatar')
-        .sort({ 'referral.totalReferrals': -1 })
-        .limit(limit);
+            .select('name referral.totalReferrals referral.totalRewards referral.referralTier avatar')
+            .sort({ 'referral.totalReferrals': -1 })
+            .limit(limit);
 
         // Enrich leaderboard data with additional metrics
         const enrichedLeaderboard = leaderboard.map(user => ({
@@ -431,7 +435,7 @@ export const getReferralLeaderboard = async (limit = 10) => {
             totalRewards: user.referral.totalRewards,
             referralTier: user.referral.referralTier,
             // Calculate efficiency metric (rewards per referral)
-            efficiency: user.referral.totalReferrals > 0 ? 
+            efficiency: user.referral.totalReferrals > 0 ?
                 (user.referral.totalRewards / user.referral.totalReferrals).toFixed(2) : '0.00'
         }));
 

@@ -1,11 +1,16 @@
-import Referral from '../models/referal.model.js'
+import Referral from '../models/referal.model.js';
+import ReferralSettings from '../models/referralSettings.model.js';
 import User from '../models/user.model.js';
+import { generateCode } from '../services/referral.services.js';
+
 
 export const generateReferralCode = async (req, res) => {
   try {
     const referral = new Referral({
       referrer: req.user._id,
-      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      code: generateCode(),
+      status: 'pending',
+      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     });
 
     const savedReferral = await referral.save();
@@ -20,6 +25,7 @@ export const getUserReferrals = async (req, res) => {
     const referrals = await Referral.find({ referrer: req.user._id })
       .populate('referred', 'name email')
       .sort('-createdAt');
+
     res.json(referrals);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -29,10 +35,11 @@ export const getUserReferrals = async (req, res) => {
 export const applyReferralCode = async (req, res) => {
   try {
     const { code } = req.body;
+
     const referral = await Referral.findOne({
       code,
       status: 'pending',
-      expiryDate: { $gt: new Date() },
+      expiryDate: { $gt: new Date() }
     });
 
     if (!referral) {
@@ -43,15 +50,15 @@ export const applyReferralCode = async (req, res) => {
       return res.status(400).json({ message: 'Cannot use your own referral code' });
     }
 
-    // Update referral status
+    // mark complete
     referral.referred = req.user._id;
     referral.status = 'completed';
-    referral.reward = 100; // Example reward amount
+    referral.reward = 100;
     await referral.save();
 
-    // Add reward to referrer
+    // add reward to the referrer
     await User.findByIdAndUpdate(referral.referrer, {
-      $inc: { rewardPoints: referral.reward },
+      $inc: { rewardPoints: referral.reward }
     });
 
     res.json({ message: 'Referral code applied successfully' });
@@ -64,19 +71,39 @@ export const getReferralStats = async (req, res) => {
   try {
     const stats = await Referral.aggregate([
       {
-        $match: { referrer: req.user._id },
+        $match: { referrer: req.user._id }
       },
       {
         $group: {
           _id: '$status',
           count: { $sum: 1 },
-          totalReward: { $sum: '$reward' },
-        },
-      },
+          totalReward: { $sum: '$reward' }
+        }
+      }
     ]);
 
     res.json(stats);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+export const getReferralSettings = async (req, res) => {
+  try {
+    let settings = await ReferralSettings.findOne();
+    if (!settings) {
+      settings = await ReferralSettings.create({});
+    }
+
+    return res.status(200).json({
+      success: true,
+      settings,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch referral settings",
+      error: error.message,
+    });
   }
 };

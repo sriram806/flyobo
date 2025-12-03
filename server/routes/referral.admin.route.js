@@ -2,10 +2,6 @@ import express from 'express';
 import isAuthenticated from '../middleware/isAuthenticated.js';
 import isAdmin from '../middleware/isAdmin.js';
 import {
-  getReferralSettings,
-  updateReferralSettings
-} from '../controllers/referralSettings.controller.js';
-import {
   getPendingReferralRewards,
   approveReferralReward,
   markReferralRewardPaid,
@@ -18,23 +14,6 @@ import {
 } from '../controllers/referral.admin.controller.js';
 
 const router = express.Router();
-
-/* ===============================
-   📌 USER & ADMIN REFERRAL SETTINGS
-   =============================== */
-
-// Get referral settings (any authenticated user)
-router.get('/settings', isAuthenticated, getReferralSettings);
-
-// Update referral settings (admin only)
-router.put('/settings', isAuthenticated, isAdmin, updateReferralSettings);
-
-
-/* ===============================
-   👑 ADMIN REFERRAL MANAGEMENT
-   =============================== */
-
-// Get all pending referral rewards (admin only)
 router.get('/pending-rewards', isAuthenticated, isAdmin, getPendingReferralRewards);
 
 // Approve a referral reward (admin only)
