@@ -26,20 +26,12 @@ const items = [
     section: "Management",
     links: [
       { key: "dashboard", label: "Dashboard", icon: HiOutlineHeart },
-      { key: "users", label: "Users", icon: HiOutlineUser },
       { key: "package", label: "Packages", icon: HiOutlineBookmark },
       { key: "bookings", label: "Bookings", icon: HiOutlineCog },
       { key: "contacts", label: "Contact", icon: HiCollection },
-      { key: "gallery", label: "Gallery", icon: HiOutlineCamera },
-      { key: "home", label: "Home", icon: HiHome }
+      { key: "gallery", label: "Gallery", icon: HiOutlineCamera }
     ],
-  },
-  {
-    section: "Referral System",
-    links: [
-      { key: "referrals-overview", label: "Referral System", icon: Gift },
-    ],
-  },
+  }
 ];
 
 const AdminSidebar = ({ selected = "overview", onSelect, onLogout }) => {

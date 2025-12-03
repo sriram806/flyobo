@@ -127,9 +127,20 @@ export default function FeaturedPackages() {
   return (
     <section className="py-12">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-wide">Featured Packages</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Handpicked trips you may like.</p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-wide">Featured Packages</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Handpicked trips you may like.</p>
+          </div>
+
+          <div className="flex items-center">
+            <Link
+              href="/packages"
+              className="inline-flex items-center px-3 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition text-sm"
+            >
+              View all packages
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -137,6 +148,7 @@ export default function FeaturedPackages() {
             <Card key={pkg?._id || pkg?.id} pkg={pkg} />
           ))}
         </div>
+        {/* CTA moved beside heading for better discoverability on all viewports */}
       </div>
     </section>
   );

@@ -58,6 +58,7 @@ const AdminDashboard = () => {
 
   const [userAnalytics, setUserAnalytics] = useState({ last12Months: [], total: 0 });
   const [packageAnalytics, setPackageAnalytics] = useState({ last12Months: [], total: 0 });
+  const [packageAdvanced, setPackageAdvanced] = useState({ topByBookings: [], priceBuckets: [], byDestination: [] });
   const [bookingsAnalytics, setBookingsAnalytics] = useState({ last12Months: [], total: 0 });
   const [loading, setLoading] = useState(false);
   const [latestUsers, setLatestUsers] = useState([]);
@@ -110,9 +111,25 @@ const AdminDashboard = () => {
         });
         if (!mounted) return;
         const pData = packageData?.data || {};
-        setPackageAnalytics({
-          last12Months: pData.last12MonthsData || [],
-          total: pData.total ?? 0,
+        // Support new response shape where analytics are nested under `basic` and `advanced` keys
+        if (pData.basic) {
+          setPackageAnalytics({
+            last12Months: pData.basic.last12Months || pData.basic.last12MonthsData || [],
+            total: pData.basic.total ?? 0,
+          });
+        } else {
+          setPackageAnalytics({
+            last12Months: pData.last12MonthsData || pData.last12Months || [],
+            total: pData.total ?? 0,
+          });
+        }
+
+        // Advanced analytics (topByBookings, priceBuckets, byDestination)
+        const adv = pData.advanced || {};
+        setPackageAdvanced({
+          topByBookings: adv.topByBookings || [],
+          priceBuckets: adv.priceBuckets || [],
+          byDestination: adv.byDestination || [],
         });
 
         // Bookings
@@ -351,14 +368,14 @@ const AdminDashboard = () => {
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { key: 'users', title: 'Users', count: userAnalytics.total, href: '/admin?tab=users', color: 'bg-blue-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.6 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>) },
-            { key: 'packages', title: 'Packages', count: packageAnalytics.total, href: '/admin?tab=package', color: 'bg-green-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3v5h8v-5h3a1 1 0 001-1V7M16 3H8v4h8V3z"/></svg>) },
-            { key: 'bookings', title: 'Bookings', count: bookingsAnalytics.total, href: '/admin?tab=bookings', color: 'bg-yellow-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4l3 8 4-16 3 8h4"/></svg>) },
-            { key: 'gallery', title: 'Gallery', count: undefined, href: '/admin?tab=gallery', color: 'bg-emerald-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7"/></svg>) },
-            { key: 'analytics', title: 'Analytics', count: undefined, href: '/admin?tab=analytics', color: 'bg-sky-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3v18M4 7h14M4 12h9M4 17h6"/></svg>) },
-            { key: 'contacts', title: 'Contacts / Notifications', count: undefined, href: '/admin?tab=contacts', color: 'bg-gray-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>) },
-            { key: 'referrals', title: 'Referrals', count: undefined, href: '/admin/referrals', color: 'bg-rose-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A2 2 0 0122 9.618V14a2 2 0 01-1.447 1.938L16 18M9 14l-4.553 2.276A2 2 0 013 14.382V10a2 2 0 011.447-1.938L8 6"/></svg>) },
-            { key: 'otp', title: 'OTP Service', count: undefined, href: '/', color: 'bg-indigo-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 1.657-1.343 3-3 3S6 12.657 6 11s1.343-3 3-3 3 1.343 3 3zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>) },
+            { key: 'users', title: 'Users', count: userAnalytics.total, href: '/admin?tab=users', color: 'bg-blue-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.6 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>) },
+            { key: 'packages', title: 'Packages', count: packageAnalytics.total, href: '/admin?tab=package', color: 'bg-green-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3v5h8v-5h3a1 1 0 001-1V7M16 3H8v4h8V3z" /></svg>) },
+            { key: 'bookings', title: 'Bookings', count: bookingsAnalytics.total, href: '/admin?tab=bookings', color: 'bg-yellow-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4l3 8 4-16 3 8h4" /></svg>) },
+            { key: 'gallery', title: 'Gallery', count: undefined, href: '/admin?tab=gallery', color: 'bg-emerald-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" /></svg>) },
+            { key: 'analytics', title: 'Analytics', count: undefined, href: '/admin?tab=analytics', color: 'bg-sky-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3v18M4 7h14M4 12h9M4 17h6" /></svg>) },
+            { key: 'contacts', title: 'Contacts / Notifications', count: undefined, href: '/admin?tab=contacts', color: 'bg-gray-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>) },
+            { key: 'referrals', title: 'Referrals', count: undefined, href: '/admin/referrals', color: 'bg-rose-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A2 2 0 0122 9.618V14a2 2 0 01-1.447 1.938L16 18M9 14l-4.553 2.276A2 2 0 013 14.382V10a2 2 0 011.447-1.938L8 6" /></svg>) },
+            { key: 'otp', title: 'OTP Service', count: undefined, href: '/', color: 'bg-indigo-50', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 1.657-1.343 3-3 3S6 12.657 6 11s1.343-3 3-3 3 1.343 3 3zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>) },
           ].map((s) => (
             <div key={s.key} className="flex items-center gap-3 p-3 rounded border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <div className={`p-2 rounded-md ${s.color} flex items-center justify-center`}>{s.icon}</div>
@@ -395,6 +412,67 @@ const AdminDashboard = () => {
             <div className="text-lg font-semibold">₹{Number(revenue.yearly).toLocaleString('en-IN')}</div>
           </div>
         </div>
+
+        {/* Package Advanced Analytics */}
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Package Analytics</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Advanced package insights (top packages, destinations, price buckets)</p>
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Updated: just now</div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/40">
+              <div className="text-xs text-gray-500">Top By Bookings</div>
+              <div className="mt-2 space-y-2 text-sm text-gray-900 dark:text-white">
+                {packageAdvanced.topByBookings && packageAdvanced.topByBookings.length > 0 ? (
+                  packageAdvanced.topByBookings.map((t, i) => (
+                    <div key={i} className="flex justify-between">
+                      <div className="truncate">{t.name || t.title || t.package || '—'}</div>
+                      <div className="text-gray-500">{t.count ?? t.bookings ?? 0}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-gray-500">No data available.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/40">
+              <div className="text-xs text-gray-500">By Destination</div>
+              <div className="mt-2 space-y-2 text-sm text-gray-900 dark:text-white">
+                {packageAdvanced.byDestination && packageAdvanced.byDestination.length > 0 ? (
+                  packageAdvanced.byDestination.map((d, i) => (
+                    <div key={i} className="flex justify-between">
+                      <div className="truncate">{d.destination || d.name || '—'}</div>
+                      <div className="text-gray-500">{d.count ?? d.bookings ?? 0}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-gray-500">No data available.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/40">
+              <div className="text-xs text-gray-500">Price Buckets</div>
+              <div className="mt-2 space-y-2 text-sm text-gray-900 dark:text-white">
+                {packageAdvanced.priceBuckets && packageAdvanced.priceBuckets.length > 0 ? (
+                  packageAdvanced.priceBuckets.map((b, i) => (
+                    <div key={i} className="flex justify-between">
+                      <div className="truncate">{b.range || b.label || `Bucket ${i + 1}`}</div>
+                      <div className="text-gray-500">{b.count ?? 0}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-gray-500">No data available.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -427,56 +505,42 @@ const AdminDashboard = () => {
 
         {/* Recent Packages & Bookings */}
         <div className="space-y-6">
-          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-            <div className="flex items-center justify-between">
+          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Packages</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Recently added or updated</p>
               </div>
-              <Link href="/admin?tab=package" className="text-sm text-sky-600 hover:underline">View all</Link>
+              <Link href="/admin?tab=package" className="text-sm text-sky-600 hover:underline mt-2 sm:mt-0">
+                View all
+              </Link>
             </div>
+
             <div className="mt-4 space-y-2">
               {recentPackages.length === 0 ? (
                 <div className="text-sm text-gray-500 dark:text-gray-400">No packages available.</div>
               ) : (
                 recentPackages.map((p) => (
-                  <div key={p._id || p.id} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white truncate">{p.title}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{p.destination || '-'} · {p.duration ?? p.days ?? 0} days</div>
+                  <div
+                    key={p._id || p.id}
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900 dark:text-white truncate">{p.title}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {p.destination || "-"} · {p.duration ?? p.days ?? 0} days
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">₹{Number(p.price || 0).toLocaleString('en-IN')}</div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Bookings</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Latest 5 bookings</p>
-              </div>
-              <Link href="/admin?tab=bookings" className="text-sm text-sky-600 hover:underline">View all</Link>
-            </div>
-
-            <div className="mt-4 space-y-2">
-              {recentBookings.length === 0 ? (
-                <div className="text-sm text-gray-500 dark:text-gray-400">No bookings yet.</div>
-              ) : (
-                recentBookings.map((b) => (
-                  <div key={b._id} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">{String(b._id).slice(0, 8)}…</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{b.userEmail || '-'}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{b.packageTitle || '-'}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">₹{Number(b.amount || 0).toLocaleString('en-IN')}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 sm:mt-0">
+                      ₹{Number(p.price || 0).toLocaleString("en-IN")}
+                    </div>
                   </div>
                 ))
               )}
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

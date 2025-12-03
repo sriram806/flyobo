@@ -17,7 +17,7 @@ const AuthLoader = ({ children }) => {
   const loadUser = async () => {
     try {
       console.log("🔄 Loading user authentication...");
-      
+
       if (!API_URL) {
         console.warn("⚠️  API_URL not configured");
         dispatch(setAuthUser(null));
@@ -25,7 +25,7 @@ const AuthLoader = ({ children }) => {
         setAuthChecked(true);
         return;
       }
-      
+
       const response = await axios.get(`${API_URL}/user/profile`, {
         withCredentials: true,
         timeout: 10000
@@ -40,7 +40,6 @@ const AuthLoader = ({ children }) => {
       }
     } catch (error) {
       console.log("❌ Auth check failed:", error.response?.status, error.response?.data?.message || error.message);
-      // Don't automatically logout on network errors, just set user to null
       dispatch(setAuthUser(null));
     } finally {
       setLoading(false);
@@ -62,7 +61,6 @@ const AuthLoader = ({ children }) => {
     }
   }, [API_URL, user, authChecked]);
 
-  // Show loading spinner while checking authentication
   if (loading && !authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">

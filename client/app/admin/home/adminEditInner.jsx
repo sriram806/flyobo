@@ -69,7 +69,8 @@ export default function AdminEditInner() {
         return;
       }
 
-      const res = await fetch('/api/v1/layout', {
+      const base = process.env.NEXT_PUBLIC_BACKEND_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}/api/v1` : 'http://localhost:5000/api/v1');
+      const res = await fetch(`${base}/layout`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

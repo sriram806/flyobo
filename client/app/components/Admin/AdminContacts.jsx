@@ -18,6 +18,7 @@ export default function AdminContacts() {
   const [total, setTotal] = useState(0);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [statusCounts, setStatusCounts] = useState({});
 
   const [selected, setSelected] = useState(null);
   const [viewLoading, setViewLoading] = useState(false);
@@ -29,14 +30,16 @@ export default function AdminContacts() {
     try {
       setLoading(true);
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      const { data } = await axios.get(`${API_URL}/contact-admin`, {
+      const { data } = await axios.get(`${API_URL}/contact`, {
         params: { q, page, limit: PageSize },
         withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       const list = data?.contacts || data?.data || [];
       setItems(list);
-      setTotal(Number(data?.total || list.length));
+      setTotal(Number(data?.total || data?.pagination?.total || list.length));
+      // fetch overall counts separately (full scan) so pagination doesn't affect stats
+      fetchCounts();
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || "Failed to load messages";
       toast.error(msg);
@@ -45,6 +48,31 @@ export default function AdminContacts() {
     }
   }
 
+  const fetchCounts = async () => {
+    if (!API_URL) return;
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      // Request a large limit so we can compute category counts for admin stats
+      const { data } = await axios.get(`${API_URL}/contact`, {
+        params: { page: 1, limit: 100000 },
+        withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const all = data?.contacts || data?.data || [];
+      const counts = {};
+      all.forEach((c) => {
+        const key = (c.status || 'pending').toString();
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      setStatusCounts(counts);
+      // If backend returns total in pagination, prefer that
+      if (data?.pagination?.total) setTotal(Number(data.pagination.total));
+    } catch (e) {
+      // don't interrupt main flow for stats failures
+      console.warn('Failed to fetch contact counts', e?.message || e);
+    }
+  };
+
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [q, page, API_URL]);
 
   const handleDelete = async (id) => {
@@ -52,7 +80,7 @@ export default function AdminContacts() {
     if (!confirm("Delete this message? This cannot be undone.")) return;
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      await axios.delete(`${API_URL}/contact-admin/${id}`, {
+      await axios.delete(`${API_URL}/contact/${id}`, {
         withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
@@ -68,7 +96,7 @@ export default function AdminContacts() {
     if (!API_URL) return;
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      await axios.put(`${API_URL}/contact-admin/${id}/read`, {}, {
+      await axios.put(`${API_URL}/contact/${id}/read`, {}, {
         withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
@@ -85,7 +113,7 @@ export default function AdminContacts() {
     try {
       setViewLoading(true);
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      const { data } = await axios.get(`${API_URL}/contact-admin/${id}`, {
+      const { data } = await axios.get(`${API_URL}/contact/${id}`, {
         withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
@@ -110,6 +138,24 @@ export default function AdminContacts() {
               Contact Messages
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Total: {total} messages</p>
+
+              {/* Stats cards */}
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-6 gap-3">
+                <div className="p-3 bg-white dark:bg-gray-900 shadow rounded-xl border dark:border-gray-700">
+                  <p className="text-xs text-gray-500">Total Messages</p>
+                  <p className="text-2xl font-bold">{total}</p>
+                </div>
+                {Object.entries(statusCounts).length === 0 ? (
+                  <></>
+                ) : (
+                  Object.entries(statusCounts).map(([k, v]) => (
+                    <div key={k} className="p-3 bg-white dark:bg-gray-900 shadow rounded-xl border dark:border-gray-700">
+                      <p className="text-xs text-gray-500 capitalize">{k.replace(/[-_]/g, ' ')}</p>
+                      <p className="text-2xl font-bold">{v}</p>
+                    </div>
+                  ))
+                )}
+              </div>
           </div>
 
           <div className="relative w-full sm:w-72">

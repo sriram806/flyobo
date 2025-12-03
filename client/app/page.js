@@ -10,14 +10,10 @@ import BoldShowcase from './components/Home/BoldShowcase';
 import ReferralBanner from './components/Home/ReferralBanner';
 import Newsletter from './components/Home/Newsletter';
 import Footer from './components/Layout/Footer';
-import WhatsApp from './components/styles/whatsapp';
 import SEO from './components/MetaData/SEO';
 import { WebsiteStructuredData, OrganizationStructuredData } from './components/MetaData/StructuredData';
 import FeaturedPackages from './components/Home/FeaturedPackages';
 import Testimonials from './components/Home/Testimonials';
-import TravelBlog from './components/Home/TravelBlog';
-import SpecialOffers from './components/Home/SpecialOffers';
-import WhyChooseUs from './components/Home/WhyChooseUs';
 
 const Home = () => {
   const [open, setOpen] = useState(false);

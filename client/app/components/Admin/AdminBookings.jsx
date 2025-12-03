@@ -661,13 +661,6 @@ export default function AdminBookings() {
                         >
                           <Pencil size={15} />
                         </button>
-                        <button
-                          title="Delete"
-                          onClick={() => deleteBooking(b._id)}
-                          className="p-2 rounded-lg border border-rose-300 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition"
-                        >
-                          <Trash2 size={15} />
-                        </button>
                       </div>
                     </div>
                   </div>

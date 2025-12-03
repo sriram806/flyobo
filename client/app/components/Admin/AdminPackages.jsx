@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import authRequest from "@/app/utils/authRequest";
@@ -241,12 +240,7 @@ const AdminPackages = () => {
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex-1">Packages</h2>
           <div className="flex gap-2">
-            <button
-              onClick={() => setShowUploadModal(!showUploadModal)}
-              className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              📊 Bulk Upload
-            </button>
+           
             <select
               value={locationFilter}
               onChange={(e) => { setLocationFilter(e.target.value); setPage(1); }}
@@ -274,120 +268,150 @@ const AdminPackages = () => {
                 <option key={sz} value={sz}>{sz}/page</option>
               ))}
             </select>
-            <Link
-              href="/admin/packages/create"
-              className="rounded-lg bg-sky-600 text-white px-4 py-2 text-sm hover:bg-sky-700"
-            >Create Package</Link>
           </div>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-600 dark:text-gray-300">
-                <th className="py-2 pr-4">Name</th>
-                <th className="py-2 pr-4">Location</th>
-                <th className="py-2 pr-4">Price</th>
-                <th className="py-2 pr-4">Duration</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2 pr-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td className="py-6" colSpan={6}>Loading...</td></tr>
-              ) : items.length === 0 ? (
-                <tr><td className="py-6" colSpan={6}>No packages found.</td></tr>
-              ) : (
-                items.map((p) => (
-                  <tr key={p._id || p.id} className="border-t border-gray-100 dark:border-gray-800">
-                    <td className="py-2 pr-4 text-gray-900 dark:text-white">{p.name || p.title || '-'}</td>
-                    <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">{p.location || p.destination || '-'}</td>
-                    <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">{p.price != null ? `₹${p.price}` : '-'}</td>
-                    <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">
-                      {p.duration != null ? `${p.duration}D` : `${p.days ?? 0}D/${p.nights ?? 0}N`}
-                    </td>
-                    <td className="py-2 pr-4">
-                      <button
-                        type="button"
-                        onClick={() => toggleStatus(p)}
-                        disabled={updatingId === (p._id || p.id)}
-                        className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold border transition active:translate-y-px disabled:opacity-60
-                          ${(normalizedStatus(p) === "active")
-                            ? "bg-gradient-to-b from-emerald-200 to-emerald-300 text-emerald-800 border-emerald-400 shadow-inner"
-                            : "bg-gradient-to-b from-gray-200 to-gray-300 text-gray-800 border-gray-400 shadow-inner"}`}
-                        title={normalizedStatus(p) || "draft"}
-                      >
-                        {updatingId === (p._id || p.id) ? "Updating..." : (normalizedStatus(p) || "draft")}
-                      </button>
-                    </td>
-                    <td className="py-2 pr-0">
-                      <div className="flex justify-end gap-2">
-                        <Link
-                          href={`/admin/packages/edit?id=${p._id || p.id}`}
-                          className="px-3 py-1.5 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-300/90 dark:hover:bg-gray-800"
-                        >Edit</Link>
-                        <button
-                          className="px-3 py-1.5 rounded-lg bg-sky-600 text-white hover:bg-sky-700"
-                          onClick={() => removePkg(p._id || p.id)}
-                        >Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="mt-4">
+          {/* Desktop: table view */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-600 dark:text-gray-300">
+                  <th className="py-2 pr-4">Name</th>
+                  <th className="py-2 pr-4">Location</th>
+                  <th className="py-2 pr-4">Price</th>
+                  <th className="py-2 pr-4">Duration</th>
+                  <th className="py-2 pr-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td className="py-6" colSpan={6}>Loading...</td></tr>
+                ) : items.length === 0 ? (
+                  <tr><td className="py-6" colSpan={6}>No packages found.</td></tr>
+                ) : (
+                  items.map((p) => (
+                    <tr key={p._id || p.id} className="border-t border-gray-100 dark:border-gray-800">
+                      <td className="py-2 pr-4 text-gray-900 dark:text-white">{p.name || p.title || '-'}</td>
+                      <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">{p.location || p.destination || '-'}</td>
+                      <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">{p.price != null ? `₹${p.price}` : '-'}</td>
+                      <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">
+                        {p.duration != null ? `${p.duration}D` : `${p.days ?? 0}D/${p.nights ?? 0}N`}
+                      </td>
+                      <td className="py-2 pr-0">
+                        <div className="flex justify-end gap-2">
+                          <Link
+                            href={`/admin/packages/edit?id=${p._id || p.id}`}
+                            className="px-3 py-1.5 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-300/90 dark:hover:bg-gray-800"
+                          >Edit</Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile: card list view */}
+          <div className="md:hidden space-y-3">
+            {loading ? (
+              <div className="py-6 text-center">Loading...</div>
+            ) : items.length === 0 ? (
+              <div className="py-6 text-center">No packages found.</div>
+            ) : (
+              items.map((p) => (
+                <div key={p._id || p.id} className="border rounded-lg p-3 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">{p.name || p.title || '-'}</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-300">{p.location || p.destination || '-'}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{p.price != null ? `₹${p.price}` : '-'}</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-300">{p.duration != null ? `${p.duration}D` : `${p.days ?? 0}D/${p.nights ?? 0}N`}</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-end gap-2">
+                    <Link
+                      href={`/admin/packages/edit?id=${p._id || p.id}`}
+                      className="px-3 py-1.5 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-300/90 dark:hover:bg-gray-800 text-sm"
+                    >Edit</Link>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <div className="text-gray-600 dark:text-gray-400">
-            Showing {total === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)} of {total}
+        <div className="mt-4">
+          {/* Desktop pagination */}
+          <div className="hidden md:flex items-center justify-between text-sm">
+            <div className="text-gray-600 dark:text-gray-400">
+              Showing {total === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)} of {total}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
+                disabled={page <= 1}
+                onClick={() => setPage(1)}
+              >First</button>
+              <button
+                className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >Previous</button>
+              {
+                // Numbesky page buttons with a small window
+                (() => {
+                  const windowSize = 5;
+                  const start = Math.max(1, page - Math.floor(windowSize/2));
+                  const end = Math.min(totalPages, start + windowSize - 1);
+                  const realStart = Math.max(1, end - windowSize + 1);
+                  const pages = [];
+                  for (let i = realStart; i <= end; i++) pages.push(i);
+                  return pages.map(n => (
+                    <button
+                      key={n}
+                      className={`px-3 py-1.5 rounded-lg border text-sm ${n === page ? 'bg-sky-600 text-white border-sky-600' : 'border-gray-200 dark:border-gray-700'}`}
+                      onClick={() => setPage(n)}
+                      disabled={n === page}
+                    >{n}</button>
+                  ));
+                })()
+              }
+              <button
+                className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-800 dark:border-gray-700 disabled:opacity-50"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >Next</button>
+              <button
+                className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
+                disabled={page >= totalPages}
+                onClick={() => setPage(totalPages)}
+              >Last</button>
+              <div className="flex items-center gap-2 ml-2">
+                <input value={jumpPage} onChange={(e) => setJumpPage(e.target.value)} placeholder="#" className="w-16 rounded-lg border border-gray-300 dark:border-gray-700 px-2 py-1 text-sm bg-transparent text-gray-800 dark:text-gray-100" />
+                <button onClick={() => { const n = parseInt(jumpPage); if (!isNaN(n) && n >=1 && n <= totalPages) setPage(n); setJumpPage(''); }} className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-800 text-sm">Go</button>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
-              disabled={page <= 1}
-              onClick={() => setPage(1)}
-            >First</button>
-            <button
-              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >Previous</button>
-            {
-              // Numbesky page buttons with a small window
-              (() => {
-                const windowSize = 5;
-                const start = Math.max(1, page - Math.floor(windowSize/2));
-                const end = Math.min(totalPages, start + windowSize - 1);
-                const realStart = Math.max(1, end - windowSize + 1);
-                const pages = [];
-                for (let i = realStart; i <= end; i++) pages.push(i);
-                return pages.map(n => (
-                  <button
-                    key={n}
-                    className={`px-3 py-1.5 rounded-lg border text-sm ${n === page ? 'bg-sky-600 text-white border-sky-600' : 'border-gray-200 dark:border-gray-700'}`}
-                    onClick={() => setPage(n)}
-                    disabled={n === page}
-                  >{n}</button>
-                ));
-              })()
-            }
-            <button
-              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-800 dark:border-gray-700 disabled:opacity-50"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >Next</button>
-            <button
-              className="px-3 py-1.5 text-gray-900 rounded-lg border border-gray-900 dark:border-gray-700 disabled:opacity-50"
-              disabled={page >= totalPages}
-              onClick={() => setPage(totalPages)}
-            >Last</button>
-            <div className="flex items-center gap-2 ml-2">
-              <input value={jumpPage} onChange={(e) => setJumpPage(e.target.value)} placeholder="#" className="w-16 rounded-lg border border-gray-300 dark:border-gray-700 px-2 py-1 text-sm bg-transparent text-gray-800 dark:text-gray-100" />
-              <button onClick={() => { const n = parseInt(jumpPage); if (!isNaN(n) && n >=1 && n <= totalPages) setPage(n); setJumpPage(''); }} className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-800 text-sm">Go</button>
+
+          {/* Mobile pagination: simplified */}
+          <div className="flex md:hidden items-center justify-between text-sm">
+            <div className="text-gray-600 dark:text-gray-400">{total === 0 ? 'No results' : `Page ${page} of ${totalPages}`}</div>
+            <div className="flex items-center gap-2">
+              <button
+                className="px-3 py-1.5 text-gray-900 rounded-lg border disabled:opacity-50"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >Previous</button>
+              <button
+                className="px-3 py-1.5 text-gray-900 rounded-lg border disabled:opacity-50"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+              >Next</button>
             </div>
           </div>
         </div>

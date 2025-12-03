@@ -57,56 +57,6 @@ export default function Page() {
     );
   });
 
-  const addFaq = () => {
-    if (!isAdmin) return;
-    setFaqs([...faqs, { question: "", answer: "" }]);
-  };
-
-  const updateFaq = (idx, key, val) => {
-    if (!isAdmin) return;
-    setFaqs(faqs.map((f, i) => (i === idx ? { ...f, [key]: val } : f)));
-  };
-
-  const deleteFaq = async (idx) => {
-    if (!isAdmin) return;
-    try {
-      const item = faqs[idx];
-      const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-      const base = (API_URL || "").replace(/\/$/, "");
-
-      if (item?._id) {
-        await axios.delete(`${base}/layout`, {
-          params: { type: "FAQ", id: item._id },
-          withCredentials: true,
-        });
-      }
-
-      setFaqs(faqs.filter((_, i) => i !== idx));
-      toast.success("Successfully Delete")
-    } catch {
-      setError("Failed to delete FAQ.");
-    }
-  };
-
-  const saveFaqs = async () => {
-    if (!isAdmin) return;
-    try {
-      setSaving(true);
-
-      const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-      const base = (API_URL || "").replace(/\/$/, "");
-      const payload = { type: "FAQ", faq: faqs };
-
-      const res = await axios.put(`${base}/layout`, payload, { withCredentials: true });
-      if (res?.data?.layout?.faq) setFaqs(res.data.layout.faq);
-
-      toast.success("Successfully Saved")
-    } catch {
-      setError("Failed to save FAQs.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <>
@@ -174,56 +124,11 @@ export default function Page() {
                         {item.answer}
                       </p>
                     )}
-
-                    {/* Admin Edit */}
-                    {isAdmin && (
-                      <div className="mt-6 space-y-3 border-t pt-4 border-gray-200 dark:border-gray-700">
-                        <input
-                          className="w-full px-3 py-2 text-gray-800 dark:text-green-100 bg-gray-50 dark:bg-gray-900 border rounded-lg text-sm"
-                          value={item.question}
-                          onChange={(e) =>
-                            updateFaq(idx, "question", e.target.value)
-                          }
-                        />
-                        <textarea
-                          className="w-full px-3 py-2 text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 border rounded-lg text-sm"
-                          value={item.answer}
-                          onChange={(e) =>
-                            updateFaq(idx, "answer", e.target.value)
-                          }
-                          rows={3}
-                        />
-                        <button
-                          onClick={() => deleteFaq(idx)}
-                          className="text-sm p-1 rounded border text-red-600   dark:text-red-400 hover:bg-red-500 hover:text-white"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
                   </div>
                 );
               })
             )}
           </div>
-
-          {isAdmin && (
-            <div className="mt-10 flex gap-3">
-              <button
-                onClick={addFaq}
-                className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm"
-              >
-                + Add FAQ
-              </button>
-              <button
-                onClick={saveFaqs}
-                disabled={saving}
-                className="px-4 py-2 border rounded-lg text-sm dark:border-gray-700"
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          )}
         </section>
       </main>
 

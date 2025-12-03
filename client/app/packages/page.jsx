@@ -12,7 +12,7 @@ import ResultsToolbar from "../components/Packages/ResultsToolbar";
 import EmptyState from "../components/Packages/EmptyState";
 import PackageCard from "../components/Packages/PackageCard";
 import Footer from "../components/Layout/Footer";
-import { MapPin, Compass, Sparkles, TrendingUp } from "lucide-react";
+import { MapPin, Compass, Sparkles, TrendingUp, Filter } from "lucide-react";
 import { HiOutlineSearch, HiOutlineSelector } from "react-icons/hi";
 
 export default function Page() {
@@ -32,6 +32,7 @@ export default function Page() {
   const [minDays, setMinDays] = useState(1);
   const [maxDays, setMaxDays] = useState(30);
   const [categories, setCategories] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
@@ -276,7 +277,7 @@ export default function Page() {
                         Destinations
                       </p>
                       <p className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">
-                        100+
+                        50+
                       </p>
                     </div>
                   </div>
@@ -357,7 +358,22 @@ export default function Page() {
         )}
 
         <section className="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <FiltersPanel
+          {/* Mobile toggle for filters */}
+          <div className="lg:hidden mb-2">
+            <button
+              onClick={() => setShowFilters((s) => !s)}
+              aria-expanded={showFilters}
+              aria-controls="filters-panel"
+              aria-label={showFilters ? "Hide filters" : "Show filters"}
+              title={showFilters ? "Hide filters" : "Show filters"}
+              className={`px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition flex items-center justify-center`}
+            >
+              <Filter className={`w-5 h-5 ${showFilters ? 'text-sky-600' : 'text-gray-600 dark:text-gray-300'}`} />
+            </button>
+          </div>
+
+          <div id="filters-panel" className={`${showFilters ? 'block' : 'hidden'} md:block`}>
+            <FiltersPanel
             search={search}
             setSearch={setSearch}
             uniqueCategories={uniqueCategories}
@@ -374,7 +390,8 @@ export default function Page() {
             categories={categories}
             setCategories={setCategories}
             onReset={resetFilters}
-          />
+            />
+          </div>
 
           <div className="lg:col-span-3 space-y-6">
             <ResultsToolbar

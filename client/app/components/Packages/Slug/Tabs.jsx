@@ -3,7 +3,7 @@
 import React from "react";
 import Badge from "./ui/Badge";
 
-export default function Tabs({ activeTab, setActiveTab, pkg, title }) {
+export default function Tabs({ activeTab, setActiveTab, pkg, title, url }) {
   return (
     <div className="rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md">
       <div className="flex flex-wrap gap-2 p-4 border-b border-gray-200 dark:border-gray-800">
@@ -39,7 +39,16 @@ export default function Tabs({ activeTab, setActiveTab, pkg, title }) {
                 <div className="text-base font-semibold text-gray-900 dark:text-white">Ready to Experience This Journey?</div>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Contact our travel experts to customize this package and get the best deals.</p>
               </div>
-              <a href={`https://wa.me/919291237999?text=${encodeURIComponent('Hi, I am interested in ' + title + ' package.')}`} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm">Contact Expert</a>
+              <a
+                href={`https://wa.me/919291237999?text=${encodeURIComponent(
+                  'Hi, I am interested in ' + title + ' package. Link: ' + (url || '')
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm"
+              >
+                Contact Expert
+              </a>
             </div>
 
             {pkg?.tags && (
