@@ -56,7 +56,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "http://localhost:3001",
-  "https://flyobo.vercel.app"
+  "https://flyobo.vercel.app",
+  "https://admin-five-gold.vercel.app"
 ];
 
 // ✅ Add any environment origin dynamically
