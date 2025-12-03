@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+html {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	background-color: #ffffff;
+	color: #111827;
+}
+
+.dark body {
+	background-color: #111827;
+	color: #f3f4f6;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+}
