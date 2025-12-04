@@ -1,9 +1,9 @@
 "use client";
 
+import PlatformServices from "@/Components/Dashboard/PlatformServices";
+import RevenueSystem from "@/Components/Dashboard/RevenueSystem";
+import SiteAnalytics from "@/Components/Dashboard/SiteAnalytics";
 import { useSearchParams } from "next/navigation";
-import PlatformServices from "../Components/Dashboard/PlatformServices";
-import RevenueSystem from "../Components/Dashboard/RevenueSystem";
-import SiteAnalytics from "../Components/Dashboard/SiteAnalytics";
 
 export default function DashboardPage() {
   const params = useSearchParams();

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import AdminContacts from '../Components/Contact/Contact';
+import AdminContacts from '@/Components/Contact/Contact';
 export default function Page() {
     const params = useSearchParams();
     const tab = params?.get('tab') || 'list';

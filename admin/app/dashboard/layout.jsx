@@ -1,15 +1,15 @@
 "use client";
 
-import Sidebar from "../Components/Sidebar";
-import Header from "../Components/Layout/Header";
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from "next/navigation";
+import Header from '@/Components/Layout/Header';
+import Sidebar from '@/Components/Sidebar';
 
 export default function DashboardLayout({ children }) {
     const router = useRouter();
     const params = useSearchParams();
     const tab = params?.get('tab') || 'list';
-    const go = (next) => router.push(`/users?tab=${encodeURIComponent(next)}`);
+    const go = (next) => router.push(`/dashboard?tab=${encodeURIComponent(next)}`);
     const [collapsed, setCollapsed] = useState(false);
 
     return (

@@ -1,15 +1,15 @@
 "use client"
 
 import React, { useState } from 'react'
-import Sidebar from '../Components/Sidebar'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Header from '../Components/Layout/Header'
+import Header from '@/Components/Layout/Header';
+import Sidebar from '@/Components/Sidebar';
 
 const Layout = ({ children }) => {
     const router = useRouter();
     const params = useSearchParams();
     const tab = params?.get('tab') || 'list';
-    const go = (next) => router.push(`/users?tab=${encodeURIComponent(next)}`);
+    const go = (next) => router.push(`/layout?tab=${encodeURIComponent(next)}`);
     const [collapsed, setCollapsed] = useState(false);
 
     return (

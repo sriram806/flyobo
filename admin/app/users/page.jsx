@@ -1,11 +1,11 @@
 "use client";
 
 import React from 'react';
-import AllUserAnalytics from "../Components/User/AllUserAnalytics";
 import { useSearchParams } from 'next/navigation';
-import CreateUser from '../Components/User/CreateUser';
-import AllUsers from '../Components/User/AllUsers';
-import ManageAdmin from '../Components/User/ManageAdmin';
+import AllUserAnalytics from '@/Components/User/AllUserAnalytics';
+import CreateUser from '@/Components/User/CreateUser';
+import AllUsers from '@/Components/User/AllUsers';
+import ManageAdmin from '@/Components/User/ManageAdmin';
 
 export default function Page() {
   const params = useSearchParams();

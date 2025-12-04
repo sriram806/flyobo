@@ -80,6 +80,7 @@ const Header = ({ activeItem }) => {
 
                         {/* actions */}
                         <div className="flex items-center gap-3" role="toolbar" aria-label="Header actions">
+                            <ThemeToggle />
 
                             {user && user.role === "admin" && (
                                 <div className="relative">

@@ -1,8 +1,8 @@
 "use client";
 
+import Faq from '@/Components/Layout/Faq';
+import AdminHero from '@/Components/Layout/Hero';
 import { useSearchParams } from 'next/navigation';
-import Faq from '../Components/Layout/Faq';
-import AdminHero from '../Components/Layout/Hero';
 
 export default function Page() {
   const params = useSearchParams();

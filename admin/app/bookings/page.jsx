@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import Bookings from '../Components/Bookings/Bookings';
+import Bookings from '@/Components/Bookings/Bookings';
 
 export default function Page() {
   const params = useSearchParams();

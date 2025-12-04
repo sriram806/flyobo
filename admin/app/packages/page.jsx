@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import CreatePackage from '../Components/Package/CreatePackage';
-import EditPackage from '../Components/Package/EditPackage';
-import AllPackages from '../Components/Package/AllPackages';
-import AllPackageAnalytics from '../Components/Package/AllPackageAnalytics';
+import AllPackages from '@/Components/Package/AllPackages';
+import EditPackage from '@/Components/Package/EditPackage';
+import AllPackageAnalytics from '@/Components/Package/AllPackageAnalytics';
+import CreatePackage from '@/Components/Package/CreatePackage'
 
 export default function Page() {
     const params = useSearchParams();

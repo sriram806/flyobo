@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { setAuthUser, logout } from "@/redux/authSlice";
-import ThemeToggle from "./Utils/Themes/ThemeToggle";
+import ThemeToggle from "@/Utils/Themes/ThemeToggle";
 
 export default function Page() {
   const router = useRouter();

@@ -41,7 +41,6 @@ export const adminCreateUser = async (req, res) => {
     return res.status(400).json({ success: false, message: "Name, email and password are required" });
   }
 
-  // Require authentication + admin role for creating users
   if (!req.user) {
     return res.status(401).json({ success: false, message: "Unauthorized: Please log in as admin" });
   }

@@ -14,3 +14,25 @@ body {
 	background-color: #111827;
 	color: #f3f4f6;
 }
+
+.label {
+  @apply text-xs uppercase font-semibold text-gray-600 dark:text-gray-300;
+}
+
+.input {
+  @apply mt-1 w-full rounded-md border px-3 py-2 bg-gray-200 border-gray-300 
+         dark:bg-gray-900 dark:text-gray-100;
+}
+
+.input.error {
+  @apply border-red-400;
+}
+
+.error-text {
+  @apply text-xs text-red-600 mt-1;
+}
+
+.btn-primary {
+  @apply px-6 py-2 rounded-lg text-white font-medium shadow-md bg-blue-600 
+         hover:bg-blue-700 transition;
+}

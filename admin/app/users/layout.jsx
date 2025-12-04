@@ -1,9 +1,9 @@
 "use client"
 
 import React, { useState } from 'react'
-import Sidebar from '../Components/Sidebar'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Header from '../Components/Layout/Header'
+import Header from '@/Components/Layout/Header';
+import Sidebar from '@/Components/Sidebar';
 
 const Layout = ({ children }) => {
     const router = useRouter();

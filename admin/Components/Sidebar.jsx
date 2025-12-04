@@ -2,21 +2,49 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
-import { FaHome, FaSignOutAlt, FaUsers, FaUserPlus, FaChartBar, FaAcquisitionsIncorporated, FaBars, FaChevronDown, FaChevronRight, FaBoxes, FaCalendarAlt, FaImage, FaBell, FaGift, FaQuestion } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { 
+  FaHome, FaSignOutAlt, FaUsers, FaUserPlus, FaChartBar, 
+  FaAcquisitionsIncorporated, FaBars, FaChevronDown, FaChevronRight, 
+  FaBoxes, FaCalendarAlt, FaGift, FaQuestion 
+} from "react-icons/fa";
 import { FiLayout } from "react-icons/fi";
 import { IoIosSettings, IoMdContact } from "react-icons/io";
 import { MdLeaderboard } from "react-icons/md";
 import { RiMoneyRupeeCircleLine, RiGalleryLine } from "react-icons/ri";
 
-export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }, userCount = null, tab, go, counts = {} }) {
+export default function Sidebar({ collapsed = false, onToggleSidebar = () => {}, counts = {} }) {
   const pathname = usePathname() || "/";
   const searchParams = useSearchParams();
   const currentTab = searchParams ? searchParams.get("tab") : null;
+
   const [openGroups, setOpenGroups] = useState({});
 
+  // Toggle a sidebar group
   function toggleGroup(id) {
-    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
+    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  // Advanced active detection (handles tabs, nested paths, trailing slashes)
+  function hrefIsActive(href) {
+    if (!href) return false;
+    try {
+      const url = new URL(href, "http://dummy"); // base required
+      const targetPath = url.pathname.replace(/\/$/, ""); // remove trailing slash
+      const targetTab = url.searchParams.get("tab");
+
+      const currentPath = pathname.replace(/\/$/, "");
+
+      const pathMatches = currentPath === targetPath || currentPath.startsWith(targetPath + "/");
+
+      if (targetTab) {
+        return pathMatches && targetTab === currentTab;
+      }
+
+      return pathMatches;
+    } catch {
+      return pathname.startsWith(href);
+    }
   }
 
   function itemClass(active) {
@@ -30,23 +58,7 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }
     `;
   }
 
-  function hrefIsActive(href) {
-    if (!href) return false;
-    // If href contains a tab query param, compare with currentTab
-    const qIndex = href.indexOf("?tab=");
-    if (qIndex !== -1) {
-      const tabValue = href.substring(qIndex + 5);
-      // handle potential additional query params
-      const amp = tabValue.indexOf("&");
-      const desired = amp === -1 ? tabValue : tabValue.substring(0, amp);
-      const base = href.substring(0, qIndex) || "/";
-      // Only treat as active if both the tab matches AND the current pathname matches the base path
-      return currentTab === desired && pathname.startsWith(base);
-    }
-    // else compare pathname
-    return pathname.startsWith(href);
-  }
-
+  // Sidebar menu
   const menu = [
     {
       id: "dashboard",
@@ -64,9 +76,9 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }
       icon: <FaUsers size={18} />,
       children: [
         { id: "analytics", label: "Analytics", icon: <FaChartBar size={16} />, href: "/users?tab=analytics" },
+        { id: "manageadmin", label: "Managers", icon: <FaAcquisitionsIncorporated size={16} />, href: "/users?tab=manageadmin" },
+        { id: "allusers", label: "Customers", icon: <FaUsers size={16} />, href: "/users?tab=allusers" },
         { id: "create", label: "Create User", icon: <FaUserPlus size={16} />, href: "/users?tab=create" },
-        { id: "allusers", label: "All Users", icon: <FaUsers size={16} />, href: "/users?tab=allusers" },
-        { id: "manageadmin", label: "Manage Admin", icon: <FaAcquisitionsIncorporated size={16} />, href: "/users?tab=manageadmin" },
       ],
     },
     {
@@ -101,9 +113,20 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }
     },
     { id: "gallery", label: "Gallery", icon: <RiGalleryLine size={18} />, href: "/gallery" },
     { id: "contact", label: "Contact", icon: <IoMdContact size={18} />, href: "/contact" },
-
   ];
 
+  // Automatically open groups if a child is active
+  useEffect(() => {
+    const newOpenGroups = {};
+    menu.forEach(item => {
+      if (item.children?.some(c => hrefIsActive(c.href))) {
+        newOpenGroups[item.id] = true;
+      }
+    });
+    setOpenGroups(prev => ({ ...prev, ...newOpenGroups }));
+  }, [pathname, currentTab]);
+
+  // Sidebar footer
   const footer = (
     <div className="mt-4">
       <button
@@ -121,21 +144,19 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }
       aria-expanded={!collapsed}
     >
       <div className="flex items-center justify-between mb-6">
-        {!collapsed && (
-          <h1 className="text-xl font-semibold text-blue-600 dark:text-blue-400">Menu</h1>
-        )}
+        {!collapsed && <h1 className="text-xl font-semibold text-blue-600 dark:text-blue-400">Menu</h1>}
         <button onClick={onToggleSidebar} aria-label="Toggle Sidebar" className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
           <FaBars className="text-blue-500" />
         </button>
       </div>
 
       <nav className="space-y-2 flex-1">
-        {menu.map((item) => {
+        {menu.map(item => {
           const hasChildren = Array.isArray(item.children) && item.children.length > 0;
           const isGroupOpen = openGroups[item.id];
 
           if (hasChildren) {
-            const childActive = item.children.some((c) => c.href && hrefIsActive(c.href));
+            const childActive = item.children.some(c => hrefIsActive(c.href));
             return (
               <div key={item.id}>
                 <button
@@ -153,16 +174,8 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }
                 </button>
 
                 <div className={`pl-6 mt-2 space-y-1 ${isGroupOpen ? "block" : "hidden"}`}>
-                  {item.children.map((child) => {
-                    const active = child.href ? hrefIsActive(child.href) : false;
-                    if (child.onClick) {
-                      return (
-                        <button key={child.id} onClick={child.onClick} className={itemClass(active)}>
-                          {child.icon}
-                          {!collapsed && <span className="font-medium">{child.label}</span>}
-                        </button>
-                      );
-                    }
+                  {item.children.map(child => {
+                    const active = hrefIsActive(child.href);
                     return (
                       <Link key={child.id} href={child.href || "#"} className={itemClass(active)}>
                         {child.icon}
@@ -175,28 +188,11 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }
             );
           }
 
-          const active = item.href ? hrefIsActive(item.href) : false;
-          if (item.onClick) {
-            return (
-              <button key={item.id} onClick={item.onClick} className={itemClass(active)}>
-                {item.icon}
-                {!collapsed && <span className="font-medium">{item.label}</span>}
-                {item.badge && !collapsed && (
-                  <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-rose-500 text-white">{item.badge}</span>
-                )}
-                {active && <span className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />}
-              </button>
-            );
-          }
-
+          const active = hrefIsActive(item.href);
           return (
             <Link key={item.id} href={item.href || "#"} className={itemClass(active)}>
               {item.icon}
               {!collapsed && <span className="font-medium">{item.label}</span>}
-              {item.badge && !collapsed && (
-                <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-rose-500 text-white">{item.badge}</span>
-              )}
-              {active && <span className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />}
             </Link>
           );
         })}
@@ -206,6 +202,5 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }
         {footer || <p className="text-xs text-gray-400 dark:text-gray-500 text-center">© 2025 Admin Panel</p>}
       </div>
     </aside>
-
   );
 }

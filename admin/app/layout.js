@@ -1,12 +1,11 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ThemeProvider from "./Utils/Themes/ThemeProvider";
-import ThemeToggle from "./Utils/Themes/ThemeToggle";
-import ClientProvider from "./hoc/ClientProvider";
 import { Toaster } from "react-hot-toast";
-import AuthLoader from "./Components/Auth/AuthLoader";
-import AdminProtected from "./hooks/adminProtected";
-import PageWrapper from "./Components/SiteWraper";
+import ClientProvider from "@/hoc/ClientProvider";
+import PageWrapper from "@/Components/SiteWraper";
+import ThemeProvider from "@/Utils/Themes/ThemeProvider";
+import AuthLoader from "@/Components/Auth/AuthLoader";
+import AdminProtected from "@/hooks/adminProtected";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
