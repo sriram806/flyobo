@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { 
-  FaHome, FaSignOutAlt, FaUsers, FaUserPlus, FaChartBar, 
-  FaAcquisitionsIncorporated, FaBars, FaChevronDown, FaChevronRight, 
-  FaBoxes, FaCalendarAlt, FaGift, FaQuestion 
+import {
+  FaHome, FaSignOutAlt, FaUsers, FaUserPlus, FaChartBar,
+  FaAcquisitionsIncorporated, FaBars, FaChevronDown, FaChevronRight,
+  FaBoxes, FaCalendarAlt, FaGift, FaQuestion,
+  FaPlane
 } from "react-icons/fa";
 import { FiLayout } from "react-icons/fi";
 import { IoIosSettings, IoMdContact } from "react-icons/io";
 import { MdLeaderboard } from "react-icons/md";
 import { RiMoneyRupeeCircleLine, RiGalleryLine } from "react-icons/ri";
 
-export default function Sidebar({ collapsed = false, onToggleSidebar = () => {}, counts = {} }) {
+export default function Sidebar({ collapsed = false, onToggleSidebar = () => { }, counts = {} }) {
   const pathname = usePathname() || "/";
   const searchParams = useSearchParams();
   const currentTab = searchParams ? searchParams.get("tab") : null;
@@ -79,6 +80,16 @@ export default function Sidebar({ collapsed = false, onToggleSidebar = () => {},
         { id: "manageadmin", label: "Managers", icon: <FaAcquisitionsIncorporated size={16} />, href: "/users?tab=manageadmin" },
         { id: "allusers", label: "Customers", icon: <FaUsers size={16} />, href: "/users?tab=allusers" },
         { id: "create", label: "Create User", icon: <FaUserPlus size={16} />, href: "/users?tab=create" },
+      ],
+    },
+    {
+      id: "destinations",
+      label: "Destinations",
+      icon: <FaPlane size={18} />,
+      children: [
+        { id: "analytics", label: "Analytics", icon: <FaChartBar size={16} />, href: "/destinations?tab=analytics" },
+        { id: "create", label: "Create", icon: <FaBoxes size={16} />, href: "/destinations?tab=create" },
+        { id: "alldestinations", label: "Destinations", icon: <FaCalendarAlt size={16} />, href: "/destinations?tab=alldestinations" },
       ],
     },
     {

@@ -1,4 +1,6 @@
 import Package from "../models/package.model.js";
+import Destination from "../models/destinations.model.js";
+import mongoose from 'mongoose';
 
 // Try to parse various string date formats, return Date or null
 function parseFlexibleDate(input) {
@@ -31,13 +33,103 @@ export const createPackage = async (data, res, req) => {
       return copy;
     });
   }
+  // Normalize destination: allow passing destination as name/slug or ObjectId
+  try {
+    if (data?.destination) {
+      // If already a valid ObjectId, leave it
+      if (typeof data.destination === 'string' && mongoose.Types.ObjectId.isValid(data.destination)) {
+        // ok
+      } else if (typeof data.destination === 'string') {
+        const raw = data.destination.trim();
+        // try find by slug
+        let dest = await Destination.findOne({ slug: raw.toLowerCase() });
+        if (!dest) {
+          // try exact place match (case-insensitive)
+          dest = await Destination.findOne({ place: { $regex: `^${raw}$`, $options: 'i' } });
+        }
+        if (dest) data.destination = dest._id;
+        else {
+          return res.status(400).json({ success: false, message: 'Destination not found. Provide a valid Destination _id, slug, or exact place name.' });
+        }
+      }
+    }
 
-  const packages = await Package.create(data);
-  res.status(201).json({
-    success: true,
-    message: `Package Created Successfully`,
-    package: packages,
-  });
+    // Normalize images: accept string (CSV or JSON), object, or array
+    let imgs = data?.images;
+    if (typeof imgs === 'string') {
+      try { imgs = JSON.parse(imgs); } catch (e) {
+        imgs = imgs.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    }
+    if (imgs && !Array.isArray(imgs)) {
+      if (typeof imgs === 'object') imgs = [imgs];
+      else imgs = [];
+    }
+    imgs = (imgs || []).map(i => {
+      if (typeof i === 'string') return { public_id: null, url: i };
+      if (i && typeof i === 'object') return { public_id: i.public_id || null, url: i.url || i.path || i.filename || null };
+      return null;
+    }).filter(Boolean);
+    data.images = imgs;
+
+    // Ensure `slug` is present and unique. If client didn't provide, derive from title.
+    const makeSlug = (s) => {
+      return String(s || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+    };
+
+    if (!data.slug && data.title) {
+      let base = makeSlug(data.title);
+      if (!base) base = `pkg-${Date.now()}`;
+      let candidate = base;
+      let suffix = 0;
+      // find unique slug
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        // if no package found with candidate slug, use it
+        // Note: small race condition possible but acceptable for admin flows
+        // because duplicates are rare; handle duplicate-key error fallback below.
+        // Use lean query for performance
+        // eslint-disable-next-line no-await-in-loop
+        const exists = await Package.findOne({ slug: candidate }).lean();
+        if (!exists) break;
+        suffix += 1;
+        candidate = `${base}-${suffix}`;
+      }
+      data.slug = candidate;
+    }
+
+    let packages;
+    try {
+      packages = await Package.create(data);
+    } catch (createErr) {
+      // Handle duplicate key error on slug gracefully by retrying once with a unique suffix
+      if (createErr && createErr.code === 11000 && createErr.keyPattern && createErr.keyPattern.slug) {
+        const base = makeSlug(data.title || `pkg-${Date.now()}`);
+        const alt = `${base}-${Date.now()}`;
+        data.slug = alt;
+        packages = await Package.create(data);
+      } else {
+        throw createErr;
+      }
+    }
+    res.status(201).json({
+      success: true,
+      message: `Package Created Successfully`,
+      package: packages,
+    });
+    return;
+  } catch (err) {
+    console.error('createPackage error:', err);
+    if (!res.headersSent) {
+      return res.status(500).json({ success: false, message: 'Error creating package', error: err.message });
+    }
+    return;
+  }
 };
 
 export const getAllPackagesServices = async (filters = {}) => {

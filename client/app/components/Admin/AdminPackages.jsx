@@ -51,7 +51,6 @@ const AdminPackages = () => {
         setTotal(0);
       }
     } catch (err) {
-      // Error handling is done in authRequest utility
       setItems([]);
       setTotal(0);
     } finally {

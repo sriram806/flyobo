@@ -107,17 +107,28 @@ export const EditPackage = async (req, res) => {
 
     // Handle image update - either file upload OR imageUrl
     if (req.file) {
-      // Get existing package to delete old image
+      // Get existing package to delete old image(s)
       const existingPackage = await Package.findById(packageId);
       if (existingPackage && existingPackage.images) {
-        const oldFilename = getFilenameFromUrl(existingPackage.images);
-        if (oldFilename) {
-          const oldFilePath = path.join(process.cwd(), 'uploads', 'packages', oldFilename);
-          deleteFile(oldFilePath);
+        if (Array.isArray(existingPackage.images)) {
+          existingPackage.images.forEach(img => {
+            const url = img && typeof img === 'object' ? img.url : img;
+            const oldFilename = getFilenameFromUrl(url);
+            if (oldFilename) {
+              const oldFilePath = path.join(process.cwd(), 'uploads', 'packages', oldFilename);
+              deleteFile(oldFilePath);
+            }
+          });
+        } else {
+          const oldFilename = getFilenameFromUrl(existingPackage.images);
+          if (oldFilename) {
+            const oldFilePath = path.join(process.cwd(), 'uploads', 'packages', oldFilename);
+            deleteFile(oldFilePath);
+          }
         }
       }
 
-      // Upload new image
+      // Upload new image (service will normalize to array)
       data.images = getFileUrl(req, req.file.filename, 'packages');
     } else if (data.imageUrl && data.imageUrl.trim()) {
       data.images = data.imageUrl.trim();
@@ -295,7 +306,6 @@ export const deletePackage = async (req, res) => {
   }
 };
 
-// ✅ 9. BULK UPLOAD PACKAGES FROM EXCEL
 export const bulkUploadPackages = async (req, res) => {
   try {
     if (!req.file) {

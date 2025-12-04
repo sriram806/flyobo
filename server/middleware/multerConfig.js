@@ -80,6 +80,14 @@ export const uploadLayoutImage = multer({
   }
 }).single('image');
 
+export const uploadDestinationImage = multer({
+  storage: createStorage('destinations'),
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  }
+}).single('coverImage');
+
 export const getFileUrl = (req, filename, subfolder) => {
   const protocol = req.protocol;
   const host = req.get('host');

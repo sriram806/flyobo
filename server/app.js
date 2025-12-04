@@ -36,6 +36,7 @@ import connecttoDatabase from "./database/mongodb.js";
 import adminRoute from "./routes/admin.route.js";
 import ContactRoute from "./routes/contact.route.js";
 import ReportRoute from "./routes/report.route.js";
+import DestinationRouter from "./routes/destination.route.js";
 connecttoDatabase();
 
 // Middleware
@@ -167,6 +168,7 @@ app.use("/api/v1/referral-admin", referralAdminRoute);
 app.use("/api/v1/contact", ContactRoute);
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/reports", ReportRoute);
+app.use("/api/v1/destinations", DestinationRouter);
 
 // ✅ Serve static files (e.g., uploaded images)
 app.use("/uploads", express.static("uploads"));

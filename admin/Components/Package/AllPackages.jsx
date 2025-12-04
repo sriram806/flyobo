@@ -35,15 +35,34 @@ export default function AllPackages() {
 		fetchPackages();
 	}, []);
 
-	// Filter + Search Logic
+	// Helper: normalize image field (string | array | object)
+	const getImageSrc = (images) => {
+		const fallback = "/images/icon.png";
+		if (!images) return fallback;
+		if (typeof images === "string") return images;
+		if (Array.isArray(images)) return images.length ? images[0] : fallback;
+		if (typeof images === "object") return images.url || images.src || fallback;
+		return fallback;
+	};
+
+	// Memoize unique destinations for filter select (stable keys)
+	const uniqueDestinations = useMemo(() => {
+		return Array.from(new Set(packages.map((p) => p.destination).filter(Boolean)));
+	}, [packages]);
+
+	// Filter + Search Logic (guard properties to avoid runtime errors)
 	const filteredPackages = useMemo(() => {
+		const q = (search || "").toLowerCase();
+
 		return packages.filter((pkg) => {
+			const title = (pkg.title || "").toString();
+			const destination = (pkg.destination || "").toString();
+
 			const matchSearch =
-				pkg.title.toLowerCase().includes(search.toLowerCase()) ||
-				pkg.destination.toLowerCase().includes(search.toLowerCase());
+				title.toLowerCase().includes(q) || destination.toLowerCase().includes(q);
 
 			const matchDestination = filterDestination
-				? pkg.destination.toLowerCase() === filterDestination.toLowerCase()
+				? destination.toLowerCase() === (filterDestination || "").toLowerCase()
 				: true;
 
 			return matchSearch && matchDestination;
@@ -103,18 +122,18 @@ export default function AllPackages() {
 					className="w-full md:w-1/3 px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
 				/>
 
-				<select
-					value={filterDestination}
-					onChange={(e) => setFilterDestination(e.target.value)}
-					className="w-full md:w-1/4 px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
-				>
-					<option value="">Filter by Destination</option>
-					{[...new Set(packages.map((p) => p.destination))].map((dest) => (
-						<option key={dest} value={dest}>
-							{dest}
-						</option>
-					))}
-				</select>
+					<select
+						value={filterDestination}
+						onChange={(e) => setFilterDestination(e.target.value)}
+						className="w-full md:w-1/4 px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
+					>
+						<option value="">Filter by Destination</option>
+						{uniqueDestinations.map((dest, idx) => (
+							<option key={`${dest}-${idx}`} value={dest}>
+								{dest}
+							</option>
+						))}
+					</select>
 			</div>
 
 			{/* Table */}
@@ -148,15 +167,15 @@ export default function AllPackages() {
 							</tr>
 						)}
 
-						{filteredPackages.map((pkg) => (
+						{filteredPackages.map((pkg, idx) => (
 							<tr
-								key={pkg._id}
+								key={pkg._id || `${pkg.title || 'pkg'}-${idx}`}
 								className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
 							>
 								<td className="p-3">
 									<img
-										src={pkg.images || "/no-image.png"}
-										alt={pkg.title}
+										src={getImageSrc(pkg.images)}
+										alt={pkg.title || "package image"}
 										className="w-20 h-16 rounded object-cover"
 									/>
 								</td>

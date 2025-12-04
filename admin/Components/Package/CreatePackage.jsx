@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import PackageImageUploader from "./PackageImageUploader";
 
 const emptyForm = {
@@ -15,7 +16,7 @@ const emptyForm = {
   status: "active",
 };
 
-export default function Page() {
+export default function CreatePackage() {
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -24,211 +25,237 @@ export default function Page() {
   const [image, setImage] = useState(null);
   const [error, setError] = useState("");
 
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedDestId, setSelectedDestId] = useState(null);
+  const destDebounceRef = useRef(null);
+
   const onChange = (key) => (e) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  // ✅ FIXED SUBMIT FUNCTION (NOW SENDS DATA TO BACKEND)
-  const submit = async (e) => {
-    e?.preventDefault?.();
+  const onDestinationInput = (e) => {
+    const value = e.target.value;
+    setForm((f) => ({ ...f, destination: value }));
+    setSelectedDestId(null);
+    setShowSuggestions(value.length >= 2);
 
-    if (!API_URL) return toast.error("API base URL is missing");
-    if (!form.title?.trim() || !String(form.price).trim())
-      return toast.error("Title and price are required");
+    if (destDebounceRef.current) clearTimeout(destDebounceRef.current);
+    if (!value || value.length < 2) return setSuggestions([]);
+
+    destDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await axios.get(
+          `${API_URL.replace(/\/$/, "")}/destinations/?q=${encodeURIComponent(
+            value
+          )}`,
+          { withCredentials: true }
+        );
+        const list = res?.data?.data?.items || [];
+        setSuggestions(list.slice(0, 10));
+      } catch {
+        setSuggestions([]);
+      }
+    }, 300);
+  };
+
+  const pickSuggestion = (dest) => {
+    setForm((f) => ({
+      ...f,
+      destination: `${dest.place}, ${dest.state}, ${dest.country}`,
+    }));
+    setSelectedDestId(dest._id);
+    setShowSuggestions(false);
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!API_URL) return toast.error("API base URL missing");
+    if (!form.title.trim() || !String(form.price).trim())
+      return toast.error("Title & price are required");
 
     try {
       setSaving(true);
-      setError("");
+      const fd = new FormData();
+      Object.entries(form).forEach(([key, val]) => {
+        if (key === "destination" && selectedDestId) return;
+        fd.append(key, val);
+      });
+      // If user picked a suggestion, send its id as `destination` (server accepts ObjectId or string)
+      if (selectedDestId) fd.append("destination", selectedDestId);
+      if (image?.file) fd.append("image", image.file);
+      else if (image?.isUrl) fd.append("imageUrl", image.url);
 
-      const formData = new FormData();
-      formData.append("title", form.title.trim());
-      formData.append("description", form.description.trim());
-      formData.append("price", Number(form.price));
-      formData.append("estimatedPrice", Number(form.estimatedPrice) || 0);
-      formData.append("duration", Number(form.duration) || 0);
-      formData.append("destination", form.destination.trim());
-      formData.append("status", form.status);
-
-      // Image (either upload or URL)
-      if (image && image.file) {
-        formData.append("image", image.file);
-      } else if (image && image.url && image.isUrl) {
-        formData.append("imageUrl", image.url);
-      }
-
-      // 🔥 IMPORTANT: SEND REQUEST TO BACKEND
       const res = await fetch(`${API_URL}/package/`, {
         method: "POST",
-        body: formData,
+        body: fd,
         credentials: "include",
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to create package");
-      }
+      if (!res.ok) throw new Error(data.message);
 
       toast.success("Package created successfully");
       router.push("/packages?tab=packages");
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to create package";
-      setError(msg);
+      setError(err?.message || "Failed to create package");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <section className="lg:col-span-3">
-      <div className="relative overflow-hidden rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-        <div className="p-6 sm:p-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Create Package
-          </h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Fill the details below to add a new package.
-          </p>
+    <section className="lg:col-span-3 space-y-6">
 
-          {error && (
-            <div className="mt-4 rounded-md border border-sky-200 bg-sky-50 p-3 text-sky-700 dark:bg-sky-950/40 dark:border-sky-900">
-              {error}
-            </div>
-          )}
+      {/* Header */}
+      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow p-6 sm:p-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Create New Package
+        </h1>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Fill in the details below to add a new travel package.
+        </p>
+      </div>
 
-          <form
-            onSubmit={submit}
-            className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"
-          >
-            {/* Title */}
+      {/* Error Message */}
+      {error && (
+        <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-4 text-red-700 dark:text-red-300">
+          {error}
+        </div>
+      )}
+
+      {/* Form */}
+      <form onSubmit={submit} className="grid grid-cols-1 gap-6">
+
+        {/* Basic Info */}
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Basic Info</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Title
-              </label>
               <input
+                type="text"
+                placeholder="Package Title"
                 value={form.title}
                 onChange={onChange("title")}
-                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500 placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="Enter package title"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
               />
             </div>
-
-            {/* Description */}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
-              </label>
               <textarea
+                placeholder="Package Description"
                 value={form.description}
                 onChange={onChange("description")}
-                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500 placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="Enter package description"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 min-h-[120px] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
               />
             </div>
-
-            {/* Package Cover Image */}
             <div className="sm:col-span-2">
               <PackageImageUploader
-                image={image}
-                onImageChange={setImage}
-                disabled={saving}
                 label="Package Cover Image"
+                image={image}
+                disabled={saving}
+                onImageChange={setImage}
               />
             </div>
+          </div>
+        </div>
 
-            {/* Price */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Price
-              </label>
-              <input
-                type="number"
-                value={form.price}
-                onChange={onChange("price")}
-                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500 placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="e.g. 4999"
-              />
-            </div>
+        {/* Pricing & Duration */}
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Pricing & Duration</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <input
+              type="number"
+              placeholder="Price"
+              value={form.price}
+              onChange={onChange("price")}
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+            />
+            <input
+              type="number"
+              placeholder="Estimated Price"
+              value={form.estimatedPrice}
+              onChange={onChange("estimatedPrice")}
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+            />
+            <input
+              type="number"
+              placeholder="Duration (Days)"
+              value={form.duration}
+              onChange={onChange("duration")}
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+            />
+          </div>
+        </div>
 
-            {/* Estimated Price */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Estimated Price
-              </label>
-              <input
-                type="number"
-                value={form.estimatedPrice}
-                onChange={onChange("estimatedPrice")}
-                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500 placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="e.g. 5999"
-              />
-            </div>
-
-            {/* Duration */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Duration (Days)
-              </label>
-              <input
-                type="number"
-                value={form.duration}
-                onChange={onChange("duration")}
-                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500 placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="e.g. 5"
-              />
-            </div>
+        {/* Destination & Status */}
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Destination & Status</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             {/* Destination */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Destination
-              </label>
+            <div className="relative sm:col-span-2">
               <input
+                type="text"
+                placeholder="Search Destination"
                 value={form.destination}
-                onChange={onChange("destination")}
-                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500 placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="City / Region"
+                onChange={onDestinationInput}
+                onFocus={() => setShowSuggestions(form.destination.length >= 2)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
               />
+
+              {showSuggestions && (
+                <ul className="absolute z-50 left-0 right-0 mt-1 max-h-52 overflow-auto rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
+                  {suggestions.length > 0 ? (
+                    suggestions.map((s) => (
+                      <li
+                        key={s._id}
+                        onMouseDown={() => pickSuggestion(s)}
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <p className="text-sm text-gray-900 dark:text-white">{s.place}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{s.state}, {s.country}</p>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-3 py-2 text-gray-500 dark:text-gray-400 cursor-default">
+                      No destinations found
+                    </li>
+                  )}
+                </ul>
+              )}
             </div>
 
             {/* Status */}
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Status
-              </label>
-              <select
-                value={form.status}
-                onChange={onChange("status")}
-                className="mt-1 w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500"
-              >
-                <option value="active">Active</option>
-                <option value="draft">Draft</option>
-              </select>
-            </div>
+            <select
+              value={form.status}
+              onChange={onChange("status")}
+              className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+            >
+              <option value="active">Active</option>
+              <option value="draft">Draft</option>
+            </select>
 
-            {/* Buttons */}
-            <div className="sm:col-span-2 flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => router.push("/admin?tab=package")}
-                className="inline-flex text-gray-800 dark:text-gray-100 items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2 text-sm hover:bg-sky-700 disabled:opacity-60"
-              >
-                {saving ? "Saving..." : "Create"}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
-      </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => router.push("/admin?tab=package")}
+            className="btn-secondary flex-1"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="btn-primary flex-1"
+          >
+            {saving ? "Saving..." : "Create Package"}
+          </button>
+        </div>
+
+      </form>
     </section>
   );
 }

@@ -50,21 +50,23 @@ const packageSchema = new mongoose.Schema({
     required: true
   },
   destination: {
-    type: String,
-    required: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Destination',
+    required: true,
+    unique: false
   },
-  Status:{
+  Status: {
     type: String,
     enum: ['active', 'draft'],
     default: 'active',
   },
-  featured:{
-    type:Boolean,
+  featured: {
+    type: Boolean,
     default: false
   },
   images: {
-    type: String,
-    default: ""
+    public_id: { type: String, default: null },
+    url: { type: String, default: null }
   },
   tags: {
     type: String

@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import AdminGallery from '../Components/Gallery/Gallery';
+import AdminGallery from '@/Components/Gallery/Gallery';
+
 export default function Page() {
     const params = useSearchParams();
     const tab = params?.get('tab') || 'list';

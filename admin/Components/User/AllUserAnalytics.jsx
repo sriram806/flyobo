@@ -18,7 +18,7 @@ export default function AllUserAnalytics() {
     async function loadAnalytics() {
       setAnalyticsLoading(true);
       try {
-        const res = await fetch(`${base}/reports/`, { credentials: "include" });
+        const res = await fetch(`${base}/reports/users`, { credentials: "include" });
         const json = await res.json();
         setAnalytics(json?.data || null);
       } catch (err) {

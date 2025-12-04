@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import AllPackages from '@/Components/Package/AllPackages';
 import EditPackage from '@/Components/Package/EditPackage';
 import AllPackageAnalytics from '@/Components/Package/AllPackageAnalytics';
-import CreatePackage from '@/Components/Package/CreatePackage'
+import CreatePackage from '@/Components/Package/CreatePackage';
 
 export default function Page() {
     const params = useSearchParams();
