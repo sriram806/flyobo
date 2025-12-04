@@ -9,7 +9,11 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         setAuthUser: (state, action) => {
-            state.user = action.payload;
+            if (!action.payload) {
+                return;
+            }
+            state.token = action.payload.token;
+            state.user = action.payload.user;
         },
         logout: (state) => {
             state.user = null;
@@ -17,7 +21,6 @@ const authSlice = createSlice({
     }
 });
 
-// 🔥 Utility function: safe client-side cleanup
 const clearClientAuth = () => {
     if (typeof window === "undefined") return;
     localStorage.removeItem("auth_token");

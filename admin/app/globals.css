@@ -14,15 +14,3 @@ body {
 	background-color: #111827;
 	color: #f3f4f6;
 }
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.no-scrollbar {
-  scrollbar-width: none;
-}
-
-.no-scrollbar {
-  -ms-overflow-style: none;
-}
