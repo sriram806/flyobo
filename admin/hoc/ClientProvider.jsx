@@ -6,13 +6,12 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/redux/store";
 import { logout } from "@/redux/authSlice";
-import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 const ClientProvider = ({ children }) => {
     const router = useRouter();
 
-    useEffect(() => {
+    {/*useEffect(() => {
         axios.defaults.withCredentials = true;
 
         const clearClientStorage = () => {
@@ -49,7 +48,7 @@ const ClientProvider = ({ children }) => {
             }
         );
         return () => axios.interceptors.response.eject(interceptor);
-    }, [router]);
+    }, [router]); */}
 
     return (
         <Provider store={store}>

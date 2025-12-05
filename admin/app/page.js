@@ -18,7 +18,7 @@ export default function Page() {
 
   const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  useEffect(() => {
+  {/*useEffect(() => {
     const clearSession = async () => {
       try {
         if (API_URL) {
@@ -39,7 +39,7 @@ export default function Page() {
     };
 
     clearSession();
-  }, [dispatch]);
+  }, [dispatch]);*/}
 
   const handleSubmit = async (e) => {
     e.preventDefault();
