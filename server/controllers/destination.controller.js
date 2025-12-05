@@ -7,13 +7,11 @@ import path from "path";
 // ------------------------------
 export const createDestination = async (req, res) => {
   try {
-    // Accept either `place` or legacy `name` from client forms
     const rawBody = req.body || {};
-    const placeValue = (rawBody.place || rawBody.name || "").toString().trim();
+    const placeValue = (rawBody.place || "").toString().trim();
     const { state, country, shortDescription, tags, popular } = rawBody;
 
     if (!placeValue) {
-      // Log incoming payload to help debug client mismatches (kept minimal)
       console.error("createDestination: missing 'place' in request", {
         bodyKeys: Object.keys(rawBody),
         file: req.file ? { fieldname: req.file.fieldname, originalname: req.file.originalname } : null,
@@ -38,6 +36,12 @@ export const createDestination = async (req, res) => {
       await dest.save();
     }
 
+    const coverImageUrlFromBody = (rawBody.coverImageUrl || rawBody.coverImage || "").toString().trim();
+    if (!req.file && coverImageUrlFromBody) {
+      dest.coverImage = { public_id: null, url: coverImageUrlFromBody };
+      await dest.save();
+    }
+
     return res.status(201).json({
       success: true,
       message: "Destination created successfully",
@@ -45,7 +49,7 @@ export const createDestination = async (req, res) => {
     });
   } catch (error) {
     console.error("createDestination error:", error);
-    return res.status(500).json({ success: false, message: "Error creating destination" });
+    return res.status(500).json({ success: false, message: `Error creating destination: ${error.message}` });
   }
 };
 
@@ -146,6 +150,22 @@ export const updateDestination = async (req, res) => {
       const newUrl = getFileUrl(req, req.file.filename, "destinations");
       dest.coverImage = { public_id: req.file.filename, url: newUrl };
     }
+    try {
+      if (!req.file && (payload.removeCover === 'true' || payload.removeCover === true)) {
+        if (dest.coverImage?.url || dest.coverImage?.public_id) {
+          const oldFilename = getFilenameFromUrl(dest.coverImage.url || dest.coverImage.public_id);
+          if (oldFilename) {
+            const oldFilePath = path.join(process.cwd(), "uploads", "destinations", oldFilename);
+            deleteFile(oldFilePath);
+          }
+        }
+        dest.coverImage = undefined;
+      }
+      const coverImageUrlFromBody = (payload.coverImageUrl || payload.coverImage || "").toString().trim();
+      if (!req.file && coverImageUrlFromBody) {
+        dest.coverImage = { public_id: null, url: coverImageUrlFromBody };
+      }
+    } catch (e) {}
 
     Object.assign(dest, payload);
     await dest.save();

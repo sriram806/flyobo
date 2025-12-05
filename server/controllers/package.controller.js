@@ -2,6 +2,7 @@ import Package from '../models/package.model.js';
 import { createPackage, getAllPackagesServices } from '../services/package.services.js';
 import { getFileUrl, deleteFile, getFilenameFromUrl } from '../middleware/multerConfig.js';
 import mongoose from 'mongoose';
+import Destination from '../models/destinations.model.js';
 import path from 'path';
 import xlsx from 'xlsx';
 import fs from 'fs';
@@ -138,11 +139,31 @@ export const EditPackage = async (req, res) => {
     if (data.title) {
       data.slug = slugify(data.title);
     }
+    // Determine if destination changed so we can update Destination.relatedPackages
+    const existing = await Package.findById(packageId).lean();
     const UpdatedPackage = await Package.findByIdAndUpdate(
       packageId,
       { $set: data },
       { new: true }
     );
+
+    try {
+      const oldDest = existing?.destination;
+      const newDest = UpdatedPackage?.destination;
+      // If destination changed, remove from old and add to new
+      if (oldDest && newDest && oldDest.toString() !== newDest.toString()) {
+        await Destination.findByIdAndUpdate(oldDest, { $pull: { relatedPackages: UpdatedPackage._id } });
+        await Destination.findByIdAndUpdate(newDest, { $addToSet: { relatedPackages: UpdatedPackage._id } });
+      } else if (oldDest && !newDest) {
+        // destination removed
+        await Destination.findByIdAndUpdate(oldDest, { $pull: { relatedPackages: UpdatedPackage._id } });
+      } else if (!oldDest && newDest) {
+        // destination newly added
+        await Destination.findByIdAndUpdate(newDest, { $addToSet: { relatedPackages: UpdatedPackage._id } });
+      }
+    } catch (e) {
+      console.warn('EditPackage: failed to sync destination.relatedPackages', e?.message);
+    }
 
     res.status(201).json({
       success: true,
@@ -292,6 +313,16 @@ export const deletePackage = async (req, res) => {
       });
     }
 
+    // Remove package id from destination.relatedPackages if present
+    try {
+      const destId = pkg.destination;
+      if (destId) {
+        await Destination.findByIdAndUpdate(destId, { $pull: { relatedPackages: pkg._id } });
+      }
+    } catch (e) {
+      console.warn('deletePackage: failed to remove package from destination.relatedPackages', e?.message);
+    }
+
     await pkg.deleteOne();
 
     res.status(200).json({
@@ -382,6 +413,13 @@ export const bulkUploadPackages = async (req, res) => {
         // generate slug
         packageData.slug = slugify(packageData.title);
         const newPackage = await Package.create(packageData);
+        // add to destination.relatedPackages when destination exists
+        try {
+          const destId = newPackage.destination;
+          if (destId) await Destination.findByIdAndUpdate(destId, { $addToSet: { relatedPackages: newPackage._id } });
+        } catch (e) {
+          // non-fatal
+        }
         results.success.push({
           row: i + 2,
           packageId: newPackage._id,

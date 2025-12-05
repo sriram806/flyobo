@@ -122,6 +122,15 @@ export const createPackage = async (data, res, req) => {
       message: `Package Created Successfully`,
       package: packages,
     });
+    // Update destination.relatedPackages
+    try {
+      const destId = packages.destination;
+      if (destId) {
+        await Destination.findByIdAndUpdate(destId, { $addToSet: { relatedPackages: packages._id } });
+      }
+    } catch (e) {
+      console.warn('createPackage: failed to update destination.relatedPackages', e?.message);
+    }
     return;
   } catch (err) {
     console.error('createPackage error:', err);

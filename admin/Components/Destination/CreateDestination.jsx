@@ -75,7 +75,7 @@ export default function CreateDestination() {
       });
 
       toast.success("Destination created successfully");
-      router.push("/destinations?tab=create");
+      router.push("/destinations?tab=analytics");
     } catch (err) {
       setError(err?.response?.data?.message || err.message || "Failed to create destination");
     } finally {
@@ -84,7 +84,7 @@ export default function CreateDestination() {
   };
 
   return (
-    <section className="w-full max-w-6xl mx-auto p-6">
+    <section className="w-full mx-auto p-6">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
         Create Destination
       </h1>

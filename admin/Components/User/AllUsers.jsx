@@ -35,7 +35,6 @@ export default function AllUsers() {
     loadUsers();
   }, []);
 
-  // Filtered users
   const filteredUsers = useMemo(() => {
     if (!search) return users;
     const s = search.toLowerCase();
