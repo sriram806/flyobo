@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 export default function AllPackages() {
 	const router = useRouter();
 	const [packages, setPackages] = useState([]);
+	const [destinationsMap, setDestinationsMap] = useState({});
+	const [destinationsList, setDestinationsList] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [search, setSearch] = useState("");
@@ -14,6 +16,7 @@ export default function AllPackages() {
 
 	const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 	const apiBase = API_URL.replace(/\/$/, "");
+	const [togglingIds, setTogglingIds] = useState([]);
 
 	const fetchPackages = async () => {
 		setLoading(true);
@@ -31,7 +34,27 @@ export default function AllPackages() {
 		}
 	};
 
+	const fetchAllDestinations = async () => {
+		try {
+			const res = await fetch(`${apiBase}/destinations?page=1&limit=1000`);
+			const json = await res.json();
+			if (!res.ok) return;
+			const items = json?.data?.items || json?.items || [];
+			if (!Array.isArray(items)) return;
+			const map = {};
+			items.forEach((d) => {
+				if (!d || !d._id) return;
+				map[String(d._id)] = d;
+			});
+			setDestinationsMap(map);
+			setDestinationsList(items);
+		} catch (e) {
+			// ignore
+		}
+	};
+
 	useEffect(() => {
+		fetchAllDestinations();
 		fetchPackages();
 	}, []);
 
@@ -46,9 +69,9 @@ export default function AllPackages() {
 	};
 
 	// Memoize unique destinations for filter select (stable keys)
-	const uniqueDestinations = useMemo(() => {
-		return Array.from(new Set(packages.map((p) => p.destination).filter(Boolean)));
-	}, [packages]);
+	const uniqueDestinationIds = useMemo(() => {
+		return destinationsList.map((d) => String(d._id));
+	}, [destinationsList]);
 
 	// Filter + Search Logic (guard properties to avoid runtime errors)
 	const filteredPackages = useMemo(() => {
@@ -56,18 +79,29 @@ export default function AllPackages() {
 
 		return packages.filter((pkg) => {
 			const title = (pkg.title || "").toString();
-			const destination = (pkg.destination || "").toString();
+			const destinationId = (() => {
+				const d = pkg.destination;
+				if (!d) return "";
+				if (typeof d === "object") return d._id || d.id || "";
+				return String(d);
+			})();
+
+			const destinationLabel = (() => {
+				const d = destinationsMap[destinationId];
+				if (!d) return destinationId;
+				return `${d.place || ""}${d.state ? ", " + d.state : ""}${d.country ? ", " + d.country : ""}`;
+			})();
 
 			const matchSearch =
-				title.toLowerCase().includes(q) || destination.toLowerCase().includes(q);
+				title.toLowerCase().includes(q) || destinationLabel.toLowerCase().includes(q);
 
 			const matchDestination = filterDestination
-				? destination.toLowerCase() === (filterDestination || "").toLowerCase()
+				? destinationId === (filterDestination || "")
 				: true;
 
 			return matchSearch && matchDestination;
 		});
-	}, [search, filterDestination, packages]);
+	}, [search, filterDestination, packages, destinationsMap]);
 
 	const handleDelete = async () => {
 		if (!deleteId) return;
@@ -85,6 +119,26 @@ export default function AllPackages() {
 			alert(err.message);
 		} finally {
 			setDeleteId(null);
+		}
+	};
+
+	const handleToggleStatus = async (pkgId, currentStatus) => {
+		const newStatus = currentStatus === "active" ? "draft" : "active";
+		setTogglingIds((s) => [...s, pkgId]);
+		try {
+			const res = await fetch(`${apiBase}/package/${pkgId}`, {
+				method: "PUT",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ status: newStatus }),
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || "Failed to update status");
+			setPackages((prev) => prev.map((p) => (p._id === pkgId ? { ...p, status: newStatus } : p)));
+		} catch (err) {
+			alert(err.message || "Failed to update status");
+		} finally {
+			setTogglingIds((s) => s.filter((id) => id !== pkgId));
 		}
 	};
 
@@ -128,11 +182,17 @@ export default function AllPackages() {
 						className="w-full md:w-1/4 px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
 					>
 						<option value="">Filter by Destination</option>
-						{uniqueDestinations.map((dest, idx) => (
-							<option key={`${dest}-${idx}`} value={dest}>
-								{dest}
-							</option>
-						))}
+						{uniqueDestinationIds.map((destId, idx) => {
+							const d = destinationsMap[destId];
+							const label = d
+								? `${d.place || ""}${d.state ? ", " + d.state : ""}${d.country ? ", " + d.country : ""}`
+								: destId;
+							return (
+								<option key={`${destId}-${idx}`} value={destId}>
+									{label}
+								</option>
+							);
+						})}
 					</select>
 			</div>
 
@@ -185,7 +245,17 @@ export default function AllPackages() {
 								</td>
 
 								<td className="p-3 text-gray-700 dark:text-gray-300">
-									{pkg.destination}
+									{(() => {
+										const d = pkg.destination;
+										let destId = "";
+										if (!d) destId = "";
+										else if (typeof d === "object") destId = d._id || d.id || "";
+										else destId = String(d);
+
+										const dest = destinationsMap[destId];
+										if (!dest) return destId || "-";
+										return `${dest.place || ""}${dest.state ? ", " + dest.state : ""}${dest.country ? ", " + dest.country : ""}`;
+									})()}
 								</td>
 
 								<td className="p-3 text-gray-900 dark:text-gray-200">

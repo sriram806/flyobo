@@ -3,7 +3,9 @@
 html {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+  zoom: 0.90
 }
+
 
 body {
 	background-color: #ffffff;
