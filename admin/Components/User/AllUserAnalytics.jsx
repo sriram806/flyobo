@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import PieChart from "./PieChart";
 import UserBarChart from "./UserBarChart";
 import { NEXT_PUBLIC_BACKEND_URL } from "../config/env";
@@ -18,10 +19,12 @@ export default function AllUserAnalytics() {
     async function loadAnalytics() {
       setAnalyticsLoading(true);
       try {
-        const res = await fetch(`${base}/reports/users`, { credentials: "include" });
-        const json = await res.json();
-        setAnalytics(json?.data || null);
+        const { data } = await axios.get(`${base}/reports/users`, {
+          withCredentials: true,
+        });
+        setAnalytics(data?.data || null);
       } catch (err) {
+        console.error("Error fetching analytics:", err);
         setAnalytics(null);
       } finally {
         setAnalyticsLoading(false);
@@ -34,16 +37,16 @@ export default function AllUserAnalytics() {
     async function loadUsers() {
       setLoading(true);
       try {
-        const res = await fetch(`${base}/user/get-all-users`, {
-          credentials: "include",
+        const { data } = await axios.get(`${base}/user/get-all-users`, {
+          withCredentials: true,
         });
 
-        const json = await res.json();
-        const sorted = (json?.users || []).sort(
+        const sorted = (data?.users || []).sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setLatestUsers(sorted.slice(0, 4));
       } catch (err) {
+        console.error("Error fetching users:", err);
         setLatestUsers([]);
       } finally {
         setLoading(false);
@@ -76,6 +79,7 @@ export default function AllUserAnalytics() {
           </div>
         ))}
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700 flex justify-center">
           <PieChart
@@ -87,11 +91,11 @@ export default function AllUserAnalytics() {
             size={240}
           />
         </div>
+
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700 lg:col-span-2">
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
             Top Booking Users
           </h3>
-
           <ul className="divide-y dark:divide-gray-700">
             {topBookingUsers.map((u) => (
               <li key={u._id} className="p-3 flex justify-between">
@@ -108,7 +112,6 @@ export default function AllUserAnalytics() {
             ))}
           </ul>
         </div>
-
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -133,11 +136,11 @@ export default function AllUserAnalytics() {
             />
           )}
         </div>
+
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700">
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
             Latest Users
           </h3>
-
           <ul className="divide-y dark:divide-gray-700">
             {latestUsers.map((u) => (
               <li key={u._id} className="p-3 flex justify-between">

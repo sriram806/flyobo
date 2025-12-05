@@ -7,10 +7,8 @@ const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     try {
         let token = null;
 
-        // Accept multiple cookie names to tolerate inconsistencies across codepaths
-        token = req.cookies.token || req.cookies.access_token || req.cookies.accessToken || null;
+        token = req.cookies.token;
 
-        // Fallback to Authorization header Bearer token
         if (!token && req.headers.authorization) {
             const authHeader = req.headers.authorization;
             if (authHeader.startsWith('Bearer ')) {
@@ -19,7 +17,6 @@ const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
         }
 
         if (!token) {
-            // Helpful diagnostic when running in production to identify client-side cookie issues
             console.warn(`isAuthenticated: no auth token found on request to ${req.originalUrl}`);
             return res.status(401).json({ 
                 success: false, 

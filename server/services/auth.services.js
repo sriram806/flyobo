@@ -47,7 +47,13 @@ export const createSendToken = (user, statusCode, res, message) => {
     try {
         if (cookieDomainRaw) {
             const host = cookieDomainRaw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
-            cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+            // Do not set domain for localhost or raw IP addresses — browsers reject these and won't store cookies
+            const isLocalhost = host === 'localhost' || /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+            if (!isLocalhost) {
+                cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+            } else {
+                cookieDomain = undefined;
+            }
         } else if (isProd) {
             cookieDomain = '.flyobo.com';
         }

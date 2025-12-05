@@ -16,7 +16,12 @@ const buildCookieForToken = (res, token) => {
     const raw = process.env.COOKIE_DOMAIN || _FRONTEND_URL;
     if (raw) {
       const host = raw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
-      cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+      const isLocalhost = host === 'localhost' || /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+      if (!isLocalhost) {
+        cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+      } else {
+        cookieDomain = undefined;
+      }
     }
   } catch (e) {
     cookieDomain = undefined;
@@ -253,7 +258,12 @@ export const logout = async (req, res) => {
       const raw = process.env.COOKIE_DOMAIN || FRONTEND_URL;
       if (raw) {
         const host = raw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
-        cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+        const isLocalhost = host === 'localhost' || /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+        if (!isLocalhost) {
+          cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+        } else {
+          cookieDomain = undefined;
+        }
       }
     } catch (e) {
       cookieDomain = undefined;
@@ -487,7 +497,12 @@ export const debugCookieInfo = (req, res) => {
     try {
       if (raw) {
         const host = raw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
-        cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+        const isLocalhost = host === 'localhost' || /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+        if (!isLocalhost) {
+          cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+        } else {
+          cookieDomain = undefined;
+        }
       }
     } catch (e) {
       cookieDomain = undefined;
