@@ -34,6 +34,25 @@ export default function AllUserAnalytics() {
   }, [base]);
 
   useEffect(() => {
+    async function loadCookie() {
+      setLoading(true);
+      try {
+        const { data } = await axios.get(`${base}/admin/debug-cookies`, {
+          withCredentials: true,
+        });;
+        console.log(data);
+        
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setLatestUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCookie();
+  }, [base]);
+
+  useEffect(() => {
     async function loadUsers() {
       setLoading(true);
       try {

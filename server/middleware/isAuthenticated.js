@@ -7,52 +7,54 @@ const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     try {
         let token = null;
 
-        token = req.cookies.token;
+        if (req.cookies && req.cookies.token) {
+            token = req.cookies.token;
+        }
 
         if (!token && req.headers.authorization) {
             const authHeader = req.headers.authorization;
-            if (authHeader.startsWith('Bearer ')) {
+            if (authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
             }
         }
 
+        const origin = req.headers.origin || req.headers.referer || req.ip || 'unknown';
+        const tokenSource = token ? (req.cookies?.token ? "cookie" : "header") : "none";
+        console.info(`[auth] ${req.method} ${req.originalUrl} origin=${origin} tokenFrom=${tokenSource}`);
+
         if (!token) {
-            console.warn(`isAuthenticated: no auth token found on request to ${req.originalUrl}`);
-            return res.status(401).json({ 
-                success: false, 
-                message: "Access denied. No token provided. Please login." 
+            return res.status(401).json({
+                success: false,
+                message: "Access denied. No token provided. Please login.",
             });
         }
-        
-        // Verify the token
+
         let decoded;
         try {
             decoded = jwt.verify(token, JWT_SECRET);
-        } catch (jwtError) {
-            if (jwtError.name === 'TokenExpiredError') {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: "Token expired. Please login again." 
+        } catch (err) {
+            if (err.name === "TokenExpiredError") {
+                return res.status(401).json({
+                    success: false,
+                    message: "Token expired. Please login again.",
                 });
-            } else if (jwtError.name === 'JsonWebTokenError') {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: "Invalid token. Please login again." 
+            } else if (err.name === "JsonWebTokenError") {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid token. Please login again.",
                 });
             }
-            throw jwtError;
+            throw err;
         }
 
-        // Find the user
         const currentUser = await User.findById(decoded.id);
         if (!currentUser) {
-            return res.status(401).json({ 
-                success: false, 
-                message: "User associated with this token no longer exists." 
+            return res.status(401).json({
+                success: false,
+                message: "User associated with this token no longer exists.",
             });
         }
 
-        // Attach user to request
         req.user = currentUser;
         next();
     } catch (error) {
