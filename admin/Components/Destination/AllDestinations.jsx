@@ -85,7 +85,6 @@ export default function AllDestinations() {
   const handleEdit = (id) => {
     if (!id) return toast.error("Invalid ID");
 
-    // Use a relative route so the admin UI opens the edit tab
     router.push(`destinations?tab=edit&id=${id}`);
   };
 

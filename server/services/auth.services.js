@@ -6,9 +6,7 @@ import {
 } from "../config/env.js";
 
 
-// -----------------------------
 // Convert "7d" → milliseconds
-// -----------------------------
 export const parseExpiryToMs = (expiresIn) => {
     const def = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -30,9 +28,7 @@ export const parseExpiryToMs = (expiresIn) => {
 };
 
 
-// -----------------------------
 // Sign JWT
-// -----------------------------
 export const signToken = (id) => {
     return jwt.sign({ id }, JWT_SECRET, {
         expiresIn: JWT_EXPIRES_IN,
@@ -40,26 +36,48 @@ export const signToken = (id) => {
 };
 
 
-// -----------------------------
 // Create & Send Cookie + Token
-// -----------------------------
 export const createSendToken = (user, statusCode, res, message) => {
     const token = signToken(user._id);
 
     const isProd = NODE_ENV === "production";
-    
+
+    let cookieDomainRaw = process.env.COOKIE_DOMAIN || process.env.FRONTEND_URL || null;
+    let cookieDomain;
+    try {
+        if (cookieDomainRaw) {
+            const host = cookieDomainRaw.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
+            cookieDomain = host.startsWith('www.') ? `.${host.replace(/^www\./, '')}` : `.${host}`;
+        } else if (isProd) {
+            cookieDomain = '.flyobo.com';
+        }
+    } catch (e) {
+        cookieDomain = undefined;
+    }
+
+    const sameSiteVal = (isProd && cookieDomain) ? 'none' : 'lax';
+
     const cookieOptions = {
         httpOnly: true,
-        secure: isProd,                           
-        sameSite: isProd ? "none" : "lax",       
-        maxAge: parseExpiryToMs(JWT_EXPIRES_IN), 
+        secure: isProd,
+        sameSite: sameSiteVal,
+        maxAge: parseExpiryToMs(JWT_EXPIRES_IN),
         path: "/",
+        ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
 
-    // Set cookie
-    res.cookie("token", token, cookieOptions);
+    try {
+        res.cookie("token", token, cookieOptions);
+    } catch (cookieErr) {
+        console.warn('createSendToken: cookie set failed, retrying with safe fallback:', cookieErr?.message);
+        try {
+            const fallback = { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: cookieOptions.maxAge, path: '/' };
+            res.cookie("token", token, fallback);
+        } catch (err2) {
+            console.error('createSendToken: fallback cookie set also failed:', err2?.message);
+        }
+    }
 
-    // Prepare sanitized user object
     const userObj = user.toObject ? user.toObject() : { ...user };
 
     delete userObj.password;
