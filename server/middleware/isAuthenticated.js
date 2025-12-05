@@ -29,6 +29,9 @@ const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
             });
         }
 
+        console.log(token);
+        
+
         let decoded;
         try {
             decoded = jwt.verify(token, JWT_SECRET);
