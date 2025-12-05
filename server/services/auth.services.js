@@ -31,7 +31,7 @@ export const signToken = (id) => {
 
 export const createSendToken = (user, statusCode, res, message) => {
     const token = signToken(user._id);
-    const cookieDomain = NODE_ENV === "production" ? ".flyobo.com" : undefined;
+    const cookieDomain = NODE_ENV === "production" ? ".flyobo.com" || "https://admin-five-gold.vercel.app" : undefined;
     const cookieOptions = {
         httpOnly: true,
         secure: NODE_ENV === "production",
