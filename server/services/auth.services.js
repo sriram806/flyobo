@@ -6,10 +6,16 @@ import {
 } from "../config/env.js";
 
 
+// -----------------------------
+// Convert "7d" → milliseconds
+// -----------------------------
 export const parseExpiryToMs = (expiresIn) => {
-    const match = expiresIn.match(/^(\d+)([smhd])$/);
+    const def = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-    if (!match) return 7 * 24 * 60 * 60 * 1000;
+    if (!expiresIn || typeof expiresIn !== "string") return def;
+
+    const match = expiresIn.match(/^(\d+)([smhd])$/);
+    if (!match) return def;
 
     const value = parseInt(match[1], 10);
     const unit = match[2];
@@ -19,30 +25,42 @@ export const parseExpiryToMs = (expiresIn) => {
         case "m": return value * 60 * 1000;
         case "h": return value * 60 * 60 * 1000;
         case "d": return value * 24 * 60 * 60 * 1000;
-        default: return 7 * 24 * 60 * 60 * 1000;
+        default: return def;
     }
 };
 
+
+// -----------------------------
+// Sign JWT
+// -----------------------------
 export const signToken = (id) => {
     return jwt.sign({ id }, JWT_SECRET, {
         expiresIn: JWT_EXPIRES_IN,
     });
 };
 
+
+// -----------------------------
+// Create & Send Cookie + Token
+// -----------------------------
 export const createSendToken = (user, statusCode, res, message) => {
     const token = signToken(user._id);
-    const cookieDomain = NODE_ENV === "production" ? ".flyobo.com" || "https://admin-five-gold.vercel.app" : undefined;
+
+    const isProd = NODE_ENV === "production";
+    
     const cookieOptions = {
         httpOnly: true,
-        secure: NODE_ENV === "production",
-        sameSite: NODE_ENV === "production" ? "none" : "lax",
-        maxAge: parseExpiryToMs(JWT_EXPIRES_IN),
+        secure: isProd,                           
+        sameSite: isProd ? "none" : "lax",       
+        maxAge: parseExpiryToMs(JWT_EXPIRES_IN), 
         path: "/",
-        ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
 
+    // Set cookie
     res.cookie("token", token, cookieOptions);
-    let userObj = user.toObject ? user.toObject() : { ...user };
+
+    // Prepare sanitized user object
+    const userObj = user.toObject ? user.toObject() : { ...user };
 
     delete userObj.password;
     delete userObj.otp;

@@ -105,7 +105,7 @@ export const registration = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || 'user', 
+      role: role || 'user',
       otp,
       otpExpireAt
     });
@@ -131,7 +131,7 @@ export const registration = async (req, res) => {
       console.error("Mail error:", mailError);
     }
 
-    const message = referrer 
+    const message = referrer
       ? "Registration successful! OTP sent to your email. You've earned ₹50 welcome bonus!"
       : "Registration successful and OTP sent to your email";
 
@@ -241,7 +241,7 @@ export const login = async (req, res) => {
     user.password = undefined;
     createSendToken(user, 200, res, "Login successful");
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Error in login" });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -268,7 +268,18 @@ export const logout = async (req, res) => {
       ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
 
-    res.cookie("token", "", cookieOptions);
+    try {
+      res.cookie("token", "", cookieOptions);
+    } catch (cookieErr) {
+      console.warn('logout: failed to clear cookie with computed options:', cookieErr?.message);
+      try {
+        const fallback = { ...cookieOptions, sameSite: 'lax' };
+        if (fallback.domain) delete fallback.domain;
+        res.cookie("token", "", fallback);
+      } catch (e) {
+        console.error('logout: fallback cookie clear also failed:', e?.message);
+      }
+    }
     res.status(200).json({ success: true, message: "Logout successful" });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Logout failed" });
