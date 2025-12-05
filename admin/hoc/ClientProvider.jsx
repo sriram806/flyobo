@@ -11,32 +11,53 @@ import { useRouter } from "next/navigation";
 const ClientProvider = ({ children }) => {
     const router = useRouter();
 
-    {/*useEffect(() => {
+    useEffect(() => {
         axios.defaults.withCredentials = true;
+        try {
+            let token = null;
+            if (typeof window !== 'undefined') {
+                try { token = localStorage.getItem('auth_token'); } catch (e) { token = null; }
+            }
+            if (!token) {
+                try {
+                    const s = store.getState && store.getState();
+                    token = s?.auth?.token || null;
+                } catch (e) {
+                    token = null;
+                }
+            }
+            if (token) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            }
+        } catch (e) {
+        }
 
         const clearClientStorage = () => {
-            localStorage.removeItem("auth_token");
-            sessionStorage.removeItem("auth_token");
+            try { localStorage.removeItem("auth_token"); } catch (e) {}
+            try { sessionStorage.removeItem("auth_token"); } catch (e) {}
         };
 
         const clearCookies = () => {
-            document.cookie.split(";").forEach((cookie) => {
-                const name = cookie.split("=")[0].trim();
-                document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
-            });
+            try {
+                document.cookie.split(";").forEach((cookie) => {
+                    const name = cookie.split("=")[0].trim();
+                    document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+                });
+            } catch (e) {}
         };
 
         const handle401 = (error) => {
-            store.dispatch(logout());
+            try { store.dispatch(logout()); } catch (e) {}
             clearClientStorage();
             clearCookies();
 
+            try {
+                if (!window.location.pathname.startsWith('/')) {
+                    window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { route: 'Login' } }));
+                }
+            } catch (e) {}
 
-            if (!window.location.pathname.startsWith('/')) {
-                window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { route: 'Login' } }));
-            }
-
-            router.replace("/");
+            try { router.replace("/"); } catch (e) {}
             return Promise.reject(error);
         };
 
@@ -48,7 +69,7 @@ const ClientProvider = ({ children }) => {
             }
         );
         return () => axios.interceptors.response.eject(interceptor);
-    }, [router]); */}
+    }, [router]);
 
     return (
         <Provider store={store}>
