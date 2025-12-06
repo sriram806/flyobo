@@ -3,16 +3,16 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import UserProtected from "../../hooks/userProtected";
-import Heading from "../../components/MetaData/Heading";
-import Header from "../../components/Layout/Header";
-import SideBarProfile from "../../components/Profile/SideBarProfile";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "@/redux/authSlice";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
-import Footer from "@/app/components/Layout/Footer";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
+import UserProtected from "@/Components/hooks/userProtected";
+import Heading from "@/Components/MetaData/Heading";
+import Header from "@/Components/Layout/Header";
+import Footer from "@/Components/Layout/Footer";
+import SideBarProfile from "@/Components/Profile/SideBarProfile";
 
 export default function EditProfilePage() {
   const router = useRouter();

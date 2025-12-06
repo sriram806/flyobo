@@ -4,7 +4,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import { HiOutlineMail, HiOutlineBadgeCheck, HiOutlineCalendar, HiOutlinePhone, } from "react-icons/hi";
-import ReferralTier from "./ReferralTier";
+import ReferralProgram from "./ReferralProgram";
 
 const ProfileInfo = () => {
   const user = useSelector((state) => state?.auth?.user);
@@ -145,7 +145,7 @@ const ProfileInfo = () => {
           </div>
 
           <div className="mt-6">
-            <ReferralTier />
+            <ReferralProgram />
           </div>
         </div>
       </div>

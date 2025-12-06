@@ -14,7 +14,6 @@ import ReferralTier from "./ReferralTier";
 const ReferralProgram = () => {
   const user = useSelector((s) => s?.auth?.user);
   const [referralData, setReferralData] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [redeemAmount, setRedeemAmount] = useState("");
   const [redeemLoading, setRedeemLoading] = useState(false);
@@ -29,7 +28,11 @@ const ReferralProgram = () => {
         withCredentials: true,
         timeout: 10000,
       });
-      if (data?.success) setReferralData(data.data);
+      if (data?.success){
+        console.log(data);
+        
+        setReferralData(data.data);
+      }
       else toast.error(data?.message || "Failed to fetch referral data");
     } catch (err) {
       if (err.response?.status === 401) toast.error("Please log in again.");
@@ -37,18 +40,6 @@ const ReferralProgram = () => {
       else toast.error("Failed to load referral data");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchLeaderboard = async () => {
-    try {
-      const { data } = await axios.get(`${API_URL}/user/referral-leaderboard?limit=10`, {
-        withCredentials: true,
-      });
-      if (data?.success) setLeaderboard(data.data || []);
-      else toast.error("Failed to load leaderboard");
-    } catch {
-      toast.error("Failed to load leaderboard");
     }
   };
 
@@ -63,7 +54,6 @@ const ReferralProgram = () => {
       setLoading(false);
       toast.error("Please log in to access the referral program");
     }
-    fetchLeaderboard();
   }, [user]);
 
   const copyReferralLink = async () => {
@@ -82,82 +72,29 @@ const ReferralProgram = () => {
     e.preventDefault();
     const amount = parseInt(redeemAmount, 10);
     if (!amount || amount < 50) {
-      toast.error("Minimum redemption amount is ₹50");
+      toast.error("Minimum withdrawal amount is ₹50");
       return;
     }
-    if (amount > (referralData?.availableRewards || 0)) {
+    if (amount > totalReward) {
       toast.error("Insufficient rewards balance");
-      return;
-    }
-    try {
-      const bankResp = await axios.get(`${API_URL}/user/bank-details`, { withCredentials: true });
-      if (!(bankResp?.data?.success && bankResp.data.data?.accountNumber)) {
-        toast.error("Add bank details under Profile → Bank Details before redeeming.");
-        return;
-      }
-    } catch {
-      toast.error("Unable to verify bank details. Try later.");
       return;
     }
     try {
       setRedeemLoading(true);
       const { data } = await axios.post(
-        `${API_URL}/user/redeem-rewards`,
+        `${API_URL}/user/withdraw-referral-rewards`,
         { amount },
         { withCredentials: true, timeout: 10000 }
       );
-      toast.success(data?.message || "Rewards redeemed successfully");
+      toast.success(data?.message || "Withdrawal request submitted successfully");
       setRedeemAmount("");
       fetchReferralData();
     } catch (err) {
       if (err.response?.status === 401) toast.error("Authentication required. Please log in.");
-      else toast.error(err.response?.data?.message || "Failed to redeem rewards");
+      else toast.error(err.response?.data?.message || "Failed to process withdrawal");
     } finally {
       setRedeemLoading(false);
     }
-  };
-
-  const getMilestoneData = () => {
-    if (!referralData) return [];
-    const base = [
-      { id: "first_referral", title: "First Referral", target: 1, reward: 50, icon: Users },
-      { id: "5_referrals", title: "Social Butterfly", target: 5, reward: 100, icon: Share },
-      { id: "10_referrals", title: "Influencer", target: 10, reward: 250, icon: Star },
-      { id: "25_referrals", title: "Ambassador", target: 25, reward: 500, icon: Award },
-      { id: "50_referrals", title: "Champion", target: 50, reward: 1000, icon: Trophy },
-      { id: "100_referrals", title: "Legend", target: 100, reward: 2500, icon: Crown },
-    ];
-    return base.map((m) => {
-      const userMilestone = referralData.milestones?.find((x) => x.milestone === m.id);
-      return { ...m, achieved: !!userMilestone, achievedAt: userMilestone?.achievedAt || null };
-    });
-  };
-
-  const getTierInfo = () => {
-    const tiers = {
-      first: { name: "First Referral", nextThreshold: 5 },
-      social: { name: "Social Butterfly", nextThreshold: 10 },
-      influencer: { name: "Influencer", nextThreshold: 25 },
-      ambassador: { name: "Ambassador", nextThreshold: 50 },
-      champion: { name: "Champion", nextThreshold: 100 },
-      legend: { name: "Legend", nextThreshold: null },
-    };
-    const totalReferrals = referralData?.totalReferrals || 0;
-    const milestoneAchieved = (id) => !!referralData?.milestones?.find((m) => m.milestone === id && m.achieved);
-    if (milestoneAchieved("100_referrals") || totalReferrals >= 100) return tiers.legend;
-    if (milestoneAchieved("50_referrals") || totalReferrals >= 50) return tiers.champion;
-    if (milestoneAchieved("25_referrals") || totalReferrals >= 25) return tiers.ambassador;
-    if (milestoneAchieved("10_referrals") || totalReferrals >= 10) return tiers.influencer;
-    if (milestoneAchieved("5_referrals") || totalReferrals >= 5) return tiers.social;
-    return tiers.first;
-  };
-
-  const getTierProgress = () => {
-    if (!referralData) return 0;
-    const info = getTierInfo();
-    if (!info?.nextThreshold) return 100;
-    const progress = (referralData.totalReferrals / info.nextThreshold) * 100;
-    return Math.min(progress, 100);
   };
 
   if (loading) {
@@ -177,11 +114,20 @@ const ReferralProgram = () => {
       </div>
     );
   }
-
-  const milestoneList = getMilestoneData();
-  const tierInfo = getTierInfo();
-  const tierProgress = getTierProgress();
   const totalReferrals = referralData?.totalReferrals || 0;
+  const totalReward = referralData?.totalReward || 0;
+
+  const copyReferralLinkFull = async () => {
+    if (!referralData?.referralLink) return;
+    try {
+      await navigator.clipboard.writeText(referralData.referralLink);
+      setCopied(true);
+      toast.success("Referral Link copied!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
 
   return (
     <div className="space-y-6 rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-md">
@@ -196,7 +142,6 @@ const ReferralProgram = () => {
         <nav className="-mb-px flex space-x-8">
           {[
             { id: "overview", label: "Overview" },
-            { id: "milestones", label: "Milestones" },
             { id: "analytics", label: "Analytics" },
             { id: "rewards", label: "Rewards History" },
           ].map((tab) => (
@@ -227,8 +172,8 @@ const ReferralProgram = () => {
             <div className="rounded-2xl border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Available Rewards</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{referralData?.availableRewards || 0}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reward</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{totalReward}</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-green-500" />
               </div>
@@ -237,143 +182,143 @@ const ReferralProgram = () => {
             <div className="rounded-2xl border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Earned</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{referralData?.totalRewards || 0}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Referral Code</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{referralData?.referralCode || "N/A"}</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-purple-500" />
+                <Award className="h-8 w-8 text-purple-500" />
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border p-6">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Gift className="h-5 w-5" />Your Referral Code</h3>
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              Withdraw Rewards
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Available Balance</p>
+                  <p className="text-3xl font-bold text-green-600 dark:text-green-400">₹{totalReward}</p>
+                </div>
+                <DollarSign className="h-12 w-12 text-green-500 opacity-20" />
+              </div>
+              
+              <form onSubmit={handleRedeemRewards} className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Withdrawal Amount (Minimum ₹50)
+                  </label>
+                  <input
+                    type="number"
+                    min="50"
+                    step="10"
+                    value={redeemAmount}
+                    onChange={(e) => setRedeemAmount(e.target.value)}
+                    placeholder="Enter amount to withdraw"
+                    className="w-full px-4 py-3 border text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    disabled={redeemLoading || totalReward < 50}
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={redeemLoading || !redeemAmount || parseInt(redeemAmount) < 50 || parseInt(redeemAmount) > totalReward || totalReward < 50}
+                  className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {redeemLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <DollarSign className="h-5 w-5" />
+                      Withdraw ₹{redeemAmount || 0}
+                    </>
+                  )}
+                </button>
+                
+                {totalReward < 50 && (
+                  <p className="text-sm text-orange-600 dark:text-orange-400 text-center">
+                    You need at least ₹50 to withdraw
+                  </p>
+                )}
+                
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Amount will be credited to your registered bank account within 3-5 business days
+                </p>
+              </form>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Gift className="h-5 w-5" />Share Your Referral</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Referral Code</label>
                 <div className="flex gap-2">
-                  <input type="text" value={referralData?.referralCode || ""} readOnly className="flex-1 px-4 py-3 border text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono" />
-                  <button onClick={copyReferralLink} className="px-4 py-3 bg-gray-200/80 dark:bg-gray-800 rounded-lg">
-                    {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+                  <input type="text" value={referralData?.referralCode || ""} readOnly className="flex-1 px-4 py-3 border text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono text-lg" />
+                  <button onClick={copyReferralLink} className="px-4 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-lg transition-colors">
+                    {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Referral Link</label>
+                <div className="flex gap-2">
+                  <input type="text" value={referralData?.referralLink || ""} readOnly className="flex-1 px-4 py-3 border text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm" />
+                  <button onClick={copyReferralLinkFull} className="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                    <Share className="h-5 w-5" />
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border p-6">
-            <ReferralTier />
-          </div>
 
-          {referralData?.availableRewards > 0 && (
-            <div className="rounded-2xl border p-6">
-              <h3 className="text-lg font-semibold mb-4">Redeem Rewards</h3>
-              <form onSubmit={handleRedeemRewards} className="flex flex-col sm:flex-row gap-4">
-                <input type="number" value={redeemAmount} onChange={(e) => setRedeemAmount(e.target.value)} placeholder="Enter amount (min. ₹50)" min="50" max={referralData?.availableRewards} className="flex-1 px-4 py-3 border rounded-lg" />
-                <button type="submit" disabled={redeemLoading || !redeemAmount} className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg">
-                  {redeemLoading ? "Processing..." : "Redeem"}
-                </button>
-              </form>
-            </div>
-          )}
         </div>
       )}
 
-      {activeTab === "milestones" && (
-        <div className="space-y-6">
-          <div className="rounded-2xl border p-6">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Target className="h-5 w-5" />Referral Milestones</h3>
-            <div className="space-y-4">
-              {milestoneList.map((milestone, i) => {
-                const isAchieved = totalReferrals >= milestone.target;
-                const progress = Math.min((totalReferrals / milestone.target) * 100, 100);
-                const Icon = milestone.icon;
-                return (
-                  <div key={i} className={`p-4 rounded-lg border ${isAchieved ? "border-green-200 bg-green-50" : "border-gray-200 bg-gray-50"}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isAchieved ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600"}`}><Icon className="h-5 w-5" /></div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{milestone.title}</h4>
-                          <p className="text-sm text-gray-600">{milestone.target} referral{milestone.target > 1 ? "s" : ""}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-green-600">₹{milestone.reward}</p>
-                        {isAchieved ? <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Achieved</span> : <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{totalReferrals}/{milestone.target}</span>}
-                      </div>
-                    </div>
-                    {!isAchieved && (
-                      <div className="mt-3">
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-sky-500 h-2 rounded-full" style={{ width: `${progress}%` }} />
-                        </div>
-                        <div className="text-xs text-gray-600 mt-1">{progress.toFixed(1)}% complete</div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
 
       {activeTab === "analytics" && (
         <div className="space-y-6">
-          <div className="rounded-2xl border p-6">
-            <h3 className="text-xl font-bold mb-4">Referred Users</h3>
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Referred Users ({referralData?.referredUsers?.length || 0})
+            </h3>
             {referralData?.referredUsers?.length > 0 ? (
               <div className="space-y-4">
                 {referralData.referredUsers.map((r, idx) => (
-                  <div key={r.user?._id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div key={r._id || idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-medium">{r.user?.name?.[0] || "U"}</div>
+                      <div className="h-10 w-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-medium">
+                        {r.user?.name?.[0]?.toUpperCase() || "U"}
+                      </div>
                       <div>
-                        <p className="font-medium">{r.user?.name || r.refereeName || "User"}</p>
-                        <p className="text-sm text-gray-600">{r.joinedAt ? `Joined ${new Date(r.joinedAt).toLocaleDateString()}` : ""}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{r.user?.name || "User"}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {r.joinedAt ? `Joined ${new Date(r.joinedAt).toLocaleDateString()}` : "Recently joined"}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">₹{r.rewardAmount || 0}</p>
+                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                        <Check className="h-4 w-4" />
+                        <span className="font-medium">Active</span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">No referred users yet. Share your link to start earning!</p>
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">No referred users yet. Share your link to start earning!</p>
+              </div>
             )}
-          </div>
-
-          <div className="rounded-2xl border p-6">
-            <h3 className="text-xl font-bold mb-4">Referral Leaderboard</h3>
-            <p className="text-sm text-gray-600 mb-4">Top referrers in our community</p>
-            <div className="space-y-4">
-              {leaderboard.length > 0 ? (
-                leaderboard.map((item, idx) => {
-                  const name = item?.user?.name || item?.name || item?.email || "User";
-                  const joined = item?.user?.createdAt || item?.createdAt || null;
-                  const amount = item?.totalRewards ?? item?.availableRewards ?? 0;
-                  const rank = item?.rank ?? idx + 1;
-                  return (
-                    <div key={item.user?._id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex items-center justify-center h-8 w-8 rounded-full font-semibold ${rank === 1 ? "bg-yellow-100 text-yellow-800" : rank === 2 ? "bg-gray-100 text-gray-800" : rank === 3 ? "bg-orange-100 text-orange-800" : "bg-gray-50 text-gray-700"}`}>#{rank}</div>
-                        <div className="h-10 w-10 bg-sky-500 rounded-full flex items-center justify-center text-white font-medium">{name?.[0] || "U"}</div>
-                        <div>
-                          <p className="font-medium">{name}</p>
-                          <p className="text-sm text-gray-600">{joined ? `Joined ${new Date(joined).toLocaleDateString()}` : ""}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">₹{amount}</p>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <p className="text-gray-500 text-center py-4">No leaderboard data yet.</p>
-              )}
-            </div>
           </div>
         </div>
       )}

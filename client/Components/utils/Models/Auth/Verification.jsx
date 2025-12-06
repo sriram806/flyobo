@@ -4,6 +4,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { HiOutlineShieldCheck } from "react-icons/hi";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { setAuthUser } from "@/redux/authSlice";
 import ModalHeader from "../components/ModalHeader";
 import { styles } from "@/Components/styles/style";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
@@ -11,6 +14,8 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
 const OTP_LENGTH = 4;
 
 const Verification = ({ setOpen, setRoute }) => {
+  const dispatch = useDispatch();
+  const router = useRouter();
   const [values, setValues] = useState(Array(OTP_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -97,10 +102,24 @@ const Verification = ({ setOpen, setRoute }) => {
       }
       const endpoint = `${API_URL}/auth/verify-otp`;
       const { data } = await axios.post(endpoint, { otp: code }, { withCredentials: true, timeout: 15000 });
-      if (data?.message) toast.success(data.message);
-      if (setOpen) setOpen(false);
-      if (setRoute) setRoute("Login");
-      if (!data?.message) toast.success("Verification successful. You can now sign in.");
+      
+      // Auto-login after successful verification
+      if (data?.user) {
+        dispatch(setAuthUser(data.user));
+        toast.success(data?.message || "Account verified successfully! You are now logged in.");
+        if (setOpen) setOpen(false);
+        
+        // Redirect based on user role
+        if (data.user.role === "manager") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+      } else {
+        toast.success(data?.message || "Verification successful. You can now sign in.");
+        if (setOpen) setOpen(false);
+        if (setRoute) setRoute("Login");
+      }
     } catch (err) {
       const serverMsg = err?.response?.data?.message || err?.message || "Invalid or expired code. Please try again.";
       setError(serverMsg);

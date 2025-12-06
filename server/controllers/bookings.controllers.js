@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import { getAllBookingsServices, newBooking, processReferralReward } from "../services/booking.services.js";
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 import { calculateEndDate, getDurationDays } from "../utils/date.utils.js";
+import ReferralSettings from "../models/referralSettings.model.js";
 
 const computeTotals = (basePrice, travelers = 1, addOns = [], discount) => {
 };
@@ -106,6 +107,45 @@ export const AdminOrManagerCreateBooking = catchAsyncErrors(async (req, res) => 
         await booking.save();
         await User.findByIdAndUpdate(user._id, { $push: { bookings: booking._id } }).catch(() => { });
 
+        // Check if this is the user's first booking and apply referral reward
+        try {
+            const userBookingsCount = await Booking.countDocuments({ userId: user._id });
+            
+            // If this is their first booking
+            if (userBookingsCount === 1) {
+                const currentUser = await User.findById(user._id).select('referral');
+            
+                // Check if user was referred by someone
+                if (currentUser?.referral?.referredBy) {
+                    const referrerId = currentUser.referral.referredBy;
+                    const referrer = await User.findById(referrerId);
+                
+                    if (referrer) {
+                        const referredUserIndex = referrer.referral.referredUsers.findIndex(
+                            ru => ru.user.toString() === user._id.toString()
+                        );
+
+                        // Only credit if we have the entry and it hasn't been marked as booked yet
+                        if (referredUserIndex !== -1 && !referrer.referral.referredUsers[referredUserIndex].hasBooked) {
+                            const settings = await ReferralSettings.findOne({}) || {};
+                            const referralBonus = typeof settings.referralBonus === 'number' ? settings.referralBonus : 100;
+
+                            // Credit reward to referrer when the referred user actually books
+                            referrer.reward = (referrer.reward || 0) + referralBonus;
+
+                            referrer.referral.referredUsers[referredUserIndex].hasBooked = true;
+                            referrer.referral.referredUsers[referredUserIndex].firstBookingDate = new Date();
+                        
+                            await referrer.save();
+                            console.log(`Referral reward credited: ${referralBonus} to user ${referrer.email}`);
+                        }
+                    }
+                }
+            }
+        } catch (referralError) {
+            console.error('Error processing referral reward:', referralError);
+        }
+
         return res.status(201).json({ success: true, booking });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -164,6 +204,48 @@ export const stripeUserBooking = catchAsyncErrors(async (req, res) => {
     });
 
     await booking.save();
+
+    // Check if this is the user's first booking and apply referral reward
+    try {
+        const userBookingsCount = await Booking.countDocuments({ userId: user._id });
+        
+        // If this is their first booking
+        if (userBookingsCount === 1) {
+            const currentUser = await User.findById(user._id).select('referral');
+            
+            // Check if user was referred by someone
+            if (currentUser?.referral?.referredBy) {
+                const referrerId = currentUser.referral.referredBy;
+                const referrer = await User.findById(referrerId);
+                
+                if (referrer) {
+                    // Update the referred user status in referrer's list
+                    const referredUserIndex = referrer.referral.referredUsers.findIndex(
+                        ru => ru.user.toString() === user._id.toString()
+                    );
+
+                    if (referredUserIndex !== -1 && !referrer.referral.referredUsers[referredUserIndex].hasBooked) {
+                        // Load referral settings to get reward amounts
+                        const ReferralSettings = (await import('../models/referralSettings.model.js')).default;
+                        const settings = await ReferralSettings.findOne({}) || {};
+                        const referralBonus = typeof settings.referralBonus === 'number' ? settings.referralBonus : 100;
+                        
+                        // Credit reward to referrer
+                        referrer.reward = (referrer.reward || 0) + referralBonus;
+                        
+                        referrer.referral.referredUsers[referredUserIndex].hasBooked = true;
+                        referrer.referral.referredUsers[referredUserIndex].firstBookingDate = new Date();
+                        
+                        await referrer.save();
+                        console.log(`Referral reward credited: ${referralBonus} to user ${referrer.email}`);
+                    }
+                }
+            }
+        }
+    } catch (referralError) {
+        console.error('Error processing referral reward:', referralError);
+        // Don't fail the booking if referral processing fails
+    }
 
     return res.status(201).json({ success: true, booking });
 });

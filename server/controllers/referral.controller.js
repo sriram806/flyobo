@@ -107,3 +107,4 @@ export const getReferralSettings = async (req, res) => {
     });
   }
 };
+

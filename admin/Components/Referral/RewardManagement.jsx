@@ -8,7 +8,7 @@ import { FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { RxCross2 } from "react-icons/rx";
 import Loading from "../Loading/Loading";
 
-const STATUS_FILTERS = ["all","pending","credited","used","expired","paid","rejected"];
+const STATUS_FILTERS = ["all","pending","processed","failed"];
 
 const REJECTION_REASONS = [
   "Invalid bank details",
@@ -48,31 +48,34 @@ export default function ReferralRewardsManagement() {
   const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      params.set("status", filter);
-      params.set("page", page);
-      params.set("limit", 20);
-
       const { data } = await axios.get(
-        `${API_URL}/user/admin/redeem-requests?${params.toString()}`,
+        `${API_URL}/user/referral-withdrawals`,
         { withCredentials: true }
       );
 
-      const mapped = (data.data || []).map((r) => ({
+      const raw = data?.data?.withdrawals || [];
+      const filtered = filter === "all" ? raw : raw.filter((r) => r.status === filter);
+
+      const mapped = filtered.map((r, idx) => ({
         ...r,
+        id: r.withdrawalId || `${r.userId}-${r.requestedAt || idx}`,
         userName: r.name,
         userEmail: r.email,
         createdAt: r.requestedAt,
+        bankDetails: r.bankDetails,
+        withdrawalId: r.withdrawalId,
+        rewardBalance: r.rewardBalance,
       }));
 
       setRequests(mapped);
-      setTotalPages(data?.pagination?.totalPages || 1);
-    } catch {
-      toast.error("Failed to fetch data");
+      setTotalPages(1);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch withdrawals");
     } finally {
       setLoading(false);
     }
-  }, [filter, page]);
+  }, [filter]);
 
   useEffect(() => {
     fetchRequests();
@@ -90,17 +93,17 @@ export default function ReferralRewardsManagement() {
   const handleApprove = async () => {
     try {
       await axios.post(
-        `${API_URL}/user/admin/process-redeem`,
+        `${API_URL}/user/referral-withdrawals/process`,
         {
           userId: selectedRequest.userId,
-          historyId: selectedRequest.historyId,
+          withdrawalId: selectedRequest.withdrawalId,
           action: "approve",
           depositReference,
         },
         { withCredentials: true }
       );
 
-      toast.success("Marked as Paid!");
+      toast.success("Marked as Processed!");
       setApproveModal(false);
       fetchRequests();
     } catch {
@@ -112,10 +115,10 @@ export default function ReferralRewardsManagement() {
   const handleReject = async () => {
     try {
       await axios.post(
-        `${API_URL}/user/admin/process-redeem`,
+        `${API_URL}/user/referral-withdrawals/process`,
         {
           userId: selectedRequest.userId,
-          historyId: selectedRequest.historyId,
+          withdrawalId: selectedRequest.withdrawalId,
           action: "reject",
           adminNote:
             rejectReason === "custom" ? customRejectReason : rejectReason,
@@ -123,7 +126,7 @@ export default function ReferralRewardsManagement() {
         { withCredentials: true }
       );
 
-      toast.success("Request Rejected");
+      toast.success("Request Rejected (failed and refunded)");
       setRejectModal(false);
       fetchRequests();
     } catch {
@@ -134,14 +137,11 @@ export default function ReferralRewardsManagement() {
   const statusBadge = (status) => {
     const colors = {
       pending: "bg-yellow-500/20 text-yellow-700",
-      paid: "bg-green-500/20 text-green-700",
-      rejected: "bg-red-500/20 text-red-700",
-      used: "bg-purple-500/20 text-purple-700",
-      credited: "bg-blue-500/20 text-blue-700",
-      expired: "bg-gray-500/20 text-gray-700",
+      processed: "bg-green-500/20 text-green-700",
+      failed: "bg-red-500/20 text-red-700",
     };
     return (
-      <span className={`px-3 py-1 rounded-md text-xs font-semibold ${colors[status]}`}>
+      <span className={`px-3 py-1 rounded-md text-xs font-semibold ${colors[status] || 'bg-gray-500/20 text-gray-700'}`}>
         {status}
       </span>
     );
@@ -207,7 +207,7 @@ export default function ReferralRewardsManagement() {
               </tr>
             ) : (
               filteredRequests.map((r) => (
-                <tr key={r.historyId} className="border-t text-gray-900 dark:text-gray-200 dark:border-gray-700">
+                <tr key={r.id} className="border-t text-gray-900 dark:text-gray-200 dark:border-gray-700">
                   <td className="p-3">
                     <div className="font-semibold">{r.userName}</div>
                     <div className="text-xs text-gray-500">{r.userEmail}</div>
@@ -220,6 +220,8 @@ export default function ReferralRewardsManagement() {
                       <>
                         <div className="font-semibold">{r.bankDetails.accountHolderName}</div>
                         <div>A/C: {r.bankDetails.accountNumber}</div>
+                        <div>{r.bankDetails.bankName}</div>
+                        <div>{r.bankDetails.ifscCode}</div>
                       </>
                     ) : (
                       <span className="text-gray-500">No bank details</span>

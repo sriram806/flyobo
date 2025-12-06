@@ -13,6 +13,7 @@ import { getAllUsersServices } from '../services/user.services.js';
 import bcrypt from 'bcryptjs';
 import { sendRewardRedemptionNotification } from "../services/notification.services.js";
 import ReferralSettings from '../models/referralSettings.model.js';
+import { FRONTEND_URL } from "../config/env.js";
 
 // 1. Get User Profile
 export const getProfile = async (req, res) => {
@@ -70,7 +71,7 @@ export const deleteUserAccount = async (req, res) => {
 
 // 5. Get All Users (Admin Only)
 export const getAllUsers = async (req, res) => {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.user || !['admin', 'manager'].includes(req.user.role)) {
     return res.status(403).json({ success: false, message: 'Access denied' });
   }
 
@@ -270,9 +271,7 @@ export const removeFavouritePackage = async (req, res) => {
 // Get referral information
 export const getReferralInfo = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-      .populate('referral.referredUsers.user', 'name email')
-      .select('referral name email reward');
+    const user = await User.findById(req.user._id).populate('referral.referredUsers.user', 'name email').select('referral name email reward');
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -283,7 +282,7 @@ export const getReferralInfo = async (req, res) => {
       totalReferrals: user.referral.totalReferrals,
       totalReward: user.reward || 0,
       referredUsers: user.referral.referredUsers,
-      referralLink: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/register?ref=${user.referral.referralCode}`
+      referralLink: `${FRONTEND_URL || 'http://localhost:3000'}/auth/page/registration?ref=${user.referral.referralCode}`
     };
 
     res.status(200).json({
@@ -293,6 +292,50 @@ export const getReferralInfo = async (req, res) => {
   } catch (error) {
     console.error('Get referral info error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Validate referral code
+export const validateReferralCode = async (req, res) => {
+  try {
+    const { referralCode } = req.body;
+
+    if (!referralCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Referral code is required'
+      });
+    }
+
+    const referrer = await User.findOne({ 'referral.referralCode': referralCode });
+
+    if (!referrer) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid referral code'
+      });
+    }
+
+    // Generate referral link
+    const referralLink = `${FRONTEND_URL}/auth/page/registration?ref=${referralCode}`;
+
+    res.status(200).json({
+      success: true,
+      message: 'Referral code is valid',
+      data: {
+        referrerName: referrer.name,
+        referrerEmail: referrer.email,
+        referralCode: referralCode,
+        referralLink: referralLink
+      }
+    });
+  } catch (error) {
+    console.error('Validate referral code error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
   }
 };
 
@@ -315,7 +358,6 @@ export const applyReferralCode = async (referralCode, newUserId) => {
 
     // Load referral settings (use defaults if not set)
     const settings = await ReferralSettings.findOne({}) || {};
-    const referralBonus = typeof settings.referralBonus === 'number' ? settings.referralBonus : 100;
     const signupBonus = typeof settings.signupBonus === 'number' ? settings.signupBonus : 50;
 
     // Add new user to referrer's referred users
@@ -324,11 +366,10 @@ export const applyReferralCode = async (referralCode, newUserId) => {
       joinedAt: new Date(),
     });
 
-    // Increment referrer's total referrals and reward
+    // Increment referrer's total referrals (reward will be added only after first booking)
     referrer.referral.totalReferrals += 1;
-    referrer.reward = (referrer.reward || 0) + referralBonus;
 
-    // Give signup bonus to new user
+    // Give signup bonus to new user (referrer bonus is credited after first booking)
     newUser.reward = (newUser.reward || 0) + signupBonus;
 
     await referrer.save();
@@ -439,6 +480,195 @@ export const getBankDetails = async (req, res) => {
       message: 'Server error',
       error: error.message
     });
+  }
+};
+
+// Withdraw referral rewards
+export const withdrawReferralRewards = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const userId = req.user._id;
+
+    // Validate amount
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid withdrawal amount'
+      });
+    }
+
+    // Minimum withdrawal check
+    if (amount < 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'Minimum withdrawal amount is ₹50'
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user has bank details
+    if (!user.bankDetails || !user.bankDetails.accountNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please add bank details before withdrawing rewards'
+      });
+    }
+
+    // Check if user has sufficient balance
+    if (user.reward < amount) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient balance. Available: ₹${user.reward}`
+      });
+    }
+
+    // Deduct amount from user's reward balance
+    user.reward -= amount;
+
+    // Record withdrawal request for tracking
+    const withdrawalEntry = {
+      amount,
+      status: 'pending',
+      requestedAt: new Date(),
+      notes: 'Referral reward withdrawal request'
+    };
+    user.referralWithdrawals.push(withdrawalEntry);
+
+    await user.save();
+
+
+    res.status(200).json({
+      success: true,
+      message: `Withdrawal request of ₹${amount} submitted successfully. Amount will be credited to your bank account within 3-5 business days.`,
+      data: {
+        withdrawnAmount: amount,
+        remainingBalance: user.reward,
+        withdrawal: withdrawalEntry
+      }
+    });
+  } catch (error) {
+    console.error('Withdraw referral rewards error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+
+
+// Admin/Manager: Get all referral withdrawal requests (user-wise and flat list)
+export const getReferralWithdrawals = async (req, res) => {
+  try {
+    if (!req.user || !['admin', 'manager'].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const users = await User.find({ 'referralWithdrawals.0': { $exists: true } })
+      .select('name email reward referralWithdrawals bankDetails')
+      .lean();
+
+    const withdrawals = [];
+    users.forEach((u) => {
+      (u.referralWithdrawals || []).forEach((w) => {
+        withdrawals.push({
+          userId: u._id,
+          name: u.name,
+          email: u.email,
+          rewardBalance: u.reward,
+          withdrawalId: w._id,
+          amount: w.amount,
+          status: w.status,
+          requestedAt: w.requestedAt,
+          processedAt: w.processedAt,
+          notes: w.notes || '',
+          bankDetails: u.bankDetails || null
+        });
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalRequests: withdrawals.length,
+        withdrawals,
+        byUser: users
+      }
+    });
+  } catch (error) {
+    console.error('Get referral withdrawals error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Admin/Manager: Process a referral withdrawal (approve/process or fail/reject)
+export const processReferralWithdrawal = async (req, res) => {
+  try {
+    if (!req.user || !['admin', 'manager'].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const { userId, withdrawalId, action, depositReference, adminNote } = req.body;
+
+    if (!userId || !withdrawalId || !action) {
+      return res.status(400).json({ success: false, message: 'userId, withdrawalId and action are required' });
+    }
+
+    if (!['approve', 'reject', 'process', 'fail'].includes(action)) {
+      return res.status(400).json({ success: false, message: 'Invalid action' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const withdrawal = user.referralWithdrawals.id(withdrawalId);
+    if (!withdrawal) return res.status(404).json({ success: false, message: 'Withdrawal not found' });
+
+    if (withdrawal.status !== 'pending') {
+      return res.status(400).json({ success: false, message: `Cannot update a ${withdrawal.status} withdrawal` });
+    }
+
+    const now = new Date();
+    const isApprove = action === 'approve' || action === 'process';
+
+    if (isApprove) {
+      withdrawal.status = 'processed';
+      withdrawal.processedAt = now;
+      withdrawal.notes = depositReference || withdrawal.notes;
+    } else {
+      // Reject/Fail: refund the amount to the user's reward balance
+      user.reward = (user.reward || 0) + (withdrawal.amount || 0);
+      withdrawal.status = 'failed';
+      withdrawal.processedAt = now;
+      withdrawal.notes = adminNote || withdrawal.notes;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: isApprove ? 'Withdrawal marked as processed' : 'Withdrawal marked as failed and amount refunded',
+      data: {
+        userId: user._id,
+        withdrawalId,
+        status: withdrawal.status,
+        processedAt: withdrawal.processedAt,
+        rewardBalance: user.reward,
+        notes: withdrawal.notes
+      }
+    });
+  } catch (error) {
+    console.error('Process referral withdrawal error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
 

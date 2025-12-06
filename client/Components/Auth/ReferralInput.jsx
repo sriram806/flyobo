@@ -4,11 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Gift, Check } from "lucide-react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function ReferralInput({ onReferralChange, disabled = false }) {
   const [referralCode, setReferralCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [isValid, setIsValid] = useState(null);
+  const [referrerEmail, setReferrerEmail] = useState(null);
   const searchParams = useSearchParams();
   const timerRef = useRef(null);
 
@@ -23,13 +25,13 @@ export default function ReferralInput({ onReferralChange, disabled = false }) {
   }, [searchParams]);
 
   const validateReferralCode = async (code) => {
-    if (!code || code.length < 6) {
+    if (!code || code.length < 6 || code.length > 13) {
       setIsValid(null);
       if (onReferralChange) onReferralChange("");
       return;
     }
 
-    const clientOk = /^FLY[A-Z0-9]{6}$/.test(code);
+    const clientOk = /^FLY[A-Z0-9]{3,10}$/.test(code);
     if (!clientOk) {
       setIsValid(false);
       if (onReferralChange) onReferralChange("");
@@ -38,19 +40,24 @@ export default function ReferralInput({ onReferralChange, disabled = false }) {
 
     setIsValidating(true);
     setIsValid(null);
+    setReferrerEmail(null);
     try {
-      const apiBase = (NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-      if (!apiBase) {
-        setIsValid(true);
-        if (onReferralChange) onReferralChange(code);
+      const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+      if (!API) {
+        toast.error("Backend URL not configured");
+        setIsValid(false);
         return;
       }
-      const url = `${apiBase}/referral/validate?code=${encodeURIComponent(code)}`;
-      const { data } = await axios.get(url, { withCredentials: true, timeout: 10000 });
-      const ok = !!data?.valid;
+      const url = `${API}/user/validate-referral`;
+      const { data } = await axios.post(url, { referralCode: code }, { withCredentials: true, timeout: 10000 });
+      const ok = !!data?.success;
       setIsValid(ok);
+      if (ok && data?.data?.referrerEmail) {
+        setReferrerEmail(data.data.referrerEmail);
+      }
       if (onReferralChange) onReferralChange(ok ? code : "");
-    } catch {
+    } catch (error) {
+      console.error('Validation error:', error);
       setIsValid(false);
       if (onReferralChange) onReferralChange("");
     } finally {
@@ -86,8 +93,8 @@ export default function ReferralInput({ onReferralChange, disabled = false }) {
           value={referralCode}
           onChange={handleReferralChange}
           disabled={disabled}
-          placeholder="Enter referral code (e.g., FLYABC123)"
-          maxLength={9}
+          placeholder="Enter referral code (e.g., FLY1A2B3C)"
+          maxLength={13}
           className={`w-full pl-10 pr-10 py-3 rounded-lg border bg-transparent outline-none text-[0.95rem] transition-all duration-200
             ${disabled ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-70" : "focus:ring-2 focus:ring-sky-500 focus:border-sky-500"}
             ${isValid === true ? "border-green-500 bg-green-50 dark:bg-green-950/20" : isValid === false ? "border-red-500 bg-red-50 dark:bg-red-950/20" : "border-gray-300 dark:border-gray-700"}
@@ -110,17 +117,27 @@ export default function ReferralInput({ onReferralChange, disabled = false }) {
       </div>
 
       {isValid === true && (
-        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
-          <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
-            <Check className="h-2.5 w-2.5 text-white" />
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+            <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+              <Check className="h-2.5 w-2.5 text-white" />
+            </div>
+            <span>Valid referral code!</span>
           </div>
-          <span>Valid referral code! You’ll get ₹50 bonus after signup.</span>
+          {referrerEmail && (
+            <div className="text-gray-700 dark:text-gray-300 text-sm bg-green-50 dark:bg-green-950/30 p-2 rounded">
+              <span className="font-semibold">Referrer:</span> {referrerEmail}
+            </div>
+          )}
+          <div className="text-gray-600 dark:text-gray-400 text-sm">
+            You'll get ₹50 bonus after signup.
+          </div>
         </div>
       )}
 
       {isValid === false && referralCode.length > 0 && (
-        <div className="text-red-600 dark:text-red-400 text-sm">
-          Invalid referral code format or code not found.
+        <div className="text-red-600 dark:text-red-400 text-sm font-semibold">
+          Invalid code
         </div>
       )}
 

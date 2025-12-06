@@ -121,6 +121,14 @@ const userSchema = new mongoose.Schema({
         joinedAt: {
           type: Date,
           default: Date.now,
+        },
+        hasBooked: {
+          type: Boolean,
+          default: false,
+        },
+        firstBookingDate: {
+          type: Date,
+          default: null,
         }
       }
     ],
@@ -141,7 +149,7 @@ const userSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "completed", "expired"],
+    enum: ["pending", "completed"],
     default: "pending",
   },
 
@@ -150,6 +158,16 @@ const userSchema = new mongoose.Schema({
     default: 0,
     min: 0,
   },
+
+  referralWithdrawals: [
+    {
+      amount: { type: Number, required: true },
+      status: { type: String, enum: ['pending', 'processed', 'failed'], default: 'pending' },
+      requestedAt: { type: Date, default: Date.now },
+      processedAt: { type: Date, default: null },
+      notes: { type: String, default: '' }
+    }
+  ],
 
   createdAt: {
     type: Date,
@@ -163,7 +181,7 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.generateReferralCode = function () {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = 'FLY';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 9; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;

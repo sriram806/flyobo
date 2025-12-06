@@ -9,7 +9,11 @@ import {
     changePassword,
     getReferralInfo,
     updateBankDetails,
-    getBankDetails
+    getBankDetails,
+    validateReferralCode,
+    withdrawReferralRewards,
+    getReferralWithdrawals,
+    processReferralWithdrawal
 } from '../controllers/user.controller.js';
 import isAuthenticated from '../middleware/isAuthenticated.js';
 
@@ -27,12 +31,15 @@ userRoute.get('/my-bookings', isAuthenticated, getUserBookings);
 
 // Referral program routes
 userRoute.get('/referral-info', isAuthenticated, getReferralInfo);
+userRoute.post('/validate-referral', validateReferralCode);
+userRoute.get('/referral-withdrawals', isAuthenticated, getReferralWithdrawals);
+userRoute.post('/referral-withdrawals/process', isAuthenticated, processReferralWithdrawal);
+userRoute.post('/withdraw-referral-rewards', isAuthenticated, withdrawReferralRewards);
+
 
 // Bank details routes
 userRoute.put('/bank-details', isAuthenticated, updateBankDetails);
 userRoute.get('/bank-details', isAuthenticated, getBankDetails);
-
-
 
 // for admin
 userRoute.get('/get-all-users', isAuthenticated, getAllUsers);

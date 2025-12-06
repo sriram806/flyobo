@@ -146,7 +146,7 @@ export default function AgentBookingUI() {
                 // show animated success popup then redirect
                 setCreatedBooking(res?.data?.booking || { message: res?.data?.message || "Booking created" });
                 // short delay to allow popup to show
-                setTimeout(() => router.push("/dashboard"), 2400);
+                setTimeout(() => router.push("/bookings?tab=analytics"), 2400);
             } else {
                 toast.error(res?.data?.message || "Failed to create booking");
                 setIsSubmitting(false);
