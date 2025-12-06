@@ -5,12 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { performLogout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
-import Heading from "../components/MetaData/Heading";
-import Header from "../components/Layout/Header";
-import Footer from "../components/Layout/Footer";
-import AdminProtected from "../hooks/adminProtected";
-import AdminSidebar from "../components/Admin/AdminSidebar";
-import Loading from "../components/LoadingScreen/Loading";
+import AdminProtected from "@/Components/hooks/adminProtected";
+import Heading from "@/Components/MetaData/Heading";
+import Header from "@/Components/Layout/Header";
+import AdminSidebar from "@/Components/Admin/AdminSidebar";
+import Loading from "@/Components/LoadingScreen/Loading";
+import Footer from "@/Components/Layout/Footer";
 
 function AdminLayoutContent({ children }) {
   const [open, setOpen] = useState(false);
@@ -20,12 +20,9 @@ function AdminLayoutContent({ children }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Sync selected tab with URL query parameter
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab) {
-      setSelected(tab);
-    }
+    const tab = searchParams.get("tab");
+    if (tab) setSelected(tab);
   }, [searchParams]);
 
   const routeMap = {
@@ -35,21 +32,19 @@ function AdminLayoutContent({ children }) {
     bookings: "/admin/bookings",
     reports: "/admin/reports",
     gallery: "/admin/gallery",
-    contact: "/admin/conatcts",
+    contact: "/admin/contacts",
     home: "/admin/home",
     "analytics-users": "/admin/analytics/users",
     "analytics-packages": "/admin/analytics/packages",
     "analytics-bookings": "/admin/analytics/bookings",
-    "referrals-overview": "/admin/referrals"
+    "referrals-overview": "/admin/referrals",
   };
+
   const handleLogout = async () => {
     try {
       await dispatch(performLogout());
       toast.success("Logged out successfully");
-      router.push("/");
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.success("Logged out successfully");
+    } finally {
       router.push("/");
     }
   };
@@ -72,9 +67,7 @@ function AdminLayoutContent({ children }) {
                 onLogout={handleLogout}
               />
             </aside>
-            <section className="lg:col-span-3">
-              {children}
-            </section>
+            <section className="lg:col-span-3">{children}</section>
           </div>
         </div>
       </main>

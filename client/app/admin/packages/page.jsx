@@ -1,6 +1,7 @@
 "use client";
 
-import AdminPackages from "@/app/components/Admin/AdminPackages";
+import AdminPackages from "@/Components/Admin/AdminPackages";
+
 
 export default function Page() {
   return (

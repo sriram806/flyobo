@@ -26,19 +26,34 @@ export default function Faq() {
   const fetchFaqs = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${API_URL}/layout`, {
+      const res = await axios.get(`${API_URL}/layout`, {
         params: { type: "FAQ" },
         withCredentials: true,
       });
 
+      // Server may return 404 with { success:false, message: 'FAQ not found' }
+      if (res?.data?.success === false) {
+        const msg = (res.data.message || '').toLowerCase();
+        if (msg.includes('not found')) {
+          setFaqs([]);
+          return;
+        }
+      }
+
+      const data = res.data;
       const serverFaqs = (data?.layout?.faq || []).map((faq, i) => ({
         ...faq,
         _key: faq._id ? `${faq._id}-${i}` : `local-${Date.now()}-${i}-${Math.random()}`,
       }));
 
       setFaqs(serverFaqs);
-    } catch {
-      toast.error("Failed to load FAQs");
+    } catch (err) {
+      const msg = err?.response?.data?.message || '';
+      if (err?.response?.status === 404 && typeof msg === 'string' && msg.toLowerCase().includes('not found')) {
+        setFaqs([]);
+      } else {
+        toast.error('Failed to load FAQs');
+      }
     } finally {
       setLoading(false);
     }
@@ -82,23 +97,37 @@ export default function Faq() {
 
       const payload = { type: "FAQ", faq: [faqs[idx]] };
 
-      const res = await axios.put(`${API_URL}/layout`, payload, {
-        withCredentials: true,
-      });
-
-      const updatedFaqArray = res?.data?.layout?.faq || [];
-      const newFaq = updatedFaqArray[0];
-
-      if (newFaq) {
-        const updated = [...faqs];
-        updated[idx] = {
-          ...newFaq,
-          _key: updated[idx]._key, // keep stable key
-        };
-        setFaqs(updated);
+      // Try update (PUT); if layout missing, fallback to create (POST)
+      try {
+        const res = await axios.put(`${API_URL}/layout`, payload, { withCredentials: true });
+        const updatedFaqArray = res?.data?.layout?.faq || [];
+        const newFaq = updatedFaqArray[0];
+        if (newFaq) {
+          const updated = [...faqs];
+          updated[idx] = { ...newFaq, _key: updated[idx]._key };
+          setFaqs(updated);
+        }
+        toast.success("FAQ saved successfully");
+      } catch (err) {
+        const msg = err?.response?.data?.message || '';
+        if (err?.response?.status === 404 && typeof msg === 'string' && msg.toLowerCase().includes('faq layout not found')) {
+          // create new layout instead
+          try {
+            const createRes = await axios.post(`${API_URL}/layout`, payload, { withCredentials: true });
+            const newFaqs = createRes?.data?.layout?.faq || [];
+            if (newFaqs.length) {
+              const updated = [...faqs];
+              updated[idx] = { ...newFaqs[newFaqs.length - 1], _key: updated[idx]._key };
+              setFaqs(updated);
+            }
+            toast.success('FAQ created successfully');
+          } catch (createErr) {
+            toast.error(createErr?.response?.data?.message || 'Failed to create FAQ');
+          }
+        } else {
+          toast.error(err?.response?.data?.message || 'Failed to save FAQ');
+        }
       }
-
-      toast.success("FAQ saved successfully");
     } catch {
       toast.error("Failed to save FAQ");
     } finally {

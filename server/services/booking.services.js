@@ -15,7 +15,6 @@ export const getAllBookingsServices = async () => {
 // Process referral rewards when a booking is completed
 export const processReferralReward = async (bookingId) => {
     try {
-        // Use the automatic referral reward processing service
         const result = await processAutomaticReferralReward(bookingId);
         return result;
     } catch (error) {

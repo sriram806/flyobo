@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, Suspense, lazy } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Heading from "../../components/MetaData/Heading";
 import Link from "next/link";
-import Header from "@/app/components/Layout/Header";
 import { useSelector } from "react-redux";
-import PackageDetailsPanel from "@/app/components/Packages/Layout/PackageDetailsPanel";
-
+import PackageDetailsPanel from "@/Components/Packages/Layout/PackageDetailsPanel"
+import axios from "axios";
+import Heading from "@/Components/MetaData/Heading";
+import Header from "@/Components/Layout/Header";
+import Footer from "@/Components/Layout/Footer";
 
 export default function CheckoutPage() {
   const params = useSearchParams();
@@ -20,7 +21,6 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [pkg, setPkg] = useState(null);
 
-  // Form state
   const [travelers, setTravelers] = useState(1);
   const [startDate, setStartDate] = useState("");
   const [name, setName] = useState("");
@@ -30,11 +30,9 @@ export default function CheckoutPage() {
   const [travelerDetails, setTravelerDetails] = useState([{ name: "", age: "", gender: "" }]);
   const [coupon, setCoupon] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState(0);
-
   const [formErrors, setFormErrors] = useState({});
 
   const user = useSelector((s) => s?.auth?.user || null);
-
   const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
 
   useEffect(() => {
@@ -54,23 +52,22 @@ export default function CheckoutPage() {
           return;
         }
         const url = `${API_URL}/package/${encodeURIComponent(slug)}`;
-        const res = await fetch(url, { credentials: "include" });
-        if (!res.ok) throw new Error("Failed to fetch package");
-        const data = await res.json();
+        const { data } = await axios.get(url, { withCredentials: true });
         if (cancelled) return;
         const p = data?.foundPackage || data?.package || data?.data?.package || data?.data || data || null;
         setPkg(p);
-      } catch (err) {
+      } catch {
         if (!cancelled) setError("Unable to load package");
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [slug, API_URL]);
 
-  // auto-fill user (B)
   useEffect(() => {
     if (user) {
       if (!name) setName(user.name || "");
@@ -79,7 +76,6 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  // sync travelerDetails length to travelers (H)
   useEffect(() => {
     const n = Math.max(1, Number(travelers || 1));
     setTravelerDetails((prev) => {
@@ -91,14 +87,13 @@ export default function CheckoutPage() {
   }, [travelers]);
 
   const price = useMemo(() => Number(pkg?.price || 0), [pkg?.price]);
-  const fee = 100; // fixed fee (I)
+  const fee = 100;
   const taxRate = 0.05;
   const subtotal = useMemo(() => Math.max(1, Number(travelers || 1)) * price, [travelers, price]);
   const tax = useMemo(() => Math.round(subtotal * taxRate), [subtotal]);
   const discountAmount = Math.round(appliedDiscount);
   const total = useMemo(() => Math.max(0, subtotal + tax + fee - discountAmount), [subtotal, tax, fee, discountAmount]);
 
-  // date helpers (F)
   const todayStr = useMemo(() => {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -122,7 +117,6 @@ export default function CheckoutPage() {
     return Object.keys(errs).length === 0;
   };
 
-  // coupon example
   const applyCoupon = () => {
     if (!coupon) return;
     const code = coupon.trim().toUpperCase();
@@ -143,20 +137,24 @@ export default function CheckoutPage() {
     });
   };
 
-  const Err = ({ field }) => formErrors[field] ? <div className="text-rose-600 text-xs mt-1">{formErrors[field]}</div> : null;
+  const Err = ({ field }) => (formErrors[field] ? <div className="text-rose-600 text-xs mt-1">{formErrors[field]}</div> : null);
 
-  // Razorpay helpers
-  const loadRazorpayScript = () => new Promise((res, rej) => {
-    if (typeof window === "undefined") return rej("no-window");
-    if (window.Razorpay) return res(true);
-    const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.onload = () => res(true);
-    s.onerror = () => rej(new Error("Razorpay SDK failed to load"));
-    document.body.appendChild(s);
-  });
+  const loadRazorpayScript = () =>
+    new Promise((res, rej) => {
+      if (typeof window === "undefined") return rej("no-window");
+      if (window.Razorpay) return res(true);
+      const s = document.createElement("script");
+      s.src = "https://checkout.razorpay.com/v1/checkout.js";
+      s.onload = () => res(true);
+      s.onerror = () => rej(new Error("Razorpay SDK failed to load"));
+      document.body.appendChild(s);
+    });
 
-  // main function: Razorpay -> verify/save -> WhatsApp
+  const buildTravelerText = () =>
+    travelerDetails
+      .map((t, i) => `Traveler ${i + 1}: ${t.name || "—"}${t.age ? `, Age: ${t.age}` : ""}${t.gender ? `, ${t.gender}` : ""}`)
+      .join("\n");
+
   const confirmViaWhatsApp = async (e) => {
     e?.preventDefault?.();
 
@@ -165,82 +163,70 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Build traveler summary text (for later WhatsApp message)
-    const travelerText = travelerDetails
-      .map((t, i) => `Traveler ${i + 1}: ${t.name || " — "}${t.age ? `, Age: ${t.age}` : ""}${t.gender ? `, ${t.gender}` : ""}`)
-      .join("\n");
-
-    // If Razorpay disabled, fallback to just saving & opening WhatsApp
+    const travelerText = buildTravelerText();
     const enableRazorpay = String(process.env.NEXT_PUBLIC_ENABLE_RAZORPAY || "true").toLowerCase() === "true";
 
-    // If Razorpay enabled: create order -> open checkout -> on success verify -> then save & open WA
     if (enableRazorpay) {
       try {
         if (!API_URL) throw new Error("API not configured");
         await loadRazorpayScript();
 
-        // create order on backend
-        const createRes = await fetch(`${API_URL}/payment/razorpay/order`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-            body: JSON.stringify({
-            amount: total, // your backend may require multiply by 100; adapt accordingly
+        const createRes = await axios.post(
+          `${API_URL}/payment/razorpay/order`,
+          {
+            amount: total,
             currency: "INR",
             packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
-            meta: { travelers: Number(travelers), startDate }
-          })
-        });
-        if (!createRes.ok) throw new Error("Failed to create payment order");
-        const orderData = await createRes.json(); // { id, amount, currency, key }
+            meta: { travelers: Number(travelers), startDate },
+          },
+          { withCredentials: true }
+        );
+
+        const orderData = createRes.data;
 
         const options = {
           key: orderData.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: orderData.amount || total * 100,
-          currency: orderData.currency || orderData.currency || "INR",
+          currency: orderData.currency || "INR",
           name: pkg?.title || "Flyobo",
           description: `Booking: ${pkg?.title || slug}`,
           order_id: orderData.id,
           prefill: { name, email, contact: phone },
           handler: async function (response) {
-            // response: { razorpay_payment_id, razorpay_order_id, razorpay_signature }
             try {
-              // verify with backend
-              const verifyRes = await fetch(`${API_URL}/payment/razorpay/verify`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
+              await axios.post(
+                `${API_URL}/payment/razorpay/verify`,
+                {
                   ...response,
                   packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
-                  meta: { travelerDetails, startDate, notes, subtotal, tax, fee, discountAmount, total }
-                })
-              });
-              if (!verifyRes.ok) throw new Error("Payment verification failed");
-              const verifyData = await verifyRes.json();
+                  meta: { travelerDetails, startDate, notes, subtotal, tax, fee, discountAmount, total },
+                },
+                { withCredentials: true }
+              );
 
-              // Optionally save checkout in DB (server may already do it during verify)
               try {
-                await fetch(`${API_URL}/checkout/create`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  credentials: "include",
-                  body: JSON.stringify({
+                await axios.post(
+                  `${API_URL}/checkout/create`,
+                  {
                     packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
-                    name, email, phone,
+                    name,
+                    email,
+                    phone,
                     travelers: Number(travelers),
                     travelerDetails,
                     startDate,
-                    subtotal, tax, fee, discountAmount, total,
+                    subtotal,
+                    tax,
+                    fee,
+                    discountAmount,
+                    total,
                     notes,
-                    payment: { verified: true, provider: "razorpay", meta: verifyData }
-                  })
-                });
-              } catch (saveErr) {
-                console.warn("Could not save checkout after payment:", saveErr);
-              }
+                    payment: { verified: true, provider: "razorpay", meta: response },
+                  },
+                  { withCredentials: true }
+                );
+              } catch {}
 
-              // Build WhatsApp message now that payment succeeded
               const encodeLine = (t) => encodeURIComponent(t + "\n");
               let msg =
                 encodeLine(`Booking Confirmation (Payment received)`) +
@@ -262,19 +248,15 @@ export default function CheckoutPage() {
               const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919291237999";
               window.open(`https://wa.me/${waNumber}?text=${msg}`, "_blank");
 
-              // Navigate to success screen (optional)
               router.push(`/booking/success?order=${encodeURIComponent(orderData.id)}`);
-            } catch (err) {
-              console.error("Verification / post-payment error:", err);
+            } catch {
               alert("Payment succeeded but verification failed. Please contact support.");
             }
           },
           modal: {
             ondismiss: function () {
-              // User closed the modal; suggest WhatsApp fallback
               const goToWa = confirm("Payment was not completed. Do you want to send a booking request via WhatsApp instead?");
               if (goToWa) {
-                // open WA with unpaid booking summary
                 const encodeLine = (t) => encodeURIComponent(t + "\n");
                 let msg =
                   encodeLine(`Booking Request (Payment not completed)`) +
@@ -290,47 +272,46 @@ export default function CheckoutPage() {
                 const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919291237999";
                 window.open(`https://wa.me/${waNumber}?text=${msg}`, "_blank");
               }
-            }
-          }
+            },
+          },
         };
 
         const rzp = new window.Razorpay(options);
-        rzp.on("payment.failed", function (resp) {
-          console.error("Razorpay payment failed", resp.error);
+        rzp.on("payment.failed", function () {
           alert("Payment failed. You can try again or use WhatsApp booking.");
         });
         rzp.open();
-
-      } catch (err) {
-        console.error("Razorpay flow error:", err);
+      } catch {
         alert("Unable to start payment. You can proceed with WhatsApp booking instead.");
       }
 
       return;
     }
 
-    // If Razorpay disabled: save (optional) and open WhatsApp
     try {
       if (API_URL) {
-        await fetch(`${API_URL}/checkout/create`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-            body: JSON.stringify({
+        await axios.post(
+          `${API_URL}/checkout/create`,
+          {
             packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
-            name, email, phone,
+            name,
+            email,
+            phone,
             travelers: Number(travelers),
             travelerDetails,
             startDate,
-            subtotal, tax, fee, discountAmount, total,
+            subtotal,
+            tax,
+            fee,
+            discountAmount,
+            total,
             notes,
-            payment: { verified: false, provider: "none" }
-          })
-        });
+            payment: { verified: false, provider: "none" },
+          },
+          { withCredentials: true }
+        );
       }
-    } catch (err) {
-      console.warn("Save checkout (no-razorpay) failed:", err);
-    }
+    } catch {}
 
     const encodeLine = (t) => encodeURIComponent(t + "\n");
     let msg =
@@ -351,11 +332,7 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <Heading
-        title={`Checkout - ${pkg?.title || "Flyobo"}`}
-        description={pkg?.destination || "Checkout your travel package"}
-        keywords="Checkout, Booking, Travel"
-      />
+      <Heading title={`Checkout - ${pkg?.title || "Flyobo"}`} description={pkg?.destination || "Checkout your travel package"} keywords="Checkout, Booking, Travel" />
 
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
@@ -439,56 +416,43 @@ export default function CheckoutPage() {
                     <div className="text-sm text-rose-600"><Err field="coupon" /></div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex gap-3 items-start">
                     <button onClick={confirmViaWhatsApp} className="inline-flex items-center rounded-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white px-4 py-2 text-sm">Pay & Confirm (Razorpay → WhatsApp)</button>
-                    <button onClick={() => {
-                      // fallback: open WhatsApp without payment
-                      const proceed = confirm("Open WhatsApp without payment?");
-                      if (proceed) {
-                        // reuse confirmViaWhatsApp path for non-razorpay
-                        (async () => {
-                          // temporarily disable Razorpay by setting env var is not possible at runtime;
-                          // instead call the inner no-razorpay flow by toggling env - simpler: call endpoint directly here:
-                          // For simplicity, open WA message using the non-razorpay branch by calling confirmViaWhatsApp with override:
-                          await (async () => {
-                            // replicate non-razorpay branch of confirmViaWhatsApp
-                            if (!validate()) { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
-                            try {
-                              if (API_URL) {
-                                await fetch(`${API_URL}/checkout/create`, {
-                                  method: "POST",
-                                  headers: { "Content-Type": "application/json" },
-                                  credentials: "include",
-                                    body: JSON.stringify({
-                                    packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
-                                    name, email, phone,
-                                    travelers: Number(travelers),
-                                    travelerDetails,
-                                    startDate,
-                                    subtotal, tax, fee, discountAmount, total,
-                                    notes,
-                                    payment: { verified: false, provider: "manual" }
-                                  })
-                                });
-                              }
-                            } catch (err) { console.warn(err); }
-                            const encodeLine = (t) => encodeURIComponent(t + "\n");
-                            let msg =
-                              encodeLine(`Booking Request`) +
-                              encodeLine(`Package: ${pkg?.title || "Package"}`) +
-                              encodeLine(`Travelers: ${travelers}`) +
-                              encodeLine(travelerText) +
-                              encodeLine(`Start Date: ${startDate || "TBD"}`) +
-                              encodeLine(`Total: ₹${total.toLocaleString("en-IN")}`) +
-                              encodeLine(`Name: ${name}`) +
-                              encodeLine(`Email: ${email}`) +
-                              encodeLine(`Phone: ${phone}`) +
-                              (notes ? encodeLine(`Notes: ${notes}`) : "");
-                            const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919291237999";
-                            window.open(`https://wa.me/${waNumber}?text=${msg}`, "_blank");
-                          })();
-                        })();
-                      }
+
+                    <button onClick={async () => {
+                      if (!validate()) { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+                      try {
+                        if (API_URL) {
+                          await axios.post(
+                            `${API_URL}/checkout/create`,
+                            {
+                              packageId: pkg?.slug || pkg?._id || pkg?.id || slug,
+                              name, email, phone,
+                              travelers: Number(travelers),
+                              travelerDetails,
+                              startDate,
+                              subtotal, tax, fee, discountAmount, total,
+                              notes,
+                              payment: { verified: false, provider: "manual" }
+                            },
+                            { withCredentials: true }
+                          );
+                        }
+                      } catch {}
+                      const encodeLine = (t) => encodeURIComponent(t + "\n");
+                      let msg =
+                        encodeLine(`Booking Request`) +
+                        encodeLine(`Package: ${pkg?.title || "Package"}`) +
+                        encodeLine(`Travelers: ${travelers}`) +
+                        encodeLine(buildTravelerText()) +
+                        encodeLine(`Start Date: ${startDate || "TBD"}`) +
+                        encodeLine(`Total: ₹${total.toLocaleString("en-IN")}`) +
+                        encodeLine(`Name: ${name}`) +
+                        encodeLine(`Email: ${email}`) +
+                        encodeLine(`Phone: ${phone}`) +
+                        (notes ? encodeLine(`Notes: ${notes}`) : "");
+                      const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919291237999";
+                      window.open(`https://wa.me/${waNumber}?text=${msg}`, "_blank");
                     }} className="inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800">Send Request via WhatsApp (no payment)</button>
 
                     <button type="button" onClick={() => router.push(`/packages/${encodeURIComponent(slug)}`)} className="inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800">Back to Package</button>
@@ -496,9 +460,7 @@ export default function CheckoutPage() {
                 </form>
 
                 <div className="mt-6">
-                  <Suspense fallback={<div className="text-sm text-gray-500">Loading package details...</div>}>
-                    <PackageDetailsPanel pkg={pkg} />
-                  </Suspense>
+                  <PackageDetailsPanel pkg={pkg} />
                 </div>
               </section>
 
@@ -527,6 +489,7 @@ export default function CheckoutPage() {
           )}
         </div>
       </main>
+      <Footer />
     </>
   );
 }

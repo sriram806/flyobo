@@ -45,7 +45,6 @@ const referralSchema = new mongoose.Schema(
   }
 );
 
-// Generate unique referral code
 async function generateUniqueCode(model) {
   let code;
   let exists = true;

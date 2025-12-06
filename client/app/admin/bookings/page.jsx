@@ -1,5 +1,5 @@
+import AdminBookings from '@/Components/Admin/AdminBookings'
 import React from 'react'
-import AdminBookings from '@/app/components/Admin/AdminBookings'
 
 const page = () => {
   return (

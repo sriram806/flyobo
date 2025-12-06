@@ -1,8 +1,7 @@
 "use client";
 
-import PlatformServices from "@/Components/Dashboard/PlatformServices";
-import RevenueSystem from "@/Components/Dashboard/RevenueSystem";
-import SiteAnalytics from "@/Components/Dashboard/SiteAnalytics";
+import AllAnalyticsDashboard from "@/Components/Dashboard/AllAnalyticsDashboard";
+import DashboardOverview from "@/Components/Dashboard/DashboardOverview";
 import { useSearchParams } from "next/navigation";
 
 export default function DashboardPage() {
@@ -10,9 +9,8 @@ export default function DashboardPage() {
   const tab = params?.get('tab') || 'list';
   return (
     <div className="space-y-6">
-      <SiteAnalytics />
-      <RevenueSystem />
-      <PlatformServices />
+      {tab === "analytics" && <AllAnalyticsDashboard />}
+      {tab === "overview" && <DashboardOverview />}
     </div>
   );
 }

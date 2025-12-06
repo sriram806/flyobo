@@ -62,16 +62,16 @@ const Header = ({ activeItem }) => {
             >
                 <div className=" mx-auto px-4 lg:px-8">
                     <div className="hidden md:flex items-center justify-between h-20">
-                                                <Link href="/" className="flex items-center gap-3" aria-label="Flyobo home">
-                                                        <Image
-                                                                src={"/images/banner.png"}
-                                                                alt="Flyobo"
-                                                                width={110}
-                                                                height={40}
-                                                                className="object-contain hover:scale-105 transition-transform duration-200"
-                                                                priority
-                                                        />
-                                                </Link>
+                        <Link href="/" className="flex items-center gap-3" aria-label="Flyobo home">
+                            <Image
+                                src={"/images/banner.png"}
+                                alt="Flyobo"
+                                width={110}
+                                height={40}
+                                className="object-contain hover:scale-105 transition-transform duration-200"
+                                priority
+                            />
+                        </Link>
 
                         {/* nav */}
                         <nav className="flex items-center gap-6" aria-label="Main navigation">
@@ -126,7 +126,7 @@ const Header = ({ activeItem }) => {
                                 <HiOutlineUserCircle
                                     size={26}
                                     className="cursor-pointer text-gray-900 dark:text-white hover:text-sky-500"
-                                    onClick={() => router.push('/')} 
+                                    onClick={() => router.push('/')}
                                 />
                             )}
                         </div>

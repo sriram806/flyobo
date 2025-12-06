@@ -1,7 +1,6 @@
 "use client";
 
 import Faq from '@/Components/Layout/Faq';
-import AdminHero from '@/Components/Layout/Hero';
 import { useSearchParams } from 'next/navigation';
 
 export default function Page() {
@@ -12,7 +11,6 @@ export default function Page() {
     <>
       <div className="flex">
         <main className="flex-1 pr-5 pl-5">
-          {tab === 'hero' && <AdminHero />}
           {tab === 'faq' && <Faq />}
         </main>
       </div>

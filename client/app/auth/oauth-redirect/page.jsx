@@ -25,6 +25,12 @@ const OAuthRedirectPage = () => {
         try { localStorage.setItem('auth_token', payload.token); } catch (e) {}
         // Dispatch user into redux store
         try { dispatch(setAuthUser(payload.user)); } catch (e) {}
+        
+        // Redirect manager to admin page
+        if (payload.user.role === "manager") {
+          router.replace('/admin');
+          return;
+        }
       }
       // Navigate to home or intended page
       router.replace('/');

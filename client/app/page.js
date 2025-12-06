@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState } from 'react';
-import Heading from './components/MetaData/Heading';
-import Header from './components/Layout/Header';
-import { HomeContentProvider } from './context/HomeContentContext';
-import Hero from './components/Home/Hero';
-import TopDestinations from './components/Home/TopDestinations';
-import BoldShowcase from './components/Home/BoldShowcase';
-import ReferralBanner from './components/Home/ReferralBanner';
-import Newsletter from './components/Home/Newsletter';
-import Footer from './components/Layout/Footer';
-import SEO from './components/MetaData/SEO';
-import { WebsiteStructuredData, OrganizationStructuredData } from './components/MetaData/StructuredData';
-import FeaturedPackages from './components/Home/FeaturedPackages';
-import Testimonials from './components/Home/Testimonials';
+import BoldShowcase from "@/Components/Home/BoldShowcase";
+import FeaturedPackages from "@/Components/Home/FeaturedPackages";
+import Hero from "@/Components/Home/Hero";
+import Newsletter from "@/Components/Home/Newsletter";
+import ReferralBanner from "@/Components/Home/ReferralBanner";
+import Testimonials from "@/Components/Home/Testimonials";
+import TopDestinations from "@/Components/Home/TopDestinations";
+import Footer from "@/Components/Layout/Footer";
+import Header from "@/Components/Layout/Header";
+import Heading from "@/Components/MetaData/Heading";
+import SEO from "@/Components/MetaData/SEO";
+import { OrganizationStructuredData, WebsiteStructuredData } from "@/Components/MetaData/StructuredData";
+import { useState } from "react";
+
 
 const Home = () => {
   const [open, setOpen] = useState(false);
@@ -31,7 +31,6 @@ const Home = () => {
       <WebsiteStructuredData />
       <OrganizationStructuredData />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        <HomeContentProvider>
           <Heading
             title="Flyobo"
             description="Discover travel tips, destination guides, and vacation inspiration for your next adventure. Explore the world's amazing places with expert advice, top itineraries, and travel deals tailored for every kind of explorer."
@@ -58,7 +57,6 @@ const Home = () => {
 
           <Newsletter />
           <Footer />
-        </HomeContentProvider>
       </div>
     </>
   );

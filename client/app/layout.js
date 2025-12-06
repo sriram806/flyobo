@@ -1,10 +1,10 @@
 import { Nunito } from "next/font/google";
 import "./globals.css";
-import ThemeProvider from "./utils/Theme-Provider";
-import ClientProvider from "./hoc/ClientProvider";
-import AuthLoader from "./components/Auth/AuthLoader";
 import { Toaster } from "react-hot-toast";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import ClientProvider from "@/Components/hoc/ClientProvider";
+import ThemeProvider from "@/Components/utils/Theme-Provider";
+import AuthLoader from "@/Components/Auth/AuthLoader";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
       <body className={`${nunito.variable} antialiased min-h-screen`}>
         <ClientProvider>
           <ThemeProvider >
-            <AuthLoader>
+            <AuthLoader >
               {children}
             </AuthLoader>
           </ThemeProvider>

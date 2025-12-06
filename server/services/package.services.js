@@ -55,22 +55,32 @@ export const createPackage = async (data, res, req) => {
     }
 
     // Normalize images: accept string (CSV or JSON), object, or array
+    // But store as a single image object { public_id, url }
     let imgs = data?.images;
+    // If it's a JSON string or CSV, try to parse
     if (typeof imgs === 'string') {
-      try { imgs = JSON.parse(imgs); } catch (e) {
-        imgs = imgs.split(',').map(s => s.trim()).filter(Boolean);
+      const raw = imgs.trim();
+      try {
+        imgs = JSON.parse(raw);
+      } catch (e) {
+        // fallback: comma-separated URLs
+        imgs = raw.length ? raw.split(',').map(s => s.trim()).filter(Boolean) : [];
       }
     }
-    if (imgs && !Array.isArray(imgs)) {
-      if (typeof imgs === 'object') imgs = [imgs];
-      else imgs = [];
+
+    let imageObj = { public_id: null, url: null };
+
+    if (Array.isArray(imgs)) {
+      const first = imgs[0];
+      if (typeof first === 'string') imageObj = { public_id: null, url: first };
+      else if (first && typeof first === 'object') imageObj = { public_id: first.public_id || null, url: first.url || first.path || first.filename || null };
+    } else if (imgs && typeof imgs === 'object') {
+      imageObj = { public_id: imgs.public_id || null, url: imgs.url || imgs.path || imgs.filename || null };
+    } else if (typeof imgs === 'string' && imgs.trim()) {
+      imageObj = { public_id: null, url: imgs.trim() };
     }
-    imgs = (imgs || []).map(i => {
-      if (typeof i === 'string') return { public_id: null, url: i };
-      if (i && typeof i === 'object') return { public_id: i.public_id || null, url: i.url || i.path || i.filename || null };
-      return null;
-    }).filter(Boolean);
-    data.images = imgs;
+
+    data.images = imageObj;
 
     // Ensure `slug` is present and unique. If client didn't provide, derive from title.
     const makeSlug = (s) => {

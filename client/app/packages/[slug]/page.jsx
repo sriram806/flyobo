@@ -2,16 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Heading from "../../components/MetaData/Heading";
 import axios from "axios";
-import { NEXT_PUBLIC_BACKEND_URL, NEXT_PUBLIC_SITE_URL } from "@/app/config/env";
 import { FaShareAlt } from "react-icons/fa";
-import Hero from "../../components/Packages/Slug/Hero";
-import Tabs from "../../components/Packages/Slug/Tabs";
-import Sidebar from "../../components/Packages/Slug/Sidebar";
-import ShareModal from "../../components/Packages/Slug/ShareModal";
-import Header from "@/app/components/Layout/Header";
-import Footer from "@/app/components/Layout/Footer";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
+import Header from "@/Components/Layout/Header";
+import Hero from "@/Components/Packages/Slug/Hero";
+import Tabs from "@/Components/Packages/Slug/Tabs";
+import Sidebar from "@/Components/Packages/Slug/Sidebar";
+import ShareModal from "@/Components/Packages/Slug/ShareModal";
+import Footer from "@/Components/Layout/Footer";
+import Heading from "@/Components/MetaData/Heading";
 
 export default function PackageDetailPage({ params }) {
   const [resolvedParams, setResolvedParams] = useState(null);
@@ -25,12 +25,8 @@ export default function PackageDetailPage({ params }) {
   }, [params]);
 
   const slug = resolvedParams?.slug || null;
-  // Ensure page loads scrolled to top when viewing a package detail.
-  // Some browsers or SPA navigation can restore previous scroll position
-  // (which can leave the user at the footer). Force top on slug changes.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    // run on next tick to override any framework scroll restoration
     setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }), 0);
   }, [slug]);
   const [loading, setLoading] = useState(true);
@@ -38,12 +34,14 @@ export default function PackageDetailPage({ params }) {
   const [pkg, setPkg] = useState(null);
   const [activeTab, setActiveTab] = useState("Overview");
   const [showShare, setShowShare] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [route, setRoute] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const base = (NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL)?.replace(/\/$/, "");
+        const base = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL
         if (!base) throw new Error("API not configured");
 
         const { data } = await axios.get(`${base}/package/${slug}`, { withCredentials: true });
@@ -73,15 +71,9 @@ export default function PackageDetailPage({ params }) {
   const category = pkg?.category || pkg?.type || "";
   const duration = pkg?.duration ?? pkg?.days ?? 0;
 
-  const image =
-    pkg?.images ||
-    pkg?.image ||
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop";
+  const image = pkg?.images || "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop";
 
-  const siteBase = (
-    NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "https://flyobo.com")
-  ).replace(/\/$/, "");
+  const siteBase = (process.env.NEXT_PUBLIC_FRONTEND_URL || (typeof window !== "undefined" ? window.location.origin : "https://flyobo.com")).replace(/\/$/, "");
 
   const url = `${siteBase}/packages/${slug}`;
 
@@ -92,23 +84,14 @@ export default function PackageDetailPage({ params }) {
 
   /** Hashtags Builder */
   const hashTags = [
-    "#Flyobo",
-    "#TravelIndia",
+    "#Flyobo", "#TravelIndia", "TravelWorld",
     destination && `#${destination.replace(/\s+/g, "")}`,
     category && `#${category.replace(/\s+/g, "")}`,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  ].filter(Boolean).join(" ");
 
   /** Enhanced Share Handler (Option B Template) */
   const handleShare = async (platform) => {
-    const shareText = `🌍 *${title}*
-${destination ? `📍 Destination: ${destination}\n` : ""}
-${duration ? `⏳ Duration: ${duration} Days\n` : ""}
-${price ? `💰 Price: ₹${price.toLocaleString()}\n` : ""}
-🔥 Check this package before it's gone!
-${hashTags}
-`;
+    const shareText = `🌍 *${title}*${destination ? `📍 Destination: ${destination}\n` : ""}${duration ? `⏳ Duration: ${duration} Days\n` : ""}${price ? `💰 Price: ₹${price.toLocaleString()}\n` : ""}🔥 Check this package before it's gone!${hashTags}`;
 
     const encodedText = encodeURIComponent(`${shareText}\n${url}`);
 
@@ -144,10 +127,8 @@ ${hashTags}
       <Heading title={`${title} - Flyobo`} description={pkg?.subtitle || destination || "Travel package"} />
 
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header />
-
+        <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-10">
-
           {loading && (
             <div className="animate-pulse space-y-6">
               <div className="h-[360px] rounded-2xl bg-gray-200 dark:bg-gray-800" />

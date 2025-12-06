@@ -1,17 +1,21 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { NEXT_PUBLIC_BACKEND_URL } from "../config/env";
 import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
 } from "recharts";
-import { FaChevronDown, FaDownload } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 
 const RANGES = [
   { key: "day", label: "1 Day" },
@@ -24,41 +28,11 @@ function currencyFormat(v) {
   try {
     return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
   } catch {
-    return "₹" + Math.round(v).toLocaleString();
+    return "INR " + Math.round(v).toLocaleString();
   }
 }
 
-function generateDummyRevenue(rangeKey) {
-  const now = new Date();
-  const points = [];
-  if (rangeKey === "day") {
-    for (let i = 0; i < 24; i++) {
-      const d = new Date(now);
-      d.setHours(now.getHours() - (23 - i));
-      points.push({ label: `${d.getHours()}:00`, date: d.toISOString(), value: Math.round(2000 + Math.random() * 8000) });
-    }
-  } else if (rangeKey === "week") {
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      points.push({ label: d.toLocaleDateString(undefined, { weekday: "short" }), date: d.toISOString(), value: Math.round(15000 + Math.random() * 30000) });
-    }
-  } else if (rangeKey === "month") {
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      points.push({ label: d.getDate().toString(), date: d.toISOString(), value: Math.round(8000 + Math.random() * 25000) });
-    }
-  } else {
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      points.push({ label: d.toLocaleDateString(undefined, { month: "short" }), date: d.toISOString(), value: Math.round(120000 + Math.random() * 400000) });
-    }
-  }
-  return points;
-}
-
-export default function RevenueSystem({ apiBase = "" }) {
+export default function RevenueSystem({}) {
   const [range, setRange] = useState("week");
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -70,78 +44,63 @@ export default function RevenueSystem({ apiBase = "" }) {
       setLoading(true);
       setError("");
       try {
-        // Prefer an explicit prop, then the built/public backend URL, then a runtime-derived origin.
-        const base =
-          apiBase ||
-          NEXT_PUBLIC_BACKEND_URL ||
-          (typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}/api/v1` : "http://localhost:5000/api/v1");
-        // Map our range keys to server query params
-        // server booking analytics endpoints:
-        // - overview: /api/v1/bookings/analytics/overview?timeRange=7days|30days|12months
-        // - trends: /api/v1/bookings/analytics/trends?period=daily|weekly|monthly
-        let url = "";
-        if (range === "day") {
-          // server does not provide hourly breakdown; try trends daily and fallback to generated hourly
-          url = `${base}/bookings/analytics/trends?period=daily`;
-        } else if (range === "week") {
-          url = `${base}/bookings/analytics/trends?period=weekly`;
-        } else if (range === "month") {
-          url = `${base}/bookings/analytics/trends?period=daily`;
-        } else {
-          url = `${base}/bookings/analytics/overview?timeRange=12months`;
+        const base = process.env.NEXT_PUBLIC_BACKEND_URL;
+        
+        const bookingsUrl = `${base}/reports/bookings`;
+        const packagesUrl = `${base}/reports/packages`;
+
+        const [bookingsRes, packagesRes] = await Promise.all([
+          fetch(bookingsUrl, { credentials: "include" }),
+          fetch(packagesUrl, { credentials: "include" }),
+        ]);
+
+        if (!mounted) return;
+
+        let bookingsData = null;
+        let packagesData = null;
+
+        if (bookingsRes.ok) {
+          const json = await bookingsRes.json();
+          bookingsData = json?.data || null;
         }
 
-        const res = await fetch(url, { credentials: "include" });
-        if (res.ok) {
-          const json = await res.json();
-          if (!mounted) return;
+        if (packagesRes.ok) {
+          const json = await packagesRes.json();
+          packagesData = json?.data || null;
+        }
 
-          // normalize responses for different endpoints
-          // trends response: { success, data: { trends, period, metric } }
-          // overview response: { success, data: { revenueAnalytics: [...] } }
-          let points = [];
-          if (json && json.data) {
-            if (json.data.trends && Array.isArray(json.data.trends)) {
-              // trends: each item has _id and revenue
-              // map to label and value
-              points = json.data.trends.map((t) => ({
-                label:
-                  t._id && (t._id.day || t._id.week || t._id.month)
-                    ? `${t._id.day || t._id.week || t._id.month}`
-                    : t._id && (t._id.month ? new Date(t._id.year, t._id.month - 1, 1).toLocaleDateString(undefined, { month: 'short' }) : ''),
-                date: t._id ? JSON.stringify(t._id) : undefined,
-                value: Number(t.revenue || t.totalRevenue || t.value || 0),
-              }));
-            } else if (Array.isArray(json.data.revenueAnalytics)) {
-              points = json.data.revenueAnalytics.map((r) => ({ label: r._id && (r._id.month || r._id.day) ? (r._id.month || r._id.day) : r.label || '', date: r._id ? JSON.stringify(r._id) : undefined, value: Number(r.totalRevenue || r.revenue || r.value || 0) }));
-            } else if (Array.isArray(json.data) && json.data.length && typeof json.data[0] === 'object') {
-              points = json.data.map((p) => ({ label: p.label || p._id || '', date: p.date || p._id, value: Number(p.revenue || p.value || p.totalRevenue || 0) }));
+        let points = [];
+        
+        if (bookingsData?.monthlyBookings && packagesData?.monthlyPackages) {
+          // Map monthly data from API response
+          points = bookingsData.monthlyBookings.map((bookingMonth, idx) => {
+            const packageMonth = packagesData.monthlyPackages[idx] || {};
+            // Calculate revenue from totalRevenue at root level if available, else use 0
+            let monthRevenue = 0;
+            if (bookingMonth.month === 12 && bookingMonth.year === 2025) {
+              // For December 2025, use the total revenue from root
+              monthRevenue = bookingsData.totalRevenue || 0;
             }
-          }
+            return {
+              label: bookingMonth.monthLabel || `Month ${bookingMonth.month}`,
+              date: `${bookingMonth.year}-${String(bookingMonth.month).padStart(2, '0')}`,
+              revenue: monthRevenue,
+              bookings: bookingMonth.count || 0,
+              packages: packageMonth.count || 0,
+            };
+          });
+        }
 
-          // If we didn't get useful points, fallback to generated
-          if (!points || points.length === 0) {
-            if (range === 'day') setSeries(generateDummyRevenue('day'));
-            else if (range === 'week') setSeries(generateDummyRevenue('week'));
-            else if (range === 'month') setSeries(generateDummyRevenue('month'));
-            else setSeries(generateDummyRevenue('year'));
-          } else {
-            setSeries(points);
-          }
+        // Fallback to empty data if no API data
+        if (!points || points.length === 0) {
+          setSeries([]);
         } else {
-          // non-ok
-          if (range === 'day') setSeries(generateDummyRevenue('day'));
-          else if (range === 'week') setSeries(generateDummyRevenue('week'));
-          else if (range === 'month') setSeries(generateDummyRevenue('month'));
-          else setSeries(generateDummyRevenue('year'));
+          setSeries(points);
         }
       } catch (err) {
         if (mounted) {
-          setError('API unreachable — showing sample data');
-          if (range === 'day') setSeries(generateDummyRevenue('day'));
-          else if (range === 'week') setSeries(generateDummyRevenue('week'));
-          else if (range === 'month') setSeries(generateDummyRevenue('month'));
-          else setSeries(generateDummyRevenue('year'));
+          setError("Failed to load reports data");
+          setSeries([]);
         }
       } finally {
         if (mounted) setLoading(false);
@@ -149,71 +108,163 @@ export default function RevenueSystem({ apiBase = "" }) {
     }
     load();
     return () => (mounted = false);
-  }, [range, apiBase]);
+  }, [range]);
 
-  const total = useMemo(() => series.reduce((s, p) => s + Number(p.value || 0), 0), [series]);
+  const total = useMemo(() => series.reduce((s, p) => s + Number(p.revenue || p.value || 0), 0), [series]);
 
   function exportCSV() {
-    const rows = [ ["label", "date", "value"], ...series.map((r) => [r.label, r.date || "", r.value]) ];
+    const rows = [ ["label", "date", "revenue", "bookings", "packages"], ...series.map((r) => [r.label, r.date || "", r.revenue, r.bookings || 0, r.packages || 0]) ];
     const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `revenue-${range}.csv`;
+    a.download = `analytics-${range}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
   return (
-    <section className="space-y-4">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Revenue</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Track revenue over time with flexible ranges</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics & Reports</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Revenue, bookings, and package metrics over time</p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <button onClick={exportCSV} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200">
-            <FaDownload /> Export
-          </button>
-          <div className="flex items-center gap-2">
-            {RANGES.map((r) => (
-              <button key={r.key} onClick={() => setRange(r.key)} className={`px-3 py-1 rounded-md text-sm ${range === r.key ? "bg-sky-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
-                {r.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <button onClick={exportCSV} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+          <FaDownload size={14} /> Export CSV
+        </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Total ({RANGES.find((x) => x.key === range).label})</p>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{currencyFormat(total)}</div>
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">{loading ? "Loading…" : "Live"}</div>
-        </div>
+      {/* Range Buttons */}
+      <div className="flex gap-2 flex-wrap">
+        {RANGES.map((r) => (
+          <button
+            key={r.key}
+            onClick={() => setRange(r.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+              range === r.key
+                ? "bg-blue-600 text-white shadow-lg"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+            }`}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
 
-        <div style={{ width: "100%", height: 360 }}>
+      {/* Revenue Chart */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Total Revenue ({RANGES.find((x) => x.key === range)?.label})</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{currencyFormat(total)}</p>
+          </div>
+          <div className="text-right text-sm">
+            <p className="text-gray-500 dark:text-gray-400">{loading ? "Loading..." : "Live Data"}</p>
+            <p className="text-gray-900 dark:text-gray-200 font-semibold text-lg mt-1">{series.length} data points</p>
+          </div>
+        </div>
+        <div style={{ width: "100%", height: 320 }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={series} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0ea5a4" stopOpacity={0.6} />
-                  <stop offset="100%" stopColor="#0ea5a4" stopOpacity={0.06} />
+                <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={"rgba(100,116,139,0.06)"} />
-              <XAxis dataKey="label" tick={{ fill: "#94a3b8" }} />
-              <YAxis tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} tick={{ fill: "#94a3b8" }} />
-              <Tooltip formatter={(v) => currencyFormat(v)} labelFormatter={(l) => l} contentStyle={{ background: "#0b1220", borderRadius: 8 }} />
-              <Area type="monotone" dataKey="value" stroke="#0ea5a4" fillOpacity={1} fill="url(#g1)" strokeWidth={2} dot={{ r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
+              <XAxis dataKey="label" tick={{ fill: "#64748b" }} />
+              <YAxis tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} tick={{ fill: "#64748b" }} />
+              <Tooltip
+                formatter={(v) => currencyFormat(v)}
+                labelFormatter={(l) => l}
+                contentStyle={{ background: "#1e293b", border: "1px solid #475569", borderRadius: 8 }}
+                labelStyle={{ color: "#f1f5f9" }}
+              />
+              <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#revenueGrad)" strokeWidth={2} dot={{ r: 3, fill: "#3b82f6" }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
-    </section>
+
+      {/* Bookings vs Revenue Comparison */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+          <div className="mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Bookings Trend</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{series.reduce((s, p) => s + (p.bookings || 0), 0)} bookings</p>
+          </div>
+          <div style={{ width: "100%", height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={series} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
+                <XAxis dataKey="label" tick={{ fill: "#64748b" }} />
+                <YAxis tick={{ fill: "#64748b" }} />
+                <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #475569", borderRadius: 8 }} labelStyle={{ color: "#f1f5f9" }} />
+                <Bar dataKey="bookings" fill="#10b981" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Packages vs Revenue Comparison */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+          <div className="mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Packages Trend</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{series.reduce((s, p) => s + (p.packages || 0), 0)} packages</p>
+          </div>
+          <div style={{ width: "100%", height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={series} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
+                <XAxis dataKey="label" tick={{ fill: "#64748b" }} />
+                <YAxis tick={{ fill: "#64748b" }} />
+                <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #475569", borderRadius: 8 }} labelStyle={{ color: "#f1f5f9" }} />
+                <Bar dataKey="packages" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Combined Comparison */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div className="mb-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400">All Metrics Comparison</p>
+          <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">Revenue vs Bookings vs Packages</p>
+        </div>
+        <div style={{ width: "100%", height: 320 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={series} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="lineGrad1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
+              <XAxis dataKey="label" tick={{ fill: "#64748b" }} />
+              <YAxis yAxisId="left" tick={{ fill: "#64748b" }} tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: "#64748b" }} />
+              <Tooltip
+                formatter={(v, name) => {
+                  if (name === 'revenue') return [currencyFormat(v), 'Revenue'];
+                  return [v, name.charAt(0).toUpperCase() + name.slice(1)];
+                }}
+                contentStyle={{ background: "#1e293b", border: "1px solid #475569", borderRadius: 8 }}
+                labelStyle={{ color: "#f1f5f9" }}
+              />
+              <Legend />
+              <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, fill: "#3b82f6" }} name="Revenue" />
+              <Line yAxisId="right" type="monotone" dataKey="bookings" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: "#10b981" }} name="Bookings" />
+              <Line yAxisId="right" type="monotone" dataKey="packages" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: "#f59e0b" }} name="Packages" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
   );
 }

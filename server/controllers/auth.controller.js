@@ -5,6 +5,7 @@ import { generateOTP } from "../services/otp.services.js";
 import { createSendToken } from "../services/auth.services.js";
 import { NODE_ENV, FRONTEND_URL } from "../config/env.js";
 import { signToken } from "../services/auth.services.js";
+import { applyReferralCode } from "./user.controller.js";
 
 const buildCookieForToken = (res, token) => {
   // replicate cookie options from createSendToken
@@ -118,7 +119,6 @@ export const registration = async (req, res) => {
     // Apply referral code if provided
     if (referrer) {
       try {
-        const { applyReferralCode } = await import('./user.controller.js');
         await applyReferralCode(referralCode.trim().toUpperCase(), createdUser._id);
       } catch (referralError) {
         console.error("Referral application error:", referralError);

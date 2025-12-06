@@ -1,74 +1,73 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import UserProtected from "../hooks/userProtected";
-import Heading from "../components/MetaData/Heading";
 import { useDispatch } from "react-redux";
 import { performLogout } from "@/redux/authSlice";
 import { toast } from "react-hot-toast";
-import SideBarProfile from "../components/Profile/SideBarProfile";
-import ProfileInfo from "../components/Profile/ProfileInfo";
-import ProfileSetting from "../components/Profile/ProfileSetting";
-import ProfileBookings from "../components/Profile/ProfileBookings";
-import Header from "../components/Layout/Header";
-import Footer from "../components/Layout/Footer";
-import FavouriteBookings from "../components/Profile/FavouriteBookings";
-import ReferralProgram from "../components/Profile/ReferralProgram";
-import BankDetails from "../components/Profile/BankDetails";
-import BNotifications from "../components/Profile/BNotifications";
+import UserProtected from "@/Components/hooks/userProtected";
+import Header from "@/Components/Layout/Header";
+import SideBarProfile from "@/Components/Profile/SideBarProfile";
+import ProfileInfo from "@/Components/Profile/ProfileInfo";
+import ProfileBookings from "@/Components/Profile/ProfileBookings";
+import FavouriteBookings from "@/Components/Profile/FavouriteBookings";
+import ReferralProgram from "@/Components/Profile/ReferralProgram";
+import BankDetails from "@/Components/Profile/BankDetails";
+import BNotifications from "@/Components/Profile/BNotifications";
+import ProfileSetting from "@/Components/Profile/ProfileSetting";
+import Footer from "@/Components/Layout/Footer";
+import Loading from "@/Components/LoadingScreen/Loading";
+import Heading from "@/Components/MetaData/Heading";
 
 const ProfileContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useDispatch();
+
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState("");
   const [selected, setSelected] = useState("overview");
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab) {
-      setSelected(tab);
-    }
+    const tab = searchParams.get("tab");
+    if (tab) setSelected(tab);
   }, [searchParams]);
 
-  const handleLogout = async () => {
+  const handleSelect = useCallback(
+    (key) => {
+      setSelected(key);
+      router.replace(`/profile${key ? `?tab=${encodeURIComponent(key)}` : ""}`);
+    },
+    [router]
+  );
+
+  const handleLogout = useCallback(async () => {
     try {
       await dispatch(performLogout());
-      toast.success("Logged out successfully");
-      router.push("/");
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
       toast.success("Logged out successfully");
       router.push("/");
     }
-  };
+  }, [dispatch, router]);
 
   return (
     <UserProtected>
       <Heading
-        title="Flyobo"
-        description="Discover travel tips, destination guides, and vacation inspiration for your next adventure. Explore the world's amazing places with expert advice, top itineraries, and travel deals tailored for every kind of explorer."
-        keywords="Travel, Adventure, Destinations, Vacation, Itineraries, Hotels, Flights, Tourism, Sightseeing, Travel Tips, Holiday, Guided Tours, Budget Travel, Luxury Travel, Family Travel, Solo Travel, Travel Deals"
+        title="My Profile — Flyobo"
+        description="Manage your profile, bookings, referrals and account settings."
+        keywords="profile, bookings, wishlist, referrals, settings"
       />
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
+
       <main className="min-h-screen bg-gray-100/90 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Sidebar */}
             <aside className="lg:col-span-1">
-              <SideBarProfile
-                selected={selected}
-                onSelect={(key) => {
-                  setSelected(key);
-                  router.push(`/profile?tab=${key}`);
-                }}
-                onLogout={handleLogout}
-              />
+              <SideBarProfile selected={selected} onSelect={handleSelect} onLogout={handleLogout} />
             </aside>
 
-            {/* Content */}
             <section className="lg:col-span-3">
               {selected === "overview" && <ProfileInfo />}
               {selected === "bookings" && <ProfileBookings />}
@@ -81,17 +80,16 @@ const ProfileContent = () => {
           </div>
         </div>
       </main>
+
       <Footer />
     </UserProtected>
   );
 };
 
-const Page = () => {
+export default function Page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="min-h-[120px] flex items-center justify-center"><Loading /></div>}>
       <ProfileContent />
     </Suspense>
   );
-};
-
-export default Page;
+}

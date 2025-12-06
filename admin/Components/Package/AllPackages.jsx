@@ -126,7 +126,7 @@ export default function AllPackages() {
 		const newStatus = currentStatus === "active" ? "draft" : "active";
 		setTogglingIds((s) => [...s, pkgId]);
 		try {
-			const res = await fetch(`${apiBase}/package/${pkgId}`, {
+			const res = await fetch(`${apiBase}/package/edit-package/${pkgId}`, {
 				method: "PUT",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
@@ -151,7 +151,7 @@ export default function AllPackages() {
 
 				<div className="flex gap-2">
 					<button
-						onClick={() => router.push("/admin/packages/create")}
+						onClick={() => router.push("packages?tab=create")}
 						className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-700"
 					>
 						Add Package
@@ -206,6 +206,7 @@ export default function AllPackages() {
 							<th className="p-3">Destination</th>
 							<th className="p-3">Price</th>
 							<th className="p-3">Duration</th>
+							<th className="p-3 text-center">Status</th>
 							<th className="p-3 text-center">Actions</th>
 						</tr>
 					</thead>
@@ -213,7 +214,7 @@ export default function AllPackages() {
 					<tbody>
 						{loading && (
 							<tr>
-								<td colSpan="6" className="p-4 text-center text-gray-500 dark:text-gray-300">
+								<td colSpan="7" className="p-4 text-center text-gray-500 dark:text-gray-300">
 									Loading...
 								</td>
 							</tr>
@@ -221,7 +222,7 @@ export default function AllPackages() {
 
 						{!loading && filteredPackages.length === 0 && (
 							<tr>
-								<td colSpan="6" className="p-4 text-center text-gray-500 dark:text-gray-400">
+								<td colSpan="7" className="p-4 text-center text-gray-500 dark:text-gray-400">
 									No packages found.
 								</td>
 							</tr>
@@ -264,6 +265,20 @@ export default function AllPackages() {
 
 								<td className="p-3 text-gray-700 dark:text-gray-300">
 									{pkg.duration} days
+								</td>
+
+								<td className="p-3 text-center">
+									<button
+										onClick={() => handleToggleStatus(pkg._id, pkg.status)}
+										disabled={togglingIds.includes(pkg._id)}
+										className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+											pkg.status === 'active'
+												? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300'
+												: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+										} ${togglingIds.includes(pkg._id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+									>
+										{togglingIds.includes(pkg._id) ? 'Updating...' : pkg.status || 'draft'}
+									</button>
 								</td>
 
 								<td className="p-3 text-center">

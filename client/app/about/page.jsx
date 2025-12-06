@@ -2,20 +2,10 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Heading from "../components/MetaData/Heading";
-import Header from "../components/Layout/Header";
-import Footer from "../components/Layout/Footer";
-import SEO from "../components/MetaData/SEO";
-import {
-  WebsiteStructuredData,
-  OrganizationStructuredData,
-} from "../components/MetaData/StructuredData";
-import WhyChooseUs from "../components/Home/WhyChooseUs";
+import Header from "@/Components/Layout/Header";
+import WhyChooseUs from "@/Components/Home/WhyChooseUs";
+import Footer from "@/Components/Layout/Footer";
 
-/**
- * AboutPage — Flyobo Premium Travel Theme
- * S1 Design Standard | Supports Dark/Light Mode
- */
 
 const stats = [
   { label: "Happy Travelers", value: "15k+" },
@@ -70,20 +60,6 @@ export default function AboutPage() {
 
   return (
     <>
-      <SEO
-        title="About Flyobo - Our Mission and Story"
-        description="Learn about Flyobo's mission to make travel planning joyful, our values, and the story of how we became a trusted travel companion since 2024."
-        keywords="About Flyobo, Travel Company, Travel Mission, Travel Story, Sustainable Travel, Local Impact"
-        url="https://www.flyobo.com/about"
-      />
-      <WebsiteStructuredData />
-      <OrganizationStructuredData />
-
-      <Heading
-        title="About Flyobo"
-        description="We've been building delightful travel experiences through curation, technology, and a traveler-first approach since 2024."
-      />
-
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
 

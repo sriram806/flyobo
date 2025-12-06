@@ -1,136 +1,193 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { useSelector } from "react-redux";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
-import Heading from "../components/MetaData/Heading";
-import Header from "../components/Layout/Header";
-import Footer from "../components/Layout/Footer";
-import FaqHero from "../components/Faq/FaqHero";
-import { Search } from "lucide-react";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
 import toast from "react-hot-toast";
+import Loading from "@/Components/LoadingScreen/Loading";
+import { Search } from "lucide-react";
+import Header from "@/Components/Layout/Header";
+import Footer from "@/Components/Layout/Footer";
 
-export default function Page() {
-  const [openItem, setOpenItem] = useState(-1);
+export default function FAQPage() {
+  const [faqs, setFaqs] = useState([]);
+  const [openIndex, setOpenIndex] = useState(-1);
   const [query, setQuery] = useState("");
-  const [expandedAll, setExpandedAll] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState("");
 
-  const user = useSelector((s) => s?.auth?.user);
-  const isAdmin = user?.role === "admin" || user?.isAdmin === true;
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [faqs, setFaqs] = useState([]);
-  const [saving, setSaving] = useState(false);
+  const API = (NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
 
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
+    (async () => {
       try {
-        const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-        const base = (API_URL || "").replace(/\/$/, "");
-        const { data } = await axios.get(`${base}/layout`, { params: { type: "FAQ" }, withCredentials: true });
-        if (!cancelled) setFaqs(data?.layout?.faq || []);
-      } catch {
-        if (!cancelled) setError("Unable to load FAQs. Please try again later.");
+        if (!API) {
+          toast.error("API base URL not configured");
+          if (!cancelled) {
+            setError("API base URL not configured");
+            setFaqs([]);
+            setLoading(false);
+          }
+          return;
+        }
+
+        const { data } = await axios.get(`${API}/layout`, {
+          params: { type: "FAQ" },
+          withCredentials: true,
+          timeout: 15000,
+        });
+
+        if (!cancelled) {
+          setFaqs(Array.isArray(data?.layout?.faq) ? data.layout.faq : []);
+        }
+      } catch (e) {
+        if (!cancelled) setError("Unable to load FAQs");
       } finally {
         if (!cancelled) setLoading(false);
       }
+    })();
+
+    return () => {
+      cancelled = true;
     };
+  }, [API]);
 
-    load();
-    return () => (cancelled = true);
-  }, []);
-
-  const filteredFaqs = faqs.filter((item) => {
+  const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return true;
+    if (!q) return faqs;
+    return faqs.filter((f) => {
+      const question = (f.question || "").toLowerCase();
+      const answer = (f.answer || "").toLowerCase();
+      const tags = (f.tags || []).join(" ").toLowerCase();
+      return question.includes(q) || answer.includes(q) || tags.includes(q);
+    });
+  }, [faqs, query]);
 
+  if (loading) {
     return (
-      item.question.toLowerCase().includes(q) ||
-      item.answer.toLowerCase().includes(q) ||
-      (item.tags || []).join(",").toLowerCase().includes(q)
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-black">
+        <div className="w-full max-w-3xl px-4 py-8">
+          <Loading />
+        </div>
+      </div>
     );
-  });
+  }
 
+  if (error) {
+    return (
+      <>
+        <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
+        <div className="min-h-screen flex items-center justify-center bg-white dark:bg-black">
+          <div className="w-full max-w-3xl px-4 py-8">
+            <div className="p-6 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-center text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
-      <Heading
-        title="FAQ | Flyobo"
-        description="Find answers to your travel booking queries. Packages, customizations, support & more."
-        url="https://www.flyobo.com/faq"
-      />
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
-      <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <section className="max-w-5xl mx-auto px-4 lg:px-8 py-12 sm:py-16">
-          <FaqHero />
 
-          {/* Search Bar */}
-          <div className="mt-10 flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 shadow-sm">
-            <Search className="w-5 h-5 text-gray-400" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for a question..."
-              className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200"
-            />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-gray-900 transition-colors duration-300 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">Frequently Asked Questions</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Answers to common questions about bookings, cancellations and account management.
+            </p>
+          </header>
+
+          <div className="mb-6">
+            <label className="relative block">
+              <span className="sr-only">Search FAQs</span>
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                <Search className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              </span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search questions, answers or tags..."
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
+                aria-label="Search FAQs"
+              />
+            </label>
           </div>
 
-          {error && (
-            <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-            </div>
-          )}
-
-          {/* FAQ List */}
-          <div className="space-y-4 mt-10">
-            {loading ? (
-              <div className="text-center py-10 text-gray-500">Loading FAQs...</div>
-            ) : filteredFaqs.length === 0 ? (
-              <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-                No results found.
+          <div className="space-y-4">
+            {filtered.length === 0 ? (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+                No FAQs found for your search.
               </div>
             ) : (
-              filteredFaqs.map((item, idx) => {
-                const expanded = expandedAll || openItem === idx;
-
+              filtered.map((f, idx) => {
+                const isOpen = openIndex === idx;
                 return (
-                  <div
-                    key={idx}
-                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6"
+                  <article
+                    key={f._id || idx}
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden"
                   >
                     <button
-                      onClick={() =>
-                        setOpenItem(openItem === idx ? -1 : idx)
-                      }
-                      className="w-full flex justify-between items-center text-left"
+                      onClick={() => setOpenIndex(isOpen ? -1 : idx)}
+                      aria-expanded={isOpen}
+                      className="w-full flex items-start justify-between gap-4 p-5 text-left focus:outline-none"
                     >
-                      <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        {item.question}
-                      </h2>
-                      <span className="text-gray-400 text-xl">
-                        {expanded ? "−" : "+"}
-                      </span>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{f.question}</h3>
+                        {f.tags?.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {f.tags.slice(0, 6).map((t) => (
+                              <span
+                                key={t}
+                                className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300"
+                              >
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-shrink-0 mt-1">
+                        <span
+                          className={`inline-flex items-center justify-center w-9 h-9 rounded-lg border ${isOpen ? "bg-sky-600 text-white border-sky-600" : "bg-white dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700"
+                            } transition`}
+                          aria-hidden
+                        >
+                          {isOpen ? "−" : "+"}
+                        </span>
+                      </div>
                     </button>
 
-                    {/* Answer */}
-                    {expanded && (
-                      <p className="mt-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                        {item.answer}
-                      </p>
-                    )}
-                  </div>
+                    <div
+                      className={`px-5 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isOpen ? "max-h-[1200px] opacity-100 py-4" : "max-h-0 opacity-0 py-0"}`}
+                      aria-hidden={!isOpen}
+                    >
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+                        <div dangerouslySetInnerHTML={{ __html: f.answer || "" }} />
+                      </div>
+
+                      {f.more && (
+                        <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                          {f.more}
+                        </div>
+                      )}
+                    </div>
+                  </article>
                 );
               })
             )}
           </div>
-        </section>
-      </main>
+        </div>
+      </div>
 
       <Footer />
     </>

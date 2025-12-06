@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import Bookings from '@/Components/Bookings/Bookings';
+import CreateBookingCustomer from '@/Components/Bookings/CreateBooking';
+import AllBookings from '@/Components/Bookings/AllBookings';
+import AllBookingsAnalytics from '@/Components/Bookings/AllBookingsAnalytics';
 
 export default function Page() {
   const params = useSearchParams();
@@ -12,7 +14,9 @@ export default function Page() {
     <>
       <div className="flex">
         <main className="flex-1 pr-5 pl-5">
-          <Bookings />
+          {tab === "create" && <CreateBookingCustomer />}
+          {tab === "allbookings" && <AllBookings />}
+          {tab === "analytics" && <AllBookingsAnalytics />}
         </main>
       </div>
     </>

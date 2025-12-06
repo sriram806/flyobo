@@ -1,16 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { logoutUser as apiLogoutUser } from '@/app/utils/authRequest';
+import axios from "axios";
 
 const initialState = {
   user: null,
-  // Forgot password flow state
   forgot: {
     loading: false,
     error: null,
     message: null,
     email: null,
   },
-  // Reset password flow state
   reset: {
     loading: false,
     error: null,
@@ -28,7 +26,8 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
     },
-    // Forgot password reducers
+
+    // Forgot password
     forgotPasswordStart: (state, action) => {
       state.forgot.loading = true;
       state.forgot.error = null;
@@ -39,14 +38,14 @@ const authSlice = createSlice({
       state.forgot.loading = false;
       state.forgot.message = action.payload?.message || "";
       state.forgot.error = null;
-      if (action.payload?.email) state.forgot.email = action.payload.email;
     },
     forgotPasswordFailure: (state, action) => {
       state.forgot.loading = false;
       state.forgot.error = action.payload || "Something went wrong";
     },
-    // Reset password reducers
-    resetPasswordStart: (state, action) => {
+
+    // Reset password
+    resetPasswordStart: (state) => {
       state.reset.loading = true;
       state.reset.error = null;
       state.reset.message = null;
@@ -60,6 +59,7 @@ const authSlice = createSlice({
       state.reset.loading = false;
       state.reset.error = action.payload || "Something went wrong";
     },
+
     clearAuthErrors: (state) => {
       state.forgot.error = null;
       state.reset.error = null;
@@ -67,57 +67,44 @@ const authSlice = createSlice({
   },
 });
 
-// Async thunk to call server logout and clear client state
 export const performLogout = createAsyncThunk(
-  'auth/performLogout',
-  async (_, { rejectWithValue, dispatch }) => {
+  "auth/logout",
+  async (_, { dispatch }) => {
     try {
-      // Call server logout endpoint which clears cookie/session
-      await apiLogoutUser();
-      // Clear client storage and cookies
-        // Also purge redux-persist storage if available (dynamic import to avoid circular deps)
+      const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+      
+      // Call backend logout endpoint
+      if (API_URL && token) {
         try {
-          const storeModule = await import("@/redux/store");
-          if (storeModule?.persistor && typeof storeModule.persistor.purge === "function") {
-            await storeModule.persistor.purge();
-          }
-        } catch (purgeErr) {
-          // ignore - non-fatal
+          await axios.post(
+            `${API_URL}/auth/logout`,
+            {},
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+            }
+          );
+        } catch (apiError) {
+          console.error("Backend logout error:", apiError?.message);
+          // Continue with local logout even if API fails
         }
+      }
+    } catch (e) {
+      console.error("Error during logout:", e);
+    } finally {
       try {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          sessionStorage.removeItem('auth_token');
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("auth_token");
+          sessionStorage.removeItem("auth_token");
           localStorage.clear();
-          sessionStorage.clear();
-          document.cookie?.split(';').forEach((c) => {
-            const eqPos = c.indexOf('=');
-            const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-          });
         }
-      } catch (e) {}
-      // Update redux state
+      } catch (e) {
+        console.error("Error clearing storage:", e);
+      }
       dispatch(logout());
-      return true;
-    } catch (err) {
-      // Still perform client-side cleanup even if server call fails
-      try {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          sessionStorage.removeItem('auth_token');
-          localStorage.clear();
-          sessionStorage.clear();
-          document.cookie?.split(';').forEach((c) => {
-            const eqPos = c.indexOf('=');
-            const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-          });
-        }
-      } catch (e) {}
-      dispatch(logout());
-      return rejectWithValue(err?.message || 'Logout failed');
     }
+    return true;
   }
 );
 

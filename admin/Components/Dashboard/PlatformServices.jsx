@@ -1,25 +1,18 @@
 import React from 'react'
 import Link from 'next/link'
-import { FaUsers, FaBoxOpen, FaCalendarCheck, FaImages, FaChartBar, FaAddressBook, FaGift, FaKey, FaBell, FaMoneyBillWave, FaCog, FaFileAlt, FaPlug, FaTools, FaShieldAlt, FaLifeRing } from 'react-icons/fa'
+import { FaUsers, FaBoxOpen, FaCalendarCheck, FaImages, FaChartBar, FaAddressBook, FaGift, FaKey, FaBell, FaMoneyBillWave, FaCog, FaFileAlt, FaPlug, FaTools, FaShieldAlt, FaLifeRing, FaPlaneDeparture } from 'react-icons/fa'
+import { MdOpenInNew } from "react-icons/md";
 
 const services = [
-  { key: 'users', title: 'Users', subtitle: 'Manage and inspect', count: 6, href: '/dashboard/users', icon: FaUsers },
-  { key: 'packages', title: 'Packages', subtitle: '10 items', count: 10, href: '/dashboard/packages', icon: FaBoxOpen },
-  { key: 'bookings', title: 'Bookings', subtitle: 'Manage bookings', count: 0, href: '/dashboard/bookings', icon: FaCalendarCheck },
-  { key: 'gallery', title: 'Gallery', subtitle: 'Manage and inspect', count: 0, href: '/dashboard/gallery', icon: FaImages },
-  { key: 'analytics', title: 'Analytics', subtitle: 'Manage and inspect', count: 0, href: '/dashboard/analytics', icon: FaChartBar },
-  { key: 'contacts', title: 'Contacts / Messages', subtitle: 'Manage and inspect', count: 0, href: '/dashboard/contacts', icon: FaAddressBook },
-  { key: 'referrals', title: 'Referrals', subtitle: 'Manage and inspect', count: 0, href: '/dashboard/referrals', icon: FaGift },
-  { key: 'otp', title: 'OTP Service', subtitle: 'Manage and inspect', count: 0, href: '/dashboard/otp', icon: FaKey },
-  // 8 additional services
-  { key: 'notifications', title: 'Notifications', subtitle: 'Manage notifications', count: 0, href: '/dashboard/notifications', icon: FaBell },
-  { key: 'payments', title: 'Payments', subtitle: 'Payment reports', count: 0, href: '/dashboard/payments', icon: FaMoneyBillWave },
-  { key: 'settings', title: 'Settings', subtitle: 'Platform settings', count: 0, href: '/dashboard/settings', icon: FaCog },
-  { key: 'reports', title: 'Reports', subtitle: 'Audit & logs', count: 0, href: '/dashboard/reports', icon: FaFileAlt },
-  { key: 'integrations', title: 'Integrations', subtitle: 'Connected services', count: 0, href: '/dashboard/integrations', icon: FaPlug },
-  { key: 'tools', title: 'Developer Tools', subtitle: 'Admin utilities', count: 0, href: '/dashboard/tools', icon: FaTools },
-  { key: 'security', title: 'Security', subtitle: 'Auth & roles', count: 0, href: '/dashboard/security', icon: FaShieldAlt },
-  { key: 'support', title: 'Support', subtitle: 'Help & tickets', count: 0, href: '/dashboard/support', icon: FaLifeRing },
+  { key: 'users', title: 'Users', subtitle: 'Manage and inspect Users', count: 6, href: '/users?tab=analytics', icon: FaUsers },
+  { key: 'packages', title: 'Packages', subtitle: 'Manage and inspect Packages', count: 10, href: '/packages?tab=analytics', icon: FaBoxOpen },
+  { key: 'bookings', title: 'Bookings', subtitle: 'Manage bookings Bookings', count: 0, href: '/bookings?tab=analytics', icon: FaCalendarCheck },
+  { key: 'gallery', title: 'Gallery', subtitle: 'Manage and inspect Gallery', count: 0, href: '/gallery', icon: FaImages },
+  { key: 'destinations', title: 'Destinations', subtitle: 'Manage and inspect Destinations', count: 0, href: '/destinations?tab=analytics', icon: FaPlaneDeparture },
+  { key: 'contacts', title: 'Contacts ', subtitle: 'Manage and inspect Contacts', count: 0, href: '/contact', icon: FaAddressBook },
+  { key: 'referrals', title: 'Referrals', subtitle: 'Manage and inspect Referrals', count: 0, href: '/referral?tab=analytics', icon: FaGift },
+  { key: 'faq', title: 'Faq', subtitle: 'Manage and inspect Faq', count: 0, href: '/layout?tab=faq', icon: FaKey },
+  // 8 additional services ravali inak vastavi 
 ]
 
 const PlatformServices = () => {
@@ -50,8 +43,7 @@ const PlatformServices = () => {
               </div>
 
               <div className="text-right">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">{typeof s.count === 'number' ? `${s.count} items` : s.count}</div>
-                <Link href={s.href} className="text-sm text-sky-500 hover:underline">Open</Link>
+                <Link href={s.href} className="text-sm text-sky-500 hover:underline"><MdOpenInNew size={25} fontSize={20} /></Link>
               </div>
             </div>
           )

@@ -55,7 +55,7 @@ const packageSchema = new mongoose.Schema({
     required: true,
     unique: false
   },
-  Status: {
+  status: {
     type: String,
     enum: ['active', 'draft'],
     default: 'active',
