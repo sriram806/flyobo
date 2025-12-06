@@ -1,4 +1,4 @@
-import AdminUsers from '@/app/components/Admin/AdminUsers'
+import AdminUsers from '@/Components/Admin/AdminUsers'
 import React from 'react'
 
 const page = () => {

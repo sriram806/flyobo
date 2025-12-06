@@ -18,7 +18,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
 
 const UsersAnalyticsPage = () => {
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;

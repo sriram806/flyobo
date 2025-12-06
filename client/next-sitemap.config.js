@@ -60,7 +60,7 @@ module.exports = {
   // Add dynamic routes to sitemap
   additionalPaths: async (config) => {
     // Import the utility functions dynamically
-    const { getPackageRoutes, getGalleryRoutes } = await import('./app/utils/sitemapUtils.mjs');
+    const { getPackageRoutes, getGalleryRoutes } = await import('./Components/utils/sitemapUtils.mjs');
     
     // Get dynamic package routes
     const packageRoutes = await getPackageRoutes();

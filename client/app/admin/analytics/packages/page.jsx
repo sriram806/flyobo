@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import {
   BarChart,
   Bar,
@@ -19,6 +18,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
 
 const PackagesAnalyticsPage = () => {
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;

@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
 
 export default function AdminCreateBookingPage() {
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;

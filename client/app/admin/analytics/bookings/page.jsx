@@ -1,7 +1,7 @@
 "use client";
 
+import AdvancedBookingAnalytics from "@/Components/Admin/AdvancedBookingAnalytics";
 import React from "react";
-import AdvancedBookingAnalytics from "@/app/components/Admin/AdvancedBookingAnalytics";
 
 const BookingsAnalyticsPage = () => {
   return (
@@ -11,7 +11,8 @@ const BookingsAnalyticsPage = () => {
         <p className="text-sm text-gray-500">Detailed booking trends and performance</p>
       </div>
 
-      <AdvancedBookingAnalytics />
+      <AdvancedBookingA
+      nalytics />
     </div>
   );
 };

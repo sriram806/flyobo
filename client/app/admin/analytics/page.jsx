@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import AdminProtected from "../../hooks/adminProtected";
 import { useRouter } from "next/navigation";
 import { Wrench } from "lucide-react";
+import AdminProtected from "@/Components/hooks/adminProtected";
 
 export default function AdminAnalyticsPage() {
   const router = useRouter();

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
-import PackageImageUploader from "@/app/components/Packages/PackageImageUploader";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
+import PackageImageUploader from "@/Components/Packages/PackageImageUploader";
 
 const emptyForm = {
   title: "",

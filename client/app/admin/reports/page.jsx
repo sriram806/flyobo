@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { NEXT_PUBLIC_BACKEND_URL } from "@/app/config/env";
 import { saveAs } from "file-saver";
 import {
   LineChart,
@@ -46,7 +45,7 @@ const normalizeSeries = (last12MonthsData, months = 12) => {
 };
 
 const useAnalyticsData = (endpoint) => {
-  const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+  const API_URL =process.env.NEXT_PUBLIC_BACKEND_URL;
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);

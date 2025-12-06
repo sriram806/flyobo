@@ -183,7 +183,7 @@ export const logoutUser = async () => {
   }
 };
 
-export default {
+const authRequest = {
   get: authenticatedGet,
   post: authenticatedPost,
   postForm: authenticatedPostForm,
@@ -192,3 +192,5 @@ export default {
   handleApiError,
   logoutUser,
 };
+
+export default authRequest;
