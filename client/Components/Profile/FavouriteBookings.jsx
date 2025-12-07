@@ -12,6 +12,7 @@ import PackageListItem from "../Packages/PackageListItem";
 export default function FavouriteBookings() {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [favoritePkgs, setFavoritePkgs] = useState([]);
+  const [destinationsMap, setDestinationsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -44,6 +45,17 @@ export default function FavouriteBookings() {
         setLoading(false);
         return;
       }
+
+      // Fetch destinations
+      const { data: destData } = await axios.get(`${API_URL}/destinations`, {
+        params: { limit: 500 },
+      });
+      const destItems = destData?.data?.items || destData?.destinations || destData?.items || [];
+      const destMap = {};
+      destItems.forEach((d) => {
+        if (d?._id) destMap[d._id] = d;
+      });
+      setDestinationsMap(destMap);
 
       const { data: packagesData } = await axios.get(`${API_URL}/package/get-packages`, {
         params: { status: "active", limit: 1000 },
@@ -149,7 +161,11 @@ export default function FavouriteBookings() {
 
       <div className="space-y-4">
         {favoritePkgs.map((pkg, idx) => (
-          <PackageListItem key={pkg?._id || pkg?.id || `pkg-${idx}`} pkg={pkg} loading={false} />
+          <PackageListItem 
+            key={pkg?._id || pkg?.id || `pkg-${idx}`} 
+            pkg={{ ...pkg, destinationDetails: destinationsMap[pkg.destination] }} 
+            loading={false} 
+          />
         ))}
       </div>
     </div>

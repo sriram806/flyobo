@@ -591,3 +591,171 @@ export const DashboardReport = async (req, res) => {
 };
 
 
+export const ReferralReports = async (req, res) => {
+  try {
+    const totalReferrers = await User.countDocuments({ referredUsers: { $exists: true, $not: { $size: 0 } } });
+    const totalReferredUsers = await User.countDocuments({ referredBy: { $exists: true, $ne: null } });
+    const activeReferralAgg = await User.aggregate([
+      { $match: { referredBy: { $exists: true, $ne: null } } },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'bookings'
+        }
+      },
+      {
+        $addFields: {
+          hasActiveBooking: {
+            $gt: [
+              {
+                $size: {
+                  $filter: {
+                    input: '$bookings',
+                    as: 'b',
+                    cond: { $eq: ['$$b.status', 'confirmed'] }
+                  }
+                }
+              },
+              0
+            ]
+          }
+        }
+      },
+      { $match: { hasActiveBooking: true } },
+      { $count: 'activeReferrals' }
+    ]);
+    const totalActiveReferrals = activeReferralAgg[0]?.activeReferrals || 0;
+
+    // Total reward: sum of referralReward for all users (or use your own logic)
+    const rewardAgg = await User.aggregate([
+      { $group: { _id: null, totalReward: { $sum: { $ifNull: ['$referralReward', 0] } } } }
+    ]);
+    const totalReward = rewardAgg[0]?.totalReward || 0;
+
+    // Conversion rate: active referrals / total referred users
+    const conversionRate = totalReferredUsers > 0 ? (totalActiveReferrals / totalReferredUsers) * 100 : 0;
+
+    // Month-wise report for last 12 months
+    const monthsBack = 11;
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - monthsBack);
+    startDate.setDate(1);
+    startDate.setHours(0, 0, 0, 0);
+
+    // Users referred per month
+    const monthlyRefAgg = await User.aggregate([
+      { $match: { referredBy: { $exists: true, $ne: null }, createdAt: { $gte: startDate } } },
+      { $project: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } } },
+      { $group: { _id: { year: '$year', month: '$month' }, count: { $sum: 1 } } },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+    const monthlyRefMap = {};
+    monthlyRefAgg.forEach(it => {
+      const key = `${it._id.year}-${it._id.month}`;
+      monthlyRefMap[key] = it.count;
+    });
+
+    // Active referrals per month (referred users who booked in that month)
+    const monthlyActiveAgg = await Booking.aggregate([
+      { $match: { createdAt: { $gte: startDate }, status: 'confirmed' } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      { $match: { 'user.referredBy': { $exists: true, $ne: null } } },
+      { $project: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } } },
+      { $group: { _id: { year: '$year', month: '$month' }, count: { $sum: 1 } } },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+    const monthlyActiveMap = {};
+    monthlyActiveAgg.forEach(it => {
+      const key = `${it._id.year}-${it._id.month}`;
+      monthlyActiveMap[key] = it.count;
+    });
+
+    const monthlyReport = [];
+    const now = new Date();
+    for (let i = monthsBack; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      const key = `${y}-${m}`;
+      monthlyReport.push({
+        year: y,
+        month: m,
+        monthLabel: `${monthLabels[m - 1]} ${y}`,
+        referredUsers: monthlyRefMap[key] || 0,
+        activeReferrals: monthlyActiveMap[key] || 0,
+        conversionRate: (monthlyRefMap[key] || 0) > 0
+          ? ((monthlyActiveMap[key] || 0) / (monthlyRefMap[key] || 1)) * 100
+          : 0
+      });
+    }
+
+    // Advanced analytics
+    // Top referrers (by number of successful referrals)
+    const topReferrersAgg = await User.aggregate([
+      { $match: { referredUsers: { $exists: true, $not: { $size: 0 } } } },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          role: 1,
+          referredCount: { $size: '$referredUsers' },
+          referralReward: 1
+        }
+      },
+      { $sort: { referredCount: -1 } },
+      { $limit: 5 }
+    ]);
+
+    // Most valuable referrals (users whose referrals generated most bookings)
+    const valuableReferrersAgg = await User.aggregate([
+      { $match: { referredUsers: { $exists: true, $not: { $size: 0 } } } },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: 'referredUsers',
+          foreignField: 'userId',
+          as: 'refBookings'
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          role: 1,
+          referredCount: { $size: '$referredUsers' },
+          bookingsCount: { $size: '$refBookings' },
+          totalRevenue: { $sum: '$refBookings.totalAmount' }
+        }
+      },
+      { $sort: { bookingsCount: -1, totalRevenue: -1 } },
+      { $limit: 5 }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalReferrers,
+        totalReferredUsers,
+        totalActiveReferrals,
+        totalReward,
+        conversionRate,
+        monthlyReport,
+        topReferrers: topReferrersAgg,
+        mostValuableReferrers: valuableReferrersAgg
+      }
+    });
+  } catch (error) {
+    console.error('ReferralReports error:', error);
+    return res.status(500).json({ success: false, message: 'Error generating referral report' });
+  }
+};

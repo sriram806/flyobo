@@ -22,6 +22,7 @@ export default function Page() {
   const [route, setRoute] = useState("");
 
   const [items, setItems] = useState([]);
+  const [destinationsMap, setDestinationsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -34,6 +35,8 @@ export default function Page() {
   const [minRating, setMinRating] = useState(0);
   const [minDays, setMinDays] = useState(1);
   const [maxDays, setMaxDays] = useState(30);
+
+  const [destinationScope, setDestinationScope] = useState("all"); // all | domestic | international
 
   const [categories, setCategories] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -68,6 +71,7 @@ export default function Page() {
     if (qp.maxDays) setMaxDays(Number(qp.maxDays));
     if (qp.cats) setCategories(qp.cats.split(",").filter(Boolean));
     if (qp.page) setPage(Math.max(1, Number(qp.page)));
+    if (qp.scope) setDestinationScope(qp.scope);
   }, [params]);
 
   useEffect(() => {
@@ -81,6 +85,7 @@ export default function Page() {
     if (maxDays !== 30) qp.set("maxDays", String(maxDays));
     if (categories.length) qp.set("cats", categories.join(","));
     if (page !== 1) qp.set("page", String(page));
+    if (destinationScope !== "all") qp.set("scope", destinationScope);
     const qs = qp.toString();
     router.replace(`/packages${qs ? `?${qs}` : ""}`);
   }, [
@@ -92,6 +97,7 @@ export default function Page() {
     minDays,
     maxDays,
     categories,
+    destinationScope,
     page,
     router,
   ]);
@@ -126,6 +132,31 @@ export default function Page() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const fetchDestinations = async () => {
+      try {
+        if (!API_URL) return;
+        const { data } = await axios.get(`${API_URL}/destinations`, {
+          params: { limit: 500 },
+        });
+        if (cancelled) return;
+        const items = data?.data?.items || data?.destinations || data?.items || [];
+        const map = {};
+        items.forEach((d) => {
+          if (d?._id) map[d._id] = d;
+        });
+        setDestinationsMap(map);
+      } catch (err) {
+        // silently ignore
+      }
+    };
+    fetchDestinations();
+    return () => {
+      cancelled = true;
+    };
+  }, [API_URL]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     let list = (items || [])
@@ -133,7 +164,16 @@ export default function Page() {
       .filter(
         (p) =>
           p.title?.toLowerCase().includes(q) ||
-          p.destination?.toLowerCase().includes(q)
+          String(p.destination || "").toLowerCase().includes(q) ||
+          (() => {
+            const d = destinationsMap[p.destination];
+            if (!d) return false;
+            return (
+              d.place?.toLowerCase().includes(q) ||
+              d.state?.toLowerCase().includes(q) ||
+              d.country?.toLowerCase().includes(q)
+            );
+          })()
       );
 
     list = list.filter((p) => {
@@ -143,12 +183,19 @@ export default function Page() {
       const rawCat = p?.category ?? p?.categoryName ?? p?.tags ?? "";
       const cat =
         Array.isArray(rawCat) ? rawCat.join(",") : String(rawCat || "");
+      const dest = destinationsMap[p.destination];
+      const country = dest?.country?.toLowerCase?.();
+      const isDomestic = country ? country === "india" : false;
+      const scopeOk =
+        destinationScope === "all" ||
+        (destinationScope === "domestic" && isDomestic) ||
+        (destinationScope === "international" && country && !isDomestic);
       const inPrice = price >= minPrice && price <= maxPrice;
       const inRating = rating >= minRating;
       const inDays =
         (!minDays || days >= minDays) && (!maxDays || days <= maxDays);
       const inCategory = categories.length ? categories.some((c) => cat.includes(c)) : true;
-      return inPrice && inRating && inDays && inCategory;
+      return inPrice && inRating && inDays && inCategory && scopeOk;
     });
 
     if (sortBy === "price_low")
@@ -169,6 +216,8 @@ export default function Page() {
     minDays,
     maxDays,
     categories,
+    destinationScope,
+    destinationsMap,
   ]);
 
   const uniqueCategories = useMemo(() => {
@@ -346,6 +395,8 @@ export default function Page() {
                 setMaxDays={setMaxDays}
                 categories={categories}
                 setCategories={setCategories}
+                destinationScope={destinationScope}
+                setDestinationScope={setDestinationScope}
                 onReset={resetFilters}
               />
             </div>
@@ -362,9 +413,9 @@ export default function Page() {
                   <div className={`${view === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6" : "grid-cols-1 gap-4"} grid`}>
                     {pageItems.map((pkg) =>
                       view === "grid" ? (
-                        <PackageCard key={pkg._id} pkg={pkg} />
+                        <PackageCard key={pkg._id} pkg={{ ...pkg, destinationDetails: destinationsMap[pkg.destination] }} />
                       ) : (
-                        <PackageListItem key={pkg._id} pkg={pkg} />
+                        <PackageListItem key={pkg._id} pkg={{ ...pkg, destinationDetails: destinationsMap[pkg.destination] }} />
                       )
                     )}
                   </div>

@@ -14,6 +14,12 @@ export default function PackageListItem({ pkg, loading }) {
   const hasDiscount = originalPrice > currentPrice && currentPrice > 0;
   const discountPct = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
 
+  // Get destination details
+  const destinationDetails = pkg?.destinationDetails;
+  const destinationDisplay = destinationDetails?.place 
+    ? `${destinationDetails.place}${destinationDetails.state ? `, ${destinationDetails.state}` : ''}${destinationDetails.country ? `, ${destinationDetails.country}` : ''}`
+    : pkg?.destination || '';
+
   // Format highlights
   const formatHighlights = (highlights) => {
     if (!highlights) return [];
@@ -78,7 +84,7 @@ export default function PackageListItem({ pkg, loading }) {
                   <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1.5">
                       <MapPin className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                      <span>{pkg?.destination}</span>
+                      <span>{destinationDisplay}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

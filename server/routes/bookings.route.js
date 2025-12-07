@@ -1,9 +1,9 @@
 import express from 'express';
 import isAuthenticated from '../middleware/isAuthenticated.js';
 import isAdmin from '../middleware/isAdmin.js';
-import { 
-  getAllBookings, 
-  adminCreateBooking, 
+import {
+  getAllBookings,
+  adminCreateBooking,
   getBookingAnalytics,
   getBookingTrends,
   getCustomerSegments,
@@ -30,6 +30,6 @@ bookingsRouter.get('/analytics/segments', isAuthenticated, isAdmin, getCustomerS
 bookingsRouter.post('/agent/booking/', isAuthenticated, AdminOrManagerCreateBooking);
 bookingsRouter.post('/user/booking/', isAuthenticated, stripeUserBooking);
 bookingsRouter.get('/bookings', isAuthenticated, getAllBookings);
-bookingsRouter.get('/bookings/:id', isAuthenticated,getBooking );
+bookingsRouter.get('/bookings/:id', isAuthenticated, getBooking);
 
 export default bookingsRouter;

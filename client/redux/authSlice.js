@@ -75,13 +75,13 @@ export const performLogout = createAsyncThunk(
       const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
       
       // Call backend logout endpoint
-      if (API_URL && token) {
+      if (API_URL) {
         try {
           await axios.post(
             `${API_URL}/auth/logout`,
             {},
             {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
               withCredentials: true,
             }
           );
@@ -95,9 +95,21 @@ export const performLogout = createAsyncThunk(
     } finally {
       try {
         if (typeof window !== "undefined") {
+          // Clear localStorage and sessionStorage
           localStorage.removeItem("auth_token");
+          localStorage.removeItem("token");
           sessionStorage.removeItem("auth_token");
+          sessionStorage.removeItem("token");
           localStorage.clear();
+          sessionStorage.clear();
+          
+          // Clear all cookies
+          document.cookie.split(";").forEach((c) => {
+            const name = c.split("=")[0].trim();
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+          });
         }
       } catch (e) {
         console.error("Error clearing storage:", e);

@@ -29,8 +29,8 @@ const AuthLoader = ({ children }) => {
                 timeout: 10000
             });
 
-            if (response.data.success && response.data.user === "admin") {
-                console.success("User loaded:", response.data.user.name);
+            if (response.data.success && response.data.user?.role === "admin") {
+                console.log("✅ Admin user loaded:", response.data.user.name);
                 dispatch(setAuthUser(response.data.user));
             } else {
                 dispatch(setAuthUser(null));

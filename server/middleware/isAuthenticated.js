@@ -20,7 +20,6 @@ const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
         const origin = req.headers.origin || req.headers.referer || req.ip || 'unknown';
         const tokenSource = token ? (req.cookies?.token ? "cookie" : "header") : "none";
-        console.info(`[auth] ${req.method} ${req.originalUrl} origin=${origin} tokenFrom=${tokenSource}`);
 
         if (!token) {
             return res.status(401).json({
@@ -28,8 +27,6 @@ const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
                 message: "Access denied. No token provided. Please login.",
             });
         }
-
-        console.log(token);
         
 
         let decoded;

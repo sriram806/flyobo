@@ -672,3 +672,66 @@ export const processReferralWithdrawal = async (req, res) => {
   }
 };
 
+// Get referral withdrawal requests for a particular user
+export const UserReferralWithdrawals = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { status, page = 1, limit = 10 } = req.query;
+
+    const user = await User.findById(userId).select('name email reward referralWithdrawals bankDetails');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    let withdrawals = user.referralWithdrawals || [];
+
+    // Filter by status if provided
+    if (status && status !== 'all') {
+      withdrawals = withdrawals.filter(w => w.status === status);
+    }
+
+    // Sort by most recent first
+    withdrawals.sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+
+    // Pagination
+    const limitNum = Number(limit) || 10;
+    const skip = (Number(page) - 1) * limitNum;
+    const paginatedWithdrawals = withdrawals.slice(skip, skip + limitNum);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          name: user.name,
+          email: user.email,
+          currentRewardBalance: user.reward,
+          bankDetails: user.bankDetails || null
+        },
+        withdrawals: paginatedWithdrawals,
+        pagination: {
+          current: Number(page),
+          totalPages: Math.ceil(withdrawals.length / limitNum),
+          count: paginatedWithdrawals.length,
+          totalItems: withdrawals.length
+        },
+        summary: {
+          totalRequested: withdrawals.reduce((sum, w) => sum + w.amount, 0),
+          processed: withdrawals.filter(w => w.status === 'processed').length,
+          pending: withdrawals.filter(w => w.status === 'pending').length,
+          failed: withdrawals.filter(w => w.status === 'failed').length
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get user referral withdrawals error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};

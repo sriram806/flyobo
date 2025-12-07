@@ -30,40 +30,55 @@ export default function ProfileBookings() {
 
   const load = useCallback(async () => {
     if (!API_URL) return setError("API not configured");
-    if (!myId) return setError("Not logged in");
     try {
       setLoading(true);
       const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-      const { data } = await axios.get(`${API_URL}/bookings/user/${myId}`, {
+      const { data } = await axios.get(`${API_URL}/user/my-bookings`, {
         withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
-      const list = data?.bookings || data?.data || [];
+      const rawList = data?.data?.bookings || data?.bookings || data?.data || [];
+      const list = Array.isArray(rawList) ? rawList : [];
       setTotal(list.length);
 
       const start = (page - 1) * PageSize;
       const pageItems = list.slice(start, start + PageSize);
 
-      const enriched = await Promise.all(
-        pageItems.map(async (b) => {
-          const hasTitle = !!(b?.package?.title || b?.packageTitle || b?.package_name || b?.pkg?.title || b?.package_title);
-          if (hasTitle) return b;
-          const candidate = b?.packageId || b?.package || b?.package_slug || b?.packageSlug || b?.pkgId;
-          if (!candidate) return b;
-          try {
-            const token2 = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-            const res = await axios.get(`${API_URL}/package/${encodeURIComponent(candidate)}`, {
-              withCredentials: true,
-              headers: token2 ? { Authorization: `Bearer ${token2}` } : undefined,
-            });
-            const p = res?.data?.foundPackage || res?.data?.package || res?.data?.data?.package || res?.data?.data || res?.data;
-            if (p) return { ...b, package: { title: p.title, slug: p.slug || p._id, _id: p._id, price: p.price } };
-            return b;
-          } catch {
-            return b;
-          }
-        })
-      );
+      // Fetch destinations
+      const { data: destData } = await axios.get(`${API_URL}/destinations`, {
+        params: { limit: 500 },
+      });
+      const destItems = destData?.data?.items || destData?.destinations || destData?.items || [];
+      const destMap = {};
+      destItems.forEach((d) => {
+        if (d?._id) destMap[d._id] = d;
+      });
+
+      const enriched = pageItems.map((b) => {
+        // packageId is already populated in the response
+        const pkg = b?.packageId;
+        if (pkg && typeof pkg === 'object') {
+          // Get destination details
+          const destDetails = destMap[pkg.destination];
+          const destDisplay = destDetails?.place 
+            ? `${destDetails.place}${destDetails.state ? `, ${destDetails.state}` : ''}${destDetails.country ? `, ${destDetails.country}` : ''}`
+            : pkg.destination || '';
+          
+          return {
+            ...b,
+            package: {
+              title: pkg.title,
+              slug: pkg.slug || pkg._id,
+              _id: pkg._id,
+              price: pkg.price,
+              destination: destDisplay,
+              images: pkg.images
+            },
+            payment_info: b.payment || b.payment_info
+          };
+        }
+        return { ...b, payment_info: b.payment || b.payment_info };
+      });
 
       setItems(enriched);
       setError("");
@@ -72,7 +87,7 @@ export default function ProfileBookings() {
     } finally {
       setLoading(false);
     }
-  }, [myId, page]);
+  }, [page]);
 
   useEffect(() => {
     load();
@@ -125,11 +140,13 @@ export default function ProfileBookings() {
       const pkgObj = booking?.package;
       if (pkgObj && typeof pkgObj === "object" && (pkgObj.title || pkgObj._id || pkgObj.slug)) {
         setPkgData(pkgObj);
+        setPkgLoading(false);
         return;
       }
-      const candidate = booking?.packageId || booking?.package || booking?.package_slug || booking?.packageSlug || booking?.pkgId;
+      const candidate = booking?.packageId?._id || booking?.packageId || booking?.package || booking?.package_slug || booking?.packageSlug || booking?.pkgId;
       if (!candidate) {
         setPkgData(null);
+        setPkgLoading(false);
         return;
       }
       const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
@@ -286,7 +303,7 @@ export default function ProfileBookings() {
                     )}
 
                     <h4 className="text-xl font-semibold text-gray-900 dark:text-white">{pkgData?.title || 'Package'}</h4>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">{pkgData?.destination || pkgData?.location}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">{pkgData?.destination || selectedBooking?.package?.destination || pkgData?.location}</div>
                     <div className="mt-3 text-sm text-gray-700 dark:text-gray-300 line-clamp-6">{pkgData?.description || pkgData?.subtitle || "No description available."}</div>
                     <div className="mt-4 flex items-center gap-3">
                       <Link href={`/packages/${pkgData?.slug || pkgData?._id || ""}`} className="rounded-lg bg-sky-600 dark:bg-sky-500 text-white px-3 py-2 text-sm">Open package page</Link>

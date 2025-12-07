@@ -14,6 +14,8 @@ export default function PackageCard({ pkg, loading }) {
   const hasDiscount = originalPrice > currentPrice && currentPrice > 0;
   const discountPct = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100): 0;
 
+  const [destinationDetails, setDestinationDetails] = useState(pkg?.destinationDetails || null);
+
   const [isFav, setIsFav] = useState(false);
   const [favBusy, setFavBusy] = useState(false);
   const packageId = pkg?.slug || pkg?.id || pkg?._id;
@@ -33,7 +35,10 @@ export default function PackageCard({ pkg, loading }) {
       const { data } = await axios.get(`${API_URL}/user/profile`, getAuthConfig());
       const user = data?.user;
       const favA = user?.favoritePackages || user?.favouritePackages || [];
-      return favA.some((id) => String(id) === String(packageId));
+      return favA.some((fav) => {
+        const fid = (fav && typeof fav === 'object') ? (fav._id || fav.id || fav.slug || fav) : fav;
+        return String(fid) === String(packageId);
+      });
     } catch {
       return false;
     }
@@ -51,6 +56,23 @@ export default function PackageCard({ pkg, loading }) {
       active = false;
     };
   }, [packageId]);
+
+  useEffect(() => {
+    let active = true;
+    const fetchDestination = async () => {
+      if (destinationDetails || !pkg?.destination || !API_URL) return;
+      try {
+        const { data } = await axios.get(`${API_URL}/destinations/${pkg.destination}`);
+        if (active && data?.data) setDestinationDetails(data.data);
+      } catch {
+        /* ignore */
+      }
+    };
+    fetchDestination();
+    return () => {
+      active = false;
+    };
+  }, [API_URL, pkg?.destination, destinationDetails]);
 
   const onToggleFav = async (e) => {
     e?.preventDefault?.();
@@ -79,7 +101,14 @@ export default function PackageCard({ pkg, loading }) {
         ok = true;
       }
     } catch (err) {
-      ok = false;
+      const msg = err?.response?.data?.message || '';
+      if (typeof msg === 'string' && msg.toLowerCase().includes('already in favourites')) {
+        // Server says it is already in favourites; ensure UI stays pink
+        ok = true;
+        setIsFav(true);
+      } else {
+        ok = false;
+      }
     }
     if (!ok) setIsFav((v) => !v);
     setFavBusy(false);
@@ -169,7 +198,11 @@ export default function PackageCard({ pkg, loading }) {
             <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                <span className="font-medium">{pkg?.destination}</span>
+                <span className="font-medium">
+                  {destinationDetails?.place || pkg?.destination || ""}
+                  {destinationDetails?.state ? `, ${destinationDetails.state}` : ""}
+                  {destinationDetails?.country ? `, ${destinationDetails.country}` : ""}
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

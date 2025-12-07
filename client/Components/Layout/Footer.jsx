@@ -2,70 +2,180 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FiFacebook, FiInstagram, FiTwitter, FiMapPin, FiPhone, FiMail } from "react-icons/fi";
-import React from 'react';
+import {
+  FiFacebook,
+  FiInstagram,
+  FiTwitter,
+  FiMapPin,
+  FiPhone,
+  FiMail,
+} from "react-icons/fi";
+import React from "react";
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-[#0b1220] dark:bg-[#0b1220] text-gray-300 pt-8 pb-8 mt-0 transition-colors duration-300">
+    <footer className="bg-[#050816] text-gray-300 pt-10 pb-6">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand */}
-          <div>
+
+        {/* TOP BRAND SECTION */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <Image src="/images/icon.png" alt="Flyobo" width={50} height={50} />
-              <div>
-                <Image src={'/images/banner.png'} alt="Flyobo" width={140} height={140} style={{ width: 'auto', height: 'auto' }} />
-              </div>
+              <Image
+                src="/images/icon.png"
+                alt="Flyobo"
+                width={50}
+                height={50}
+                className="opacity-90"
+              />
+              <Image
+                src="/images/banner.png"
+                alt="Flyobo"
+                width={150}
+                height={50}
+                className="h-auto w-auto opacity-95"
+              />
             </div>
-            <p className="mt-4 text-sm text-gray-400 leading-relaxed">
-              Making your travel dreams come true since 2024. Unbeatable prices, unforgettable experiences.
+
+            <p className="text-sm text-gray-400 max-w-md">
+              Making your travel dreams come true since 2024.<br />
+              Unbeatable prices, unforgettable experiences.
             </p>
-            <div className="flex items-center gap-4 mt-4 text-gray-300">
-              <a href="#" aria-label="Facebook" className="hover:text-white"><FiFacebook size={18} /></a>
-              <a href="#" aria-label="Instagram" className="hover:text-white"><FiInstagram size={18} /></a>
-              <a href="#" aria-label="Twitter" className="hover:text-white"><FiTwitter size={18} /></a>
+
+            <div className="flex items-center gap-4">
+              {[FiFacebook, FiInstagram, FiTwitter].map((Icon, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-gray-300 transition hover:-translate-y-0.5 hover:border-[#33bfff] hover:text-white"
+                >
+                  <Icon size={16} />
+                </a>
+              ))}
             </div>
           </div>
 
+          <div className="mt-4 md:mt-0 text-xs text-gray-400 md:text-right">
+            <p className="uppercase tracking-[0.25em] text-[#33bfff]">
+              Swagatam World LLP
+            </p>
+            <p>Curated trips. Hassle-free journeys.</p>
+          </div>
+        </div>
+
+        {/* DIVIDER */}
+        <div className="mt-8 border-t border-gray-700/70" />
+
+        {/* MAIN GRID (2 columns for small/medium, 4 for large) */}
+        <div className="
+          mt-8
+          grid grid-cols-1 
+          sm:grid-cols-2 md:grid-cols-2 
+          lg:grid-cols-4 
+          gap-10
+        ">
           {/* Quick Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Quick Links</h4>
+            <h4 className="text-sm font-semibold uppercase text-gray-100 mb-4">
+              Quick Links
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-white">Home</Link></li>
-              <li><Link href="/packages" className="hover:text-white">Packages</Link></li>
-              <li><Link href="/gallery" className="hover:text-white">Gallery</Link></li>
-              <li><Link href="/about" className="hover:text-white">About Us</Link></li>
-              <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
-              <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
+              {[
+                { href: "/", label: "Home" },
+                { href: "/packages", label: "Packages" },
+                { href: "/gallery", label: "Gallery" },
+                { href: "/about", label: "About Us" },
+                { href: "/contact", label: "Contact" },
+                { href: "/faq", label: "FAQ" },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="hover:text-white text-gray-400 transition"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Popular Destinations */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Popular Destinations</h4>
+            <h4 className="text-sm font-semibold uppercase text-gray-100 mb-4">
+              Popular Destinations
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/packages?q=Goa" className="hover:text-white">Goa</Link></li>
-              <li><Link href="/packages?q=Kerala" className="hover:text-white">Kerala</Link></li>
-              <li><Link href="/packages?q=Rajasthan" className="hover:text-white">Rajasthan</Link></li>
-              <li><Link href="/packages?q=Himachal%20Pradesh" className="hover:text-white">Himachal Pradesh</Link></li>
-              <li><Link href="/packages?q=Andaman" className="hover:text-white">Andaman</Link></li>
+              {[
+                "Goa",
+                "Kerala",
+                "Rajasthan",
+                "Himachal Pradesh",
+                "Andaman",
+              ].map((place) => (
+                <li key={place}>
+                  <Link
+                    href={`/packages?q=${encodeURIComponent(place)}`}
+                    className="hover:text-white text-gray-400 transition"
+                  >
+                    {place}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Contact Us</h4>
+            <h4 className="text-sm font-semibold uppercase text-gray-100 mb-4">
+              Contact Us
+            </h4>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2"><FiMapPin className="mt-0.5" /> Visakhapatnam<br />Andhra Pradesh, India - 530044</li>
-              <li className="flex items-center gap-2"><FiPhone /> +91 92912 37399</li>
-              <li className="flex items-center gap-2"><FiMail /> team.flyobo@gmail.com</li>
+              <li className="flex gap-3">
+                <FiMapPin className="text-[#33bfff] mt-1" />
+                Visakhapatnam,<br /> Andhra Pradesh, India – 530044
+              </li>
+              <li className="flex gap-3">
+                <FiPhone className="text-[#33bfff]" />
+                <a href="tel:+919291237399" className="hover:text-white">
+                  +91 92912 37399
+                </a>
+              </li>
+              <li className="flex gap-3">
+                <FiMail className="text-[#33bfff]" />
+                <a href="mailto:team.flyobo@gmail.com" className="hover:text-white">
+                  team.flyobo@gmail.com
+                </a>
+              </li>
             </ul>
+          </div>
+
+          {/* Map */}
+          <div>
+            <h4 className="text-sm font-semibold uppercase text-gray-100 mb-4">
+              Our Location
+            </h4>
+
+            <div className="rounded-xl overflow-hidden border border-gray-700/70 shadow-lg">
+              <iframe
+                title="Flyobo Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.664350391623!2d83.303!3d17.738!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sVisakhapatnam!5e0!3m2!1sen!2sin!4v0000000000000"
+                className="w-full h-40 border-0"
+                loading="lazy"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="text-center text-xs text-gray-400 mt-6">
-          <span>© {new Date().getFullYear()} Flyobo (Swagatam World LLP). All rights reserved.</span>
+        {/* BOTTOM BAR */}
+        <div className="mt-8 border-t border-gray-800/80 pt-4 text-xs text-gray-400 flex flex-col sm:flex-row items-center justify-between">
+          <p>© {year} Flyobo (Swagatam World LLP). All rights reserved.</p>
+          <div className="flex items-center gap-4 mt-2 sm:mt-0">
+            <Link href="/terms" className="hover:text-gray-200">Terms</Link>
+            <Link href="/privacy" className="hover:text-gray-200">Privacy</Link>
+          </div>
         </div>
       </div>
     </footer>

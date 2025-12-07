@@ -6,6 +6,7 @@ import AllReferralAnalytics from '@/Components/Referral/AllReferralAnalytics';
 import ReferralSettings from '@/Components/Referral/ReferralSettings';
 import ReferralLeaderboard from '@/Components/Referral/ReferralLeaderboard';
 import ReferralRewardsManagement from '@/Components/Referral/RewardManagement';
+import MaintenancePage from '@/Components/Maintenance/Maintenance';
 
 
 export default function Page() {
@@ -16,10 +17,10 @@ export default function Page() {
     <>
       <div className="flex">
         <main className="flex-1 pr-5 pl-5">
-          {tab === 'analytics' && <AllReferralAnalytics />}
+          {tab === 'analytics' && <MaintenancePage />}
           {tab === 'settings' && <ReferralSettings />}
-          {tab === 'leaderboard' && <ReferralLeaderboard />}
-          {tab === 'management' && <ReferralRewardsManagement />}
+          {tab === 'leaderboard' && <MaintenancePage />}
+          {tab === 'management' && <MaintenancePage />}
         </main>
       </div>
     </>

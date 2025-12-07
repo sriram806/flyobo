@@ -18,8 +18,6 @@ export const createBooking = async (req, res) => {
 export const adminCreateBooking = async (req, res) => {
 }
 
-export const getUserBookings = async (req, res) => {
-}
 
 // Advanced Booking Analytics
 export const getBookingAnalytics = catchAsyncErrors(async (req, res) => {
@@ -390,3 +388,4 @@ export const cancelBooking = catchAsyncErrors(async (req, res) => {
 
     return res.status(200).json({ success: true, booking });
 });
+
