@@ -40,7 +40,9 @@ export const signToken = (id) => {
 export const createSendToken = (user, statusCode, res, message) => {
     const token = signToken(user._id);
 
-    const isProd = NODE_ENV === "production";
+    // Normalize NODE_ENV - handle any string value safely
+    const nodeEnv = String(NODE_ENV || process.env.NODE_ENV || '').toLowerCase().trim();
+    const isProd = nodeEnv === "production";
 
     let cookieDomainRaw = process.env.COOKIE_DOMAIN || process.env.FRONTEND_URL || null;
     let cookieDomain;
@@ -78,9 +80,16 @@ export const createSendToken = (user, statusCode, res, message) => {
     try {
         res.cookie("token", token, cookieOptions);
     } catch (cookieErr) {
-        console.warn('createSendToken: cookie set failed, retrying with safe fallback:', cookieErr?.message);
+        console.error('createSendToken: cookie set failed -', cookieErr?.message, '| Options:', JSON.stringify(cookieOptions));
+        // Safe fallback that should always work
         try {
-            const fallback = { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: cookieOptions.maxAge, path: '/' };
+            const fallback = { 
+                httpOnly: true, 
+                secure: isProd, 
+                sameSite: 'lax', 
+                maxAge: cookieOptions.maxAge, 
+                path: '/' 
+            };
             res.cookie("token", token, fallback);
         } catch (err2) {
             console.error('createSendToken: fallback cookie set also failed:', err2?.message);

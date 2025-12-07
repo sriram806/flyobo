@@ -28,10 +28,11 @@ const buildCookieForToken = (res, token) => {
     cookieDomain = undefined;
   }
 
+  const isProd = (NODE_ENV && NODE_ENV.toLowerCase().trim() === "production");
   const cookieOptions = {
     httpOnly: true,
-    secure: NODE_ENV === "production",
-    sameSite: NODE_ENV === "production" ? "none" : "lax",
+    secure: isProd,
+    sameSite: (isProd && cookieDomain) ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
     ...(cookieDomain ? { domain: cookieDomain } : {}),
@@ -269,11 +270,12 @@ export const logout = async (req, res) => {
       cookieDomain = undefined;
     }
 
+    const isProd = (NODE_ENV && NODE_ENV.toLowerCase().trim() === "production");
     const cookieOptions = {
       expires: new Date(0),
       httpOnly: true,
-      secure: NODE_ENV === "production",
-      sameSite: NODE_ENV === "production" ? "none" : "lax",
+      secure: isProd,
+      sameSite: (isProd && cookieDomain) ? "none" : "lax",
       path: '/',
       ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
@@ -508,6 +510,7 @@ export const debugCookieInfo = (req, res) => {
       cookieDomain = undefined;
     }
 
+    const isProd = (NODE_ENV && NODE_ENV.toLowerCase().trim() === 'production');
     const info = {
       NODE_ENV: NODE_ENV || process.env.NODE_ENV || 'unknown',
       FRONTEND_URL: FRONTEND_URL || process.env.FRONTEND_URL || null,
@@ -515,8 +518,8 @@ export const debugCookieInfo = (req, res) => {
       computedCookieDomain: cookieDomain || null,
       cookieOptionsPreview: {
         httpOnly: true,
-        secure: (NODE_ENV === 'production') || (process.env.NODE_ENV === 'production'),
-        sameSite: (NODE_ENV === 'production') ? 'none' : 'lax',
+        secure: isProd,
+        sameSite: (isProd && cookieDomain) ? 'none' : 'lax',
         path: '/',
         domain: cookieDomain || null,
       }
