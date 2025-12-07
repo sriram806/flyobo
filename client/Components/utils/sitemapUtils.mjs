@@ -14,19 +14,24 @@ export async function fetchPackages() {
         ? "http://localhost:5000/api/v1"
         : "https://flyobo.com/api/v1");
 
-    const endpoints = [`${base}/packages`, `${base}/package`, `${base}/packages/get-packages`];
+    // Correct endpoint: /package/get-packages
+    const endpoint = `${base}/package/get-packages`;
     let data = null;
 
-    for (const ep of endpoints) {
-      try {
-        const res = await fetch(ep, { method: "GET" });
-        if (!res || !res.ok) continue;
+    try {
+      const res = await fetch(endpoint, { 
+        method: "GET",
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      if (res && res.ok) {
         data = await res.json();
-        break;
-      } catch (e) {
-        console.warn(`sitemapUtils: failed to fetch packages from ${ep}:`, e?.message || e);
-        continue;
       }
+    } catch (e) {
+      // Silently return empty array during build if server not running
+      if (process.env.NODE_ENV === 'production' || e.name === 'AbortError') {
+        return [];
+      }
+      console.warn(`sitemapUtils: failed to fetch packages from ${endpoint}:`, e?.message || e);
     }
 
     if (data) {
@@ -79,19 +84,24 @@ export async function fetchGalleryItems() {
         ? "http://localhost:5000/api/v1"
         : "https://flyobo.com/api/v1");
 
-    const endpoints = [`${base}/gallery`, `${base}/galleries`, `${base}/gallery-items`, `${base}/galleryitems`, `${base}/gallery/get-gallery`];
+    // Correct endpoint: /gallery (no plural or variations)
+    const endpoint = `${base}/gallery`;
     let data = null;
 
-    for (const ep of endpoints) {
-      try {
-        const res = await fetch(ep, { method: "GET" });
-        if (!res || !res.ok) continue;
+    try {
+      const res = await fetch(endpoint, { 
+        method: "GET",
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      if (res && res.ok) {
         data = await res.json();
-        break;
-      } catch (e) {
-        console.warn(`sitemapUtils: failed to fetch gallery from ${ep}:`, e?.message || e);
-        continue;
       }
+    } catch (e) {
+      // Silently return empty array during build if server not running
+      if (process.env.NODE_ENV === 'production' || e.name === 'AbortError') {
+        return [];
+      }
+      console.warn(`sitemapUtils: failed to fetch gallery from ${endpoint}:`, e?.message || e);
     }
 
     if (data) {
