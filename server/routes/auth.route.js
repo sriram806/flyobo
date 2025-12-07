@@ -11,7 +11,7 @@ import isAuthenticated from '../middleware/isAuthenticated.js';
 const authRoute = express.Router();
 
 authRoute.post('/register', registration);
-authRoute.post('/verify-otp', isAuthenticated, VerifyOTP);
+authRoute.post('/verify-otp', VerifyOTP);
 authRoute.post('/resend-otp', isAuthenticated, ResendOTP);
 authRoute.post('/login', login);
 authRoute.get('/debug/cookie-info', debugCookieInfo);
