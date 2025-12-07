@@ -55,7 +55,9 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
   "https://flyobo.vercel.app",
-  "https://admin-five-gold.vercel.app"
+  "https://flyobo-upm1.vercel.app",
+  "https://admin-five-gold.vercel.app",
+  "https://admin-sriram806s-projects.vercel.app"
 ];
 
 if (ORIGIN && !allowedOrigins.includes(ORIGIN)) {
