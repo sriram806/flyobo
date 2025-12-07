@@ -61,7 +61,10 @@ export const createSendToken = (user, statusCode, res, message) => {
         cookieDomain = undefined;
     }
 
-    const sameSiteVal = (isProd && cookieDomain) ? 'none' : 'lax';
+    let sameSiteVal = 'lax';
+    if (isProd && cookieDomain) {
+        sameSiteVal = 'none';
+    }
 
     const cookieOptions = {
         httpOnly: true,
