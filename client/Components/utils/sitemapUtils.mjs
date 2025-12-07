@@ -21,17 +21,14 @@ export async function fetchPackages() {
     try {
       const res = await fetch(endpoint, { 
         method: "GET",
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(3000) // 3 second timeout
       });
       if (res && res.ok) {
         data = await res.json();
       }
     } catch (e) {
-      // Silently return empty array during build if server not running
-      if (process.env.NODE_ENV === 'production' || e.name === 'AbortError') {
-        return [];
-      }
-      console.warn(`sitemapUtils: failed to fetch packages from ${endpoint}:`, e?.message || e);
+      // Silently return empty array during build - backend not required for build
+      return [];
     }
 
     if (data) {
@@ -91,17 +88,14 @@ export async function fetchGalleryItems() {
     try {
       const res = await fetch(endpoint, { 
         method: "GET",
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(3000) // 3 second timeout
       });
       if (res && res.ok) {
         data = await res.json();
       }
     } catch (e) {
-      // Silently return empty array during build if server not running
-      if (process.env.NODE_ENV === 'production' || e.name === 'AbortError') {
-        return [];
-      }
-      console.warn(`sitemapUtils: failed to fetch gallery from ${endpoint}:`, e?.message || e);
+      // Silently return empty array during build - backend not required for build
+      return [];
     }
 
     if (data) {
