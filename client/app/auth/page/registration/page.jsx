@@ -16,6 +16,7 @@ import Heading from "@/Components/MetaData/Heading";
 export default function RegistrationPage() {
     const dispatch = useDispatch();
     const router = useRouter();
+
     const [open, setOpen] = useState(false);
     const [route, setRoute] = useState("");
 
@@ -31,7 +32,8 @@ export default function RegistrationPage() {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [errors, setErrors] = useState({});
 
-    const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+    const API_URL =
+        NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handleChange = (e) =>
         setFormData((s) => ({ ...s, [e.target.name]: e.target.value }));
@@ -102,6 +104,7 @@ export default function RegistrationPage() {
                 }
             } else {
                 toast.success("Account created. Please verify your email.");
+                setOpen(true);
                 setRoute("Verification");
             }
         } catch (err) {
@@ -115,22 +118,25 @@ export default function RegistrationPage() {
 
     return (
         <>
-        <Heading title={"Referral | Flyobo"} description={""} keywords={``} />
+            <Heading title={"Register | Flyobo"} description={""} keywords={``} />
             <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
-            <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center px-4 py-10">
-                <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    {/* Left travel promo side */}
+
+            <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-sky-50 via-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center px-4 py-8">
+                <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    {/* Left travel promo side (desktop / tablet only) */}
                     <div className="hidden md:flex flex-col gap-5 text-slate-900 dark:text-slate-100">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 w-fit">
                             ✈️ Flyobo • Your smart travel partner
                         </span>
+
                         <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight">
                             Create your{" "}
-                            <span className="bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
                                 travel account
                             </span>{" "}
                             and explore the world.
                         </h1>
+
                         <p className="text-sm text-slate-600 dark:text-slate-300">
                             Manage trips, track bookings, earn rewards from referrals, and get
                             the best deals curated just for you.
@@ -150,6 +156,7 @@ export default function RegistrationPage() {
                                 </p>
                             </div>
                         </div>
+
                         <ReferralInput
                             onReferralChange={(val) =>
                                 setFormData((s) => ({ ...s, referralCode: val }))
@@ -158,13 +165,17 @@ export default function RegistrationPage() {
                     </div>
 
                     {/* Right auth card */}
-                    <div className="w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-sky-100/70 dark:border-slate-800">
-                        <div className="text-center mb-6">
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                Join Flyobo
+                    <div className="w-full max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl p-6 sm:p-7 md:p-8 border border-sky-100/70 dark:border-slate-800">
+                        {/* Small-screen promo text */}
+                        <div className="mb-5 md:hidden text-center">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 mb-3">
+                                ✈️ Flyobo • Smart travel account
+                            </span>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                                Create your travel account
                             </h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                Sign up to start planning your next adventure.
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Sign up in seconds and start planning your next trip.
                             </p>
                         </div>
 
@@ -178,7 +189,7 @@ export default function RegistrationPage() {
                                     value={formData.name}
                                     onChange={handleChange}
                                     placeholder="Full Name"
-                                    className={`peer w-full bg-transparent border-2 rounded-xl h-14 px-3 pt-5 pb-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition ${errors.name
+                                    className={`peer w-full bg-transparent border-2 rounded-xl h-12 sm:h-14 px-3 pt-5 pb-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition ${errors.name
                                         ? "border-red-500"
                                         : "border-slate-200 dark:border-slate-700"
                                         } focus:border-sky-500 dark:focus:border-sky-400`}
@@ -186,12 +197,14 @@ export default function RegistrationPage() {
                                 />
                                 <label
                                     htmlFor="name"
-                                    className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-xs text-slate-500 dark:text-slate-400 transition-all top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+                                    className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-[11px] text-slate-500 dark:text-slate-400 transition-all top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-[11px]"
                                 >
                                     Full Name
                                 </label>
                                 {errors.name && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+                                    <p className="text-[11px] text-red-500 mt-1">
+                                        {errors.name}
+                                    </p>
                                 )}
                             </div>
 
@@ -204,7 +217,7 @@ export default function RegistrationPage() {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="Email address"
-                                    className={`peer w-full bg-transparent border-2 rounded-xl h-14 px-3 pt-5 pb-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition ${errors.email
+                                    className={`peer w-full bg-transparent border-2 rounded-xl h-12 sm:h-14 px-3 pt-5 pb-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition ${errors.email
                                         ? "border-red-500"
                                         : "border-slate-200 dark:border-slate-700"
                                         } focus:border-sky-500 dark:focus:border-sky-400`}
@@ -212,12 +225,14 @@ export default function RegistrationPage() {
                                 />
                                 <label
                                     htmlFor="email"
-                                    className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-xs text-slate-500 dark:text-slate-400 transition-all top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+                                    className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-[11px] text-slate-500 dark:text-slate-400 transition-all top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-[11px]"
                                 >
                                     Email address
                                 </label>
                                 {errors.email && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                                    <p className="text-[11px] text-red-500 mt-1">
+                                        {errors.email}
+                                    </p>
                                 )}
                             </div>
 
@@ -230,7 +245,7 @@ export default function RegistrationPage() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="Password"
-                                    className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-11 px-3 pt-5 pb-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition ${errors.password
+                                    className={`peer w-full bg-transparent border-2 rounded-xl h-12 sm:h-14 pr-11 px-3 pt-5 pb-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition ${errors.password
                                         ? "border-red-500"
                                         : "border-slate-200 dark:border-slate-700"
                                         } focus:border-sky-500 dark:focus:border-sky-400`}
@@ -238,7 +253,7 @@ export default function RegistrationPage() {
                                 />
                                 <label
                                     htmlFor="password"
-                                    className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-xs text-slate-500 dark:text-slate-400 transition-all top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+                                    className="absolute left-3 bg-white dark:bg-slate-900 px-1 text-[11px] text-slate-500 dark:text-slate-400 transition-all top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-[11px]"
                                 >
                                     Password
                                 </label>
@@ -256,14 +271,24 @@ export default function RegistrationPage() {
                                 </button>
 
                                 {errors.password && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+                                    <p className="text-[11px] text-red-500 mt-1">
+                                        {errors.password}
+                                    </p>
                                 )}
                             </div>
 
+                            {/* Referral (mobile & desktop, simple inline) */}
+                            <div className="block md:hidden">
+                                <ReferralInput
+                                    onReferralChange={(val) =>
+                                        setFormData((s) => ({ ...s, referralCode: val }))
+                                    }
+                                />
+                            </div>
 
                             {/* Terms */}
                             <div className="mt-1">
-                                <label className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <label className="flex items-start gap-2 text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         checked={acceptTerms}
@@ -274,6 +299,10 @@ export default function RegistrationPage() {
                                         I agree to the{" "}
                                         <button
                                             type="button"
+                                            onClick={() => {
+                                                setOpen(true);
+                                                setRoute("Terms");
+                                            }}
                                             className="text-sky-600 hover:underline"
                                         >
                                             Terms of Service
@@ -281,6 +310,10 @@ export default function RegistrationPage() {
                                         and{" "}
                                         <button
                                             type="button"
+                                            onClick={() => {
+                                                setOpen(true);
+                                                setRoute("Privacy");
+                                            }}
                                             className="text-sky-600 hover:underline"
                                         >
                                             Privacy Policy
@@ -289,7 +322,9 @@ export default function RegistrationPage() {
                                     </span>
                                 </label>
                                 {errors.terms && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.terms}</p>
+                                    <p className="text-[11px] text-red-500 mt-1">
+                                        {errors.terms}
+                                    </p>
                                 )}
                             </div>
 
@@ -297,14 +332,17 @@ export default function RegistrationPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full mt-2 h-11 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 text-white text-sm font-semibold tracking-wide shadow-md shadow-sky-500/30 hover:from-sky-600 hover:to-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                                className="w-full mt-2 h-11 rounded-xl bg-linear-to-r from-sky-500 to-indigo-500 text-white text-sm font-semibold tracking-wide shadow-md shadow-sky-500/30 hover:from-sky-600 hover:to-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed transition"
                             >
-                                {loading ? "Creating your travel account..." : "Create account"}
+                                {loading
+                                    ? "Creating your travel account..."
+                                    : "Create account"}
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
+
             <Footer />
         </>
     );

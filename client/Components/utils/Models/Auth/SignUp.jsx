@@ -214,9 +214,9 @@ export default function SignUp({ setOpen, setRoute }) {
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="h-4 w-4 text-sky-600 border-gray-300 rounded" />
               I agree to{" "}
-              <button type="button" className="text-sky-600 hover:underline">Terms</button>{" "}
+              <button type="button" onClick={() => setRoute("Terms")} className="text-sky-600 hover:underline">Terms</button>{" "}
               and{" "}
-              <button type="button" className="text-sky-600 hover:underline">Privacy Policy</button>
+              <button type="button" onClick={() => setRoute("Privacy")} className="text-sky-600 hover:underline">Privacy Policy</button>
             </label>
             {errors.terms && <p className="text-sm text-red-500 mt-1">{errors.terms}</p>}
           </>

@@ -19,6 +19,8 @@ import SignUp from "../utils/Models/Auth/SignUp";
 import Verification from "../utils/Models/Auth/Verification";
 import ForgetPassword from "../utils/Models/User/ForgetPassword";
 import ResetPassword from "../utils/Models/User/ResetPassword";
+import Terms from "../utils/Models/Legal/Terms";
+import Privacy from "../utils/Models/Legal/Privacy";
 import { performLogout } from "@/redux/authSlice";
 
 const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
@@ -176,8 +178,8 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
     return (
         <header className="w-full relative">
             <div
-                className="sticky top-0 z-[1000] w-full border-b border-gray-200 dark:border-gray-800
-        bg-white dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-white dark:supports-[backdrop-filter]:bg-gray-900/70
+                className="sticky top-0 z-1000 w-full border-b border-gray-200 dark:border-gray-800
+        bg-white dark:bg-gray-900/80 backdrop-blur supports-backdrop-filter:bg-white dark:supports-backdrop-filter:bg-gray-900/70
         transition-colors duration-300"
             >
                 <div className="max-w-7xl mx-auto px-4 lg:px-8">
@@ -269,7 +271,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                                   ${n?.status === "unread" ? "bg-sky-50 dark:bg-sky-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-800"}`}
                                                                 aria-label={n?.title}
                                                             >
-                                                                <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${n?.status === "read" ? "bg-gray-400" : "bg-sky-500"}`} aria-hidden />
+                                                                <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n?.status === "read" ? "bg-gray-400" : "bg-sky-500"}`} aria-hidden />
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-center gap-2">
                                                                         <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{n?.title}</div>
@@ -358,7 +360,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
 
             {/* Mobile Sidebar (slide-in) */}
             {openSidebar && (
-                <div id="screen" onClick={handleClose} className="fixed inset-0 z-[1100] flex bg-black/40 dark:bg-black/60 transition-opacity" aria-hidden={!openSidebar}>
+                <div id="screen" onClick={handleClose} className="fixed inset-0 z-1100 flex bg-black/40 dark:bg-black/60 transition-opacity" aria-hidden={!openSidebar}>
                     <aside ref={sidebarRef} className="w-4/6 max-w-sm h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-6 overflow-auto transform transition-transform duration-300 ease-out translate-x-0" role="dialog" aria-modal="true">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
@@ -377,11 +379,11 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                             {user ? (
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold shadow">
+                                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-r from-sky-500 to-indigo-600 text-white font-bold shadow">
                                             {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
                                         </div>
                                         <div className="min-w-0">
-                                            <div className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[160px]">{user?.name || user?.email}</div>
+                                            <div className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-160">{user?.name || user?.email}</div>
                                             {user?.email && <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[180px]">{user.email}</div>}
                                         </div>
                                     </div>
@@ -414,7 +416,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                     open={open}
                     setOpen={setOpen}
                     activeItem={activeItem}
-                    component={route === "Login" ? Login : route === "Sign-Up" ? SignUp : route === "Verification" ? Verification : route === "ForgetPassword" ? ForgetPassword : ResetPassword}
+                    component={route === "Login" ? Login : route === "Sign-Up" ? SignUp : route === "Verification" ? Verification : route === "ForgetPassword" ? ForgetPassword : route === "Terms" ? Terms : route === "Privacy" ? Privacy : ResetPassword}
                     setRoute={setRoute}
                 />
             )}

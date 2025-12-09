@@ -97,7 +97,7 @@ export default function FAQPage() {
     <>
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-gray-900 transition-colors duration-300 py-12">
+      <div className="min-h-screen bg-linear-to-b from-gray-50 to-white dark:from-black dark:to-gray-900 transition-colors duration-300 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-8">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">Frequently Asked Questions</h1>
@@ -156,7 +156,7 @@ export default function FAQPage() {
                         )}
                       </div>
 
-                      <div className="flex-shrink-0 mt-1">
+                      <div className="flex-linear-0 mt-1">
                         <span
                           className={`inline-flex items-center justify-center w-9 h-9 rounded-lg border ${isOpen ? "bg-sky-600 text-white border-sky-600" : "bg-white dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700"
                             } transition`}
