@@ -107,6 +107,7 @@ export const createSendToken = (user, statusCode, res, message) => {
         email: userObj.email,
         role: userObj.role,
         isAccountVerified: userObj.isAccountVerified,
+        favoritePackages: userObj.favoritePackages || userObj.favouritePackages || [],
         avatar: userObj.avatar,
         createdAt: userObj.createdAt,
         phone: userObj.phone || null,

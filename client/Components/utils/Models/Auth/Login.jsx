@@ -52,7 +52,6 @@ export default function Login({ setRoute, setOpen }) {
       if (setOpen) setOpen(false);
       toast.success(data?.message || "Login successful");
       
-      // Redirect manager to admin page
       if (user.role === "manager") {
         router.push("/admin");
       }
@@ -105,7 +104,6 @@ export default function Login({ setRoute, setOpen }) {
   return (
     <div className="w-full max-w-md mx-auto px-4 py-6 sm:px-6 sm:py-8 bg-white dark:bg-slate-900 rounded-2xl shadow-lg transition-all duration-300">
       <ModalHeader title="Sign in to Flyobo" description="Welcome back! Please enter your details." />
-
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div className="relative">
           <input

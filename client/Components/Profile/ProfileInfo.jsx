@@ -4,6 +4,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import { HiOutlineMail, HiOutlineBadgeCheck, HiOutlineCalendar, HiOutlinePhone, } from "react-icons/hi";
+import ProfileBookings from "./ProfileBookings";
 
 const ProfileInfo = () => {
   const user = useSelector((state) => state?.auth?.user);
@@ -41,20 +42,9 @@ const ProfileInfo = () => {
       <div className="relative overflow-hidden rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
         <div className="relative p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-            <div className="h-24 w-24 rounded-full shadow-md border-4 border-gray-200/90 dark:border-gray-700/90 overflow-hidden bg-sky-600 flex items-center justify-center">
-              {user?.avatar?.url ? (
-                <img
-                  src={`${user.avatar.url}${user?.updatedAt ? `?v=${new Date(user.updatedAt).getTime()}` : `?v=${Date.now()}`}`}
-                  alt={user?.name ? `${user.name}'s avatar` : "User avatar"}
-                  className="h-full w-full object-cover"
-                  draggable={false}
-                />
-              ) : (
-                <span className="text-white text-3xl font-bold">{initial}</span>
-              )}
+            <div className="h-25 w-25 rounded-full shadow-md border-4 border-gray-200/90 dark:border-gray-700/90 overflow-hidden bg-sky-600 flex items-center justify-center">
+              <span className="text-white text-3xl font-bold">{initial}</span>
             </div>
-
-            {/* Identity */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white truncate">
@@ -83,8 +73,6 @@ const ProfileInfo = () => {
                 <HiOutlineCalendar /> Joined {joinedDate || "Recently"}
               </div>
             </div>
-
-            {/* Actions */}
             <div className="flex items-center gap-3">
               {user?.role === 'manager' && (
                 <Link
@@ -104,16 +92,6 @@ const ProfileInfo = () => {
               </Link>
             </div>
           </div>
-
-          <div className="mt-6">
-            <div className="h-2 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className="h-2 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"
-                style={{ width: `100%` }}
-              />
-            </div>
-          </div>
-
           <div className="mt-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/60 p-4">
             <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
               {user?.bio && user.bio.trim().length > 0 ? (
@@ -141,6 +119,9 @@ const ProfileInfo = () => {
                 </div>
               </button>
             ))}
+          </div>
+          <div className="mt-6">
+            <ProfileBookings />
           </div>
         </div>
       </div>

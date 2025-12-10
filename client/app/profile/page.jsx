@@ -9,7 +9,6 @@ import UserProtected from "@/Components/hooks/userProtected";
 import Header from "@/Components/Layout/Header";
 import SideBarProfile from "@/Components/Profile/SideBarProfile";
 import ProfileInfo from "@/Components/Profile/ProfileInfo";
-import ProfileBookings from "@/Components/Profile/ProfileBookings";
 import FavouriteBookings from "@/Components/Profile/FavouriteBookings";
 import ReferralProgram from "@/Components/Profile/ReferralProgram";
 import BankDetails from "@/Components/Profile/BankDetails";
@@ -70,7 +69,6 @@ const ProfileContent = () => {
 
             <section className="lg:col-span-3">
               {selected === "overview" && <ProfileInfo />}
-              {selected === "bookings" && <ProfileBookings />}
               {selected === "wishlist" && <FavouriteBookings />}
               {selected === "referral" && <ReferralProgram />}
               {selected === "bank-details" && <BankDetails />}

@@ -3,12 +3,6 @@ import { JWT_SECRET } from "../config/env.js";
 import catchAsyncErrors from "./catchAsyncErrors.js";
 import User from "../models/user.model.js";
 
-/** 
- * Extract token from:
- * - Cookies
- * - Authorization header
- * - Query param
- */
 const extractToken = (req) => {
     // Cookie
     if (req.cookies?.token) {

@@ -4,20 +4,12 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import {
-  Gift,
-  Share,
-  Trophy,
-  Users,
-  Check,
-  DollarSign,
-  Copy,
-  Award,
-} from "lucide-react";
+import { Gift, Share, Trophy, Users, Check, DollarSign, Copy, Award } from "lucide-react";
 import { NEXT_PUBLIC_BACKEND_URL } from "../config/env";
 
 const ReferralProgram = () => {
   const user = useSelector((s) => s?.auth?.user);
+  const token = useSelector((t) => t?.auth?.token);
 
   const [referralData, setReferralData] = useState(null);
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
@@ -28,8 +20,7 @@ const ReferralProgram = () => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
-  const API_URL =
-    NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+  const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const totalReferrals = referralData?.totalReferrals || 0;
   const totalReward = referralData?.totalReward || 0;
@@ -37,6 +28,7 @@ const ReferralProgram = () => {
   const api = axios.create({
     baseURL: API_URL,
     withCredentials: true,
+    headers: token,
     timeout: 10000,
   });
 
@@ -61,7 +53,6 @@ const ReferralProgram = () => {
   const fetchWithdrawalHistory = async () => {
     try {
       setHistoryLoading(true);
-      // 👇 FIXED URL: added /user/ prefix to match backend style
       const { data } = await api.get("/user/referral-withdrawals", {
         params: { status: "all", limit: 50 },
       });
@@ -94,9 +85,7 @@ const ReferralProgram = () => {
     setReferralData(null);
     setWithdrawalHistory([]);
 
-    (async () => {
-      await Promise.all([fetchReferralData(), fetchWithdrawalHistory()]);
-    })();
+    Promise.all([fetchReferralData(), fetchWithdrawalHistory()]);
   }, [user, API_URL]);
 
   const handleCopy = async (value, successMsg = "Copied!") => {
@@ -175,7 +164,7 @@ const ReferralProgram = () => {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-sky-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold bg-linear-to-r from-sky-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
             Referral Program
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-md">
@@ -196,11 +185,10 @@ const ReferralProgram = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                   ? "border-sky-500 text-sky-600 dark:text-sky-400"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -257,7 +245,7 @@ const ReferralProgram = () => {
           </div>
 
           {/* WITHDRAW SECTION */}
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
               Withdraw Rewards
@@ -302,7 +290,7 @@ const ReferralProgram = () => {
                     parseInt(redeemAmount, 10) > totalReward ||
                     totalReward < 50
                   }
-                  className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {redeemLoading ? (
                     <>
@@ -428,8 +416,8 @@ const ReferralProgram = () => {
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {r.joinedAt
                             ? `Joined ${new Date(
-                                r.joinedAt
-                              ).toLocaleDateString()}`
+                              r.joinedAt
+                            ).toLocaleDateString()}`
                             : "Recently joined"}
                         </p>
                       </div>
@@ -497,10 +485,9 @@ const ReferralProgram = () => {
                             {withdrawal.amount?.toLocaleString("en-IN") || 0}
                           </span>
                           <span
-                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                              statusColors[withdrawal.status] ||
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[withdrawal.status] ||
                               "bg-gray-100 text-gray-800"
-                            }`}
+                              }`}
                           >
                             {statusIcons[withdrawal.status] || "•"}{" "}
                             {withdrawal.status?.toUpperCase() || "N/A"}
@@ -512,11 +499,11 @@ const ReferralProgram = () => {
                             <span className="font-medium">Requested:</span>{" "}
                             {withdrawal.requestedAt
                               ? new Date(
-                                  withdrawal.requestedAt
-                                ).toLocaleString("en-IN", {
-                                  dateStyle: "medium",
-                                  timeStyle: "short",
-                                })
+                                withdrawal.requestedAt
+                              ).toLocaleString("en-IN", {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              })
                               : "N/A"}
                           </p>
 

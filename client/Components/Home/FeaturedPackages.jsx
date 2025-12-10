@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 export default function FeaturedPackages() {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     let isMounted = true;

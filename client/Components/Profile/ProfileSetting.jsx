@@ -10,8 +10,7 @@ import { NEXT_PUBLIC_BACKEND_URL } from "../config/env";
 const ProfileSetting = () => {
   const user = useSelector((s) => s?.auth?.user);
   const token = useSelector((t) => t?.auth?.token);
-  console.log(user);
-  
+
   const dispatch = useDispatch();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -21,11 +20,9 @@ const ProfileSetting = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-        console.log(token);
   const passwordsMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
   const disablePwSubmit = pwLoading || !currentPassword || !newPassword || !confirmPassword || passwordsMismatch;
 
-  // ✅ Change password handler
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
@@ -35,17 +32,14 @@ const ProfileSetting = () => {
 
     try {
       setPwLoading(true);
-      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-
       await axios.put(
         `${API_URL}/user/change-password`,
         { oldPassword: currentPassword, newPassword },
         {
           withCredentials: true,
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          headers: token
         }
       );
-
       toast.success("Password updated successfully!");
       setCurrentPassword("");
       setNewPassword("");
@@ -58,7 +52,6 @@ const ProfileSetting = () => {
     }
   };
 
-  // 🗑️ Delete account handler
   const handleDeleteAccount = async (e) => {
     e.preventDefault();
     if (!API_URL) return toast.error("API base URL is missing");
@@ -68,30 +61,21 @@ const ProfileSetting = () => {
 
     try {
       setDeleteLoading(true);
-      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-
       await axios.delete(`${API_URL}/user/${user._id}`, {
         withCredentials: true,
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: token,
       });
 
       toast.success("Your account has been deleted successfully.");
-
-      // Clear all storage and state
       localStorage.clear();
       sessionStorage.clear();
 
-      // Clear cookies
       document.cookie?.split(";").forEach((c) => {
         const eqPos = c.indexOf("=");
         const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
       });
-
-      // Dispatch logout after clearing storage
       dispatch(logout());
-
-      // Force page reload to ensure clean state
       window.location.href = "/";
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || "Failed to delete account";

@@ -11,8 +11,7 @@ const items = [
     section: "Profile",
     links: [
       { key: "overview", label: "Overview", icon: User },
-      { key: "bookings", label: "Bookings", icon: Bookmark, badge: 2 },
-      { key: "wishlist", label: "Wishlist", icon: Heart },
+      { key: "wishlist", label: "My Wishlist", icon: Heart },
       { key: "referral", label: "Referral Program", icon: Gift },
     ],
   },
