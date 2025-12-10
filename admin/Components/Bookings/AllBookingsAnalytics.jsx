@@ -7,7 +7,7 @@ import BookingBarChart from "./BookingBarChart";
 import BookingPieChart from "./BookingPieChart";
 
 export default function AllBookingsAnalytics() {
-  const base = NEXT_PUBLIC_BACKEND_URL;
+  const API_URL = NEXT_PUBLIC_BACKEND_URL;
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,7 +17,7 @@ export default function AllBookingsAnalytics() {
     async function loadReport() {
       setLoading(true);
       try {
-        const { data } = await axios.get(`${base}/reports/bookings`, { withCredentials: true });
+        const { data } = await axios.get(`${API_URL}/reports/bookings`, { withCredentials: true });
         if (mounted) setReport(data?.data || null);
       } catch (err) {
         if (mounted) setError(err?.response?.data?.message || err.message || "Failed to fetch report");
@@ -27,7 +27,7 @@ export default function AllBookingsAnalytics() {
     }
     loadReport();
     return () => (mounted = false);
-  }, [base]);
+  }, [API_URL]);
 
   if (loading) return <div className="p-6 text-center text-gray-500 dark:text-gray-300">Loading...</div>;
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
@@ -44,8 +44,6 @@ export default function AllBookingsAnalytics() {
     topPackages,
     topBookingUsers,
   } = report;
-
-  const chartHeight = 350; // set same height for both charts
 
   return (
     <section className="p-5 bg-gray-50 dark:bg-gray-900 min-h-screen space-y-6">

@@ -12,6 +12,8 @@ export default function AgentBookingUI() {
 
     // Auth agent from Redux
     const authUser = useSelector((s) => s.auth?.user);
+    const reduxToken = useSelector((t) => t?.auth?.token);
+    const token = reduxToken ?? (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
     const agent = authUser ? { id: authUser._id, name: authUser.name, role: authUser.role } : null;
 
     // Data from server
@@ -48,8 +50,14 @@ export default function AgentBookingUI() {
             try {
                 setLoading(true);
                 const [uRes, pRes] = await Promise.all([
-                    axios.get(`${API}/user/get-all-users`, { withCredentials: true }),
-                    axios.get(`${API}/package/get-packages`)
+                    axios.get(`${API}/user/get-all-users`, { 
+                        withCredentials: true,
+                        headers: token ? { Authorization: `Bearer ${token}` } : {}
+                    }),
+                    axios.get(`${API}/package/get-packages`, {
+                        withCredentials: true,
+                        headers: token ? { Authorization: `Bearer ${token}` } : {}
+                    })
                 ]);
                 setUsers(uRes?.data?.users || []);
                 setPackages(pRes?.data?.packages || []);
@@ -60,7 +68,7 @@ export default function AgentBookingUI() {
             }
         };
         loadData();
-    }, [API]);
+    }, [API, token]);
 
     useEffect(() => {
         if (authUser?._id) {
@@ -140,7 +148,10 @@ export default function AgentBookingUI() {
                 totalAmount: Number.isFinite(totalPrice) ? totalPrice : (safePayment.amount || 0),
                 bookedBy: agent,
             };
-            const res = await axios.post(`${API}/bookings/agent/booking/`, payload, { withCredentials: true });
+            const res = await axios.post(`${API}/bookings/agent/booking/`, payload, { 
+                withCredentials: true,
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
             if (res?.data?.success) {
                 toast.success("Booking created");
                 // show animated success popup then redirect
