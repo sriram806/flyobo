@@ -9,7 +9,8 @@ import { NEXT_PUBLIC_BACKEND_URL } from "../config/env";
 
 const ReferralProgram = () => {
   const user = useSelector((s) => s?.auth?.user);
-  const token = useSelector((t) => t?.auth?.token);
+  const reduxToken = useSelector((t) => t?.auth?.token);
+  const token = reduxToken ?? (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
 
   const [referralData, setReferralData] = useState(null);
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
@@ -28,7 +29,7 @@ const ReferralProgram = () => {
   const api = axios.create({
     baseURL: API_URL,
     withCredentials: true,
-    headers: token,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
     timeout: 10000,
   });
 
