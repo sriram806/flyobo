@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import Loading from "../Loading/Loading";
 
 const CATEGORIES = [
     "nature",
@@ -15,20 +16,11 @@ const CATEGORIES = [
     "other",
 ];
 
-/* UPDATED GLOBAL INPUT STYLE */
-const input =
-  "w-full rounded-xl border border-gray-300 dark:border-gray-700 \
-bg-white dark:bg-gray-900 \
-px-4 py-3 text-gray-900 dark:text-gray-100 \
-placeholder-gray-400 dark:placeholder-gray-500 \
-focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 \
-transition-all duration-200 ease-in-out";
+const input =```w-full rounded-xl border border-gray-300 dark:border-gray-700  bg-white dark:bg-gray-900  px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 \
+focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out`;
 
 export default function AdminGallery() {
-    const API_BASE = useMemo(() => {
-        const base = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-        return base.replace(/\/$/, "");
-    }, []);
+    const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -187,6 +179,10 @@ export default function AdminGallery() {
             setLoading(false);
         }
     };
+
+    if (loading){
+        return <Loading />
+    }
 
     return (
         <div className="space-y-8">
