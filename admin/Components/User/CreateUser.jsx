@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 import { FaCopy, FaEye, FaEyeSlash, FaMagic } from "react-icons/fa";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -9,7 +10,11 @@ import axios from "axios";
 export default function CreateUser() {
   const router = useRouter();
   const base = process.env.NEXT_PUBLIC_BACKEND_URL;
-
+  
+  const reduxToken = useSelector((t) => t?.auth?.token);
+  const token = reduxToken 
+  console.log(token);
+  
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -24,7 +29,6 @@ export default function CreateUser() {
   const [showPassword, setShowPassword] = useState(false);
   const [confirmAdminOpen, setConfirmAdminOpen] = useState(false);
 
-  // ---------- Handlers ----------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -43,8 +47,9 @@ export default function CreateUser() {
         if (!value.trim()) err.name = "Full name is required.";
         break;
       case "email":
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-          err.email = "Enter a valid email.";
+        if (!/^[a-zA-Z0-9._%+-]+@(gmail\.com|swagatom\.com|flyobo\.com)$/.test(value)) {
+          err.email = "Enter a valid Gmail, Swagatom, or Flyobo email.";
+        }
         break;
       case "phone":
         if (value && !/^[0-9+()\s-]{6,20}$/.test(value))
@@ -65,7 +70,6 @@ export default function CreateUser() {
 
   const isValid = () => Object.keys(errors).length === 0;
 
-  // ---------- Password Utilities ----------
   const generatePassword = (length = 12) => {
     const chars =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~";
@@ -121,7 +125,10 @@ export default function CreateUser() {
       const { data } = await axios.post(
         `${base}/admin/create-user`,
         payload,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: token
+        }
       );
 
       toast.success("User created successfully!");
@@ -164,11 +171,10 @@ export default function CreateUser() {
               onChange={handleChange}
               onBlur={handleBlur}
               placeholder="Jane Doe"
-              className={`mt-1 w-full rounded-md px-3 py-2 border ${
-                touched.name && errors.name
+              className={`mt-1 w-full rounded-md px-3 py-2 border ${touched.name && errors.name
                   ? "border-red-400"
                   : "border-gray-300"
-              } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
+                } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
             />
             {touched.name && errors.name && (
               <p className="text-xs text-red-600 mt-1">{errors.name}</p>
@@ -187,11 +193,10 @@ export default function CreateUser() {
               onChange={handleChange}
               onBlur={handleBlur}
               placeholder="example@email.com"
-              className={`mt-1 w-full rounded-md px-3 py-2 border ${
-                touched.email && errors.email
+              className={`mt-1 w-full rounded-md px-3 py-2 border ${touched.email && errors.email
                   ? "border-red-400"
                   : "border-gray-300"
-              } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
+                } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
             />
             {touched.email && errors.email && (
               <p className="text-xs text-red-600 mt-1">{errors.email}</p>
@@ -209,11 +214,10 @@ export default function CreateUser() {
               onChange={handleChange}
               onBlur={handleBlur}
               placeholder="+91 98765 43210"
-              className={`mt-1 w-full rounded-md px-3 py-2 border ${
-                touched.phone && errors.phone
+              className={`mt-1 w-full rounded-md px-3 py-2 border ${touched.phone && errors.phone
                   ? "border-red-400"
                   : "border-gray-300"
-              } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
+                } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
             />
             {touched.phone && errors.phone && (
               <p className="text-xs text-red-600 mt-1">{errors.phone}</p>
@@ -278,11 +282,10 @@ export default function CreateUser() {
               value={form.password}
               onChange={handleChange}
               onBlur={handleBlur}
-              className={`mt-1 w-full rounded-md px-3 py-2 border ${
-                touched.password && errors.password
+              className={`mt-1 w-full rounded-md px-3 py-2 border ${touched.password && errors.password
                   ? "border-red-400"
                   : "border-gray-300"
-              } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
+                } bg-gray-200 dark:bg-gray-900 dark:text-gray-100`}
             />
 
             {/* Strength Bar */}
@@ -290,15 +293,14 @@ export default function CreateUser() {
               <div className="mt-2">
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full transition-all ${
-                      passwordStrength(form.password) === 0
+                    className={`h-2 rounded-full transition-all ${passwordStrength(form.password) === 0
                         ? "bg-red-400"
                         : passwordStrength(form.password) === 1
-                        ? "bg-orange-400"
-                        : passwordStrength(form.password) === 2
-                        ? "bg-yellow-400"
-                        : "bg-green-500"
-                    }`}
+                          ? "bg-orange-400"
+                          : passwordStrength(form.password) === 2
+                            ? "bg-yellow-400"
+                            : "bg-green-500"
+                      }`}
                     style={{
                       width: `${(passwordStrength(form.password) / 4) * 100}%`,
                     }}
@@ -316,11 +318,10 @@ export default function CreateUser() {
             <button
               type="submit"
               disabled={loading}
-              className={`px-6 py-2 rounded-lg text-white font-medium shadow-md transition-all ${
-                loading
+              className={`px-6 py-2 rounded-lg text-white font-medium shadow-md transition-all ${loading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 hover:scale-[1.02]"
-              }`}
+                }`}
             >
               {loading ? "Creating..." : "Create User"}
             </button>

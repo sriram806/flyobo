@@ -3,13 +3,13 @@
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
 import AllUserAnalytics from '@/Components/User/AllUserAnalytics';
-import CreateUser from '@/Components/User/CreateUser';
 import AllUsers from '@/Components/User/AllUsers';
 import ManageAdmin from '@/Components/User/ManageAdmin';
+import CreateUser from '@/Components/User/CreateUser';
 
 export default function Page() {
   const params = useSearchParams();
-  const tab = params?.get('tab') || 'list';
+  const tab = params?.get('tab');
 
   return (
     <>
