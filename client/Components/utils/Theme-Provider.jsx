@@ -19,10 +19,10 @@ const ThemeProvider = ({ children, ...props }) => {
   }
   return (
     <NextThemesProvider 
-      attribute="class" 
-      defaultTheme="dark" 
-      enableSystem={false}
-      forcedTheme="dark"
+      attribute="class"
+      defaultTheme="system"
+      enableSystem={true}
+      storageKey="flyobo-theme"
       {...props}
     >
       {children}

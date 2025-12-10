@@ -94,7 +94,12 @@ export default function RegistrationPage() {
             }
 
             if (res.data?.user) {
-                dispatch(setAuthUser(res.data.user));
+                const token = res.data?.token;
+                if (token) {
+                    try { localStorage.setItem("auth_token", token); } catch {}
+                    try { sessionStorage.setItem("auth_token", token); } catch {}
+                }
+                dispatch(setAuthUser({ user: res.data.user, token }));
                 toast.success("Welcome aboard! Your account is ready.");
 
                 if (res.data.user.role === "manager") {

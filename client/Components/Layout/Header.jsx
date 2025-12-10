@@ -177,11 +177,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
 
     return (
         <header className="w-full relative">
-            <div
-                className="sticky top-0 z-1000 w-full border-b border-gray-200 dark:border-gray-800
-        bg-white dark:bg-gray-900/80 backdrop-blur supports-backdrop-filter:bg-white dark:supports-backdrop-filter:bg-gray-900/70
-        transition-colors duration-300"
-            >
+            <div className="sticky top-0 z-1000 w-full border-b border-gray-200 dark:border-gray-800 bg-gray-950 transition-colors duration-300" >
                 <div className="max-w-7xl mx-auto px-4 lg:px-8">
                     {/* Desktop */}
                     <div className="hidden md:flex items-center justify-between h-20">
@@ -202,6 +198,7 @@ const Header = ({ open, setOpen, activeItem, route, setRoute }) => {
                         </nav>
 
                         <div className="flex items-center gap-3" role="toolbar" aria-label="Header actions">
+                            <ThemeSwitcher />
                             <button
                                 aria-label="Search"
                                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-300"

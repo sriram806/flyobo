@@ -105,7 +105,12 @@ const Verification = ({ setOpen, setRoute }) => {
       
       // Auto-login after successful verification
       if (data?.user) {
-        dispatch(setAuthUser(data.user));
+        const token = data?.token;
+        if (token) {
+          try { localStorage.setItem("auth_token", token); } catch {}
+          try { sessionStorage.setItem("auth_token", token); } catch {}
+        }
+        dispatch(setAuthUser({ user: data.user, token }));
         toast.success(data?.message || "Account verified successfully! You are now logged in.");
         if (setOpen) setOpen(false);
         

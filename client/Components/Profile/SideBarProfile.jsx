@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
-import { User, Bookmark, Heart, Settings, LogOut, Bell, Search, Gift, Trophy, Wallet, CreditCard } from "lucide-react";
+import { User, Bookmark, Heart, Settings, LogOut, Bell, Search, Gift, CreditCard } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const items = [
@@ -28,27 +28,17 @@ const items = [
 
 const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
   const user = useSelector((s) => s?.auth?.user);
-  const initial =
-    user?.name?.[0]?.toUpperCase() ||
-    user?.email?.[0]?.toUpperCase() ||
-    "U";
+  const initial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U";
   const [search, setSearch] = useState("");
   const pathname = usePathname();
 
-  const bookingsCount = user?.bookings?.length ?? user?.bookingsCount ?? 0;
-  const wishlistCount = user?.wishlist?.length ?? user?.wishlistCount ?? 0;
-  const notificationsCount =
-    user?.unreadNotificationsCount ??
-    (Array.isArray(user?.notifications)
-      ? user.notifications.filter((n) => !n.read).length
-      : 0);
+  const bookingsCount = user?.bookings?.length;
+  const wishlistCount = user?.wishlist?.length;
+  const notificationsCount = user?.unreadNotificationsCount ?? (Array.isArray(user?.notifications) ? user.notifications.filter((n) => !n.read).length : 0);
 
   return (
     <aside
-      className={`relative flex flex-col rounded border border-gray-200 dark:border-gray-800 
-      bg-white dark:bg-gray-900 shadow-sm overflow-hidden w-full lg:w-auto lg:sticky lg:top-24`}
-    >
-      {/* Profile Header */}
+      className={`relative flex flex-col rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden w-full lg:w-auto lg:sticky lg:top-24`}>
       <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-600 text-white font-semibold">
           {initial}
@@ -58,7 +48,7 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
             {user?.name || "Traveler"}
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
-            {user?.email || "youremail@gmail.com"}
+            {user?.email || "travellermail@gmail.com"}
           </div>
         </div>
       </div>
@@ -84,36 +74,31 @@ const SideBarProfile = ({ selected = "overview", onSelect, onLogout }) => {
             <div className="px-3 py-1 text-xs uppercase text-gray-400 tracking-wide">
               {group.section}
             </div>
-            {group.links
-              .filter((it) =>
-                it.label.toLowerCase().includes(search.toLowerCase())
-              )
+            {group.links.filter((it) => it.label.toLowerCase().includes(search.toLowerCase()))
               .map((it) => {
                 const active = selected === it.key || pathname.includes(it.key);
                 const Icon = it.icon;
 
-                // Compute badge value per link key, falling back to the static value if present
                 const displayedBadge =
                   it.key === "bookings"
                     ? bookingsCount
                     : it.key === "wishlist"
-                    ? wishlistCount
-                    : it.key === "notifications"
-                    ? notificationsCount
-                    : it.badge;
+                      ? wishlistCount
+                      : it.key === "notifications"
+                        ? notificationsCount
+                        : it.badge;
 
                 return (
                   <button
                     key={it.key}
                     onClick={() => onSelect?.(it.key)}
                     aria-label={it.label}
-                    className={`relative w-full flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors duration-200 ${
-                      active
-                        ? "bg-sky-500/10 text-sky-600 dark:text-sky-400"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    }`}
+                    className={`relative w-full flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors duration-200 ${active
+                      ? "bg-sky-500/10 text-sky-600 dark:text-sky-400"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      }`}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <Icon className="h-5 w-5 shrink-0" />
                     <span className="truncate">{it.label}</span>
                     {displayedBadge > 0 && (
                       <span className="absolute right-3 bg-sky-500 text-white text-xs px-2 py-0.5 rounded-full">

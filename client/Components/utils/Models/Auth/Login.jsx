@@ -48,7 +48,7 @@ export default function Login({ setRoute, setOpen }) {
 
       const user = data?.user || data?.data?.user;
       if (!user) throw new Error(data?.message || "User data not received");
-      dispatch(setAuthUser(user));
+      dispatch(setAuthUser({ user, token }));
       if (setOpen) setOpen(false);
       toast.success(data?.message || "Login successful");
       
@@ -85,7 +85,7 @@ export default function Login({ setRoute, setOpen }) {
           try { axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; } catch {}
         }
         if (user) {
-          dispatch(setAuthUser(user));
+          dispatch(setAuthUser({ user, token }));
           if (user.role === "manager") {
             router.push("/admin");
           }

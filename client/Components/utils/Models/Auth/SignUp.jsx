@@ -53,7 +53,7 @@ export default function SignUp({ setOpen, setRoute }) {
           try { window.axios && (window.axios.defaults.headers.common["Authorization"] = `Bearer ${token}`); } catch {}
         }
         if (user) {
-          dispatch(setAuthUser(user));
+          dispatch(setAuthUser({ user, token }));
           if (user.role === "manager") {
             router.push("/admin");
           }
@@ -108,8 +108,15 @@ export default function SignUp({ setOpen, setRoute }) {
 
       if (res.data?.success === false) throw new Error(res.data?.message || "Registration failed");
 
+      const token = res.data?.token;
+      if (token) {
+        try { localStorage.setItem("auth_token", token); } catch {}
+        try { sessionStorage.setItem("auth_token", token); } catch {}
+        try { axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; } catch {}
+      }
+
       if (res.data?.user) {
-        dispatch(setAuthUser(res.data.user));
+        dispatch(setAuthUser({ user: res.data.user, token }));
         toast.success("Account created successfully!");
         if (res.data.user.role === "manager") {
           router.push("/admin");

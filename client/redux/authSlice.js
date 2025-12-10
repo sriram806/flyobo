@@ -3,6 +3,7 @@ import axios from "axios";
 
 const initialState = {
   user: null,
+  token: null,
   forgot: {
     loading: false,
     error: null,
@@ -21,10 +22,21 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setAuthUser: (state, action) => {
-      state.user = action.payload;
+      // Handle both user object and token (can be passed as {user, token} or just user)
+      if (action.payload?.user !== undefined) {
+        state.user = action.payload.user;
+        state.token = action.payload.token || null;
+      } else {
+        state.user = action.payload;
+        // Try to get token from localStorage if not provided
+        if (typeof window !== "undefined") {
+          state.token = localStorage.getItem("auth_token") || null;
+        }
+      }
     },
     logout: (state) => {
       state.user = null;
+      state.token = null;
     },
 
     // Forgot password

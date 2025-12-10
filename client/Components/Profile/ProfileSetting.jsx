@@ -8,7 +8,10 @@ import { logout } from "@/redux/authSlice";
 import { NEXT_PUBLIC_BACKEND_URL } from "../config/env";
 
 const ProfileSetting = () => {
-  const user = useSelector((state) => state?.auth?.user);
+  const user = useSelector((s) => s?.auth?.user);
+  const token = useSelector((t) => t?.auth?.token);
+  console.log(user);
+  
   const dispatch = useDispatch();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -18,7 +21,7 @@ const ProfileSetting = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-
+        console.log(token);
   const passwordsMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
   const disablePwSubmit = pwLoading || !currentPassword || !newPassword || !confirmPassword || passwordsMismatch;
 
@@ -27,10 +30,8 @@ const ProfileSetting = () => {
     e.preventDefault();
 
     if (!API_URL) return toast.error("API base URL is missing");
-    if (!currentPassword || !newPassword || !confirmPassword)
-      return toast.error("Please fill in all fields");
-    if (newPassword !== confirmPassword)
-      return toast.error("Passwords do not match");
+    if (!currentPassword || !newPassword || !confirmPassword) return toast.error("Please fill in all fields");
+    if (newPassword !== confirmPassword) return toast.error("Passwords do not match");
 
     try {
       setPwLoading(true);
@@ -75,21 +76,21 @@ const ProfileSetting = () => {
       });
 
       toast.success("Your account has been deleted successfully.");
-      
+
       // Clear all storage and state
       localStorage.clear();
       sessionStorage.clear();
-      
+
       // Clear cookies
       document.cookie?.split(";").forEach((c) => {
         const eqPos = c.indexOf("=");
         const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
       });
-      
+
       // Dispatch logout after clearing storage
       dispatch(logout());
-      
+
       // Force page reload to ensure clean state
       window.location.href = "/";
     } catch (err) {

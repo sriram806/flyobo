@@ -61,7 +61,7 @@ const ProfileContent = () => {
       />
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
 
-      <main className="min-h-screen bg-gray-100/90 dark:bg-gray-900">
+      <main className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <aside className="lg:col-span-1">

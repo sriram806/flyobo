@@ -3,7 +3,7 @@
 /* CSS Variables for themes */
 :root {
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8fafc;
+  --color-bg-secondary: #96ddf4;
   --color-text-primary: #1e293b;
   --color-text-secondary: #64748b;
   --color-border-primary: #e2e8f0;
@@ -12,7 +12,7 @@
 .dark {
   --color-bg-primary: #1e293b;
   --color-bg-secondary: #0f172a;
-  --color-text-primary: #f1f5f9;
+  --color-text-primary: #e3e5e7;
   --color-text-secondary: #cbd5e1;
   --color-border-primary: #334155;
 }
