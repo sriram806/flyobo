@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import PackageImageUploader from "./PackageImageUploader";
+import { useSelector } from "react-redux";
 
 const emptyForm = {
   title: "",
@@ -19,6 +20,8 @@ const emptyForm = {
 export default function CreatePackage() {
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  const token = useSelector((t) => t?.auth?.token);
 
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -48,7 +51,7 @@ export default function CreatePackage() {
           `${API_URL.replace(/\/$/, "")}/destinations/?q=${encodeURIComponent(
             value
           )}`,
-          { withCredentials: true }
+          { withCredentials: true, headers: token }
         );
         const list = res?.data?.data?.items || [];
         setSuggestions(list.slice(0, 10));
@@ -80,7 +83,6 @@ export default function CreatePackage() {
         if (key === "destination" && selectedDestId) return;
         fd.append(key, val);
       });
-      // If user picked a suggestion, send its id as `destination` (server accepts ObjectId or string)
       if (selectedDestId) fd.append("destination", selectedDestId);
       if (image?.file) fd.append("image", image.file);
       else if (image?.isUrl) fd.append("imageUrl", image.url);
@@ -89,6 +91,7 @@ export default function CreatePackage() {
         method: "POST",
         body: fd,
         credentials: "include",
+        headers: token
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
