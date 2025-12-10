@@ -21,7 +21,8 @@ export default function CreatePackage() {
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const token = useSelector((t) => t?.auth?.token);
+  const reduxToken = useSelector((t) => t?.auth?.token);
+  const token = reduxToken ?? (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
 
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -51,7 +52,10 @@ export default function CreatePackage() {
           `${API_URL.replace(/\/$/, "")}/destinations/?q=${encodeURIComponent(
             value
           )}`,
-          { withCredentials: true, headers: token }
+          { 
+            withCredentials: true, 
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          }
         );
         const list = res?.data?.data?.items || [];
         setSuggestions(list.slice(0, 10));
@@ -87,11 +91,16 @@ export default function CreatePackage() {
       if (image?.file) fd.append("image", image.file);
       else if (image?.isUrl) fd.append("imageUrl", image.url);
 
+      const headers = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
       const res = await fetch(`${API_URL}/package/`, {
         method: "POST",
         body: fd,
         credentials: "include",
-        headers: token
+        headers
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
