@@ -47,6 +47,7 @@ export const {
     SMTP_SERVICE,
     SMTP_EMAIL,
     FRONTEND_URL,
+    FRONTEND_REFERRAL_URL,
     ORIGIN,
     CLOUD_NAME,
     CLOUD_API_KEY,

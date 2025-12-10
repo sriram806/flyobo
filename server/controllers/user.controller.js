@@ -13,7 +13,7 @@ import { getAllUsersServices } from '../services/user.services.js';
 import bcrypt from 'bcryptjs';
 import { sendRewardRedemptionNotification } from "../services/notification.services.js";
 import ReferralSettings from '../models/referralSettings.model.js';
-import { FRONTEND_URL } from "../config/env.js";
+import { FRONTEND_REFERRAL_URL, FRONTEND_URL } from "../config/env.js";
 
 // 1. Get User Profile
 export const getProfile = async (req, res) => {
@@ -282,7 +282,7 @@ export const getReferralInfo = async (req, res) => {
       totalReferrals: user.referral.totalReferrals,
       totalReward: user.reward || 0,
       referredUsers: user.referral.referredUsers,
-      referralLink: `${FRONTEND_URL || 'http://localhost:3000'}/auth/page/registration?ref=${user.referral.referralCode}`
+      referralLink: `${FRONTEND_REFERRAL_URL || 'http://localhost:3000'}/auth/page/registration?ref=${user.referral.referralCode}`
     };
 
     res.status(200).json({
@@ -563,8 +563,6 @@ export const withdrawReferralRewards = async (req, res) => {
     });
   }
 };
-
-
 
 // Admin/Manager: Get all referral withdrawal requests (user-wise and flat list)
 export const getReferralWithdrawals = async (req, res) => {
