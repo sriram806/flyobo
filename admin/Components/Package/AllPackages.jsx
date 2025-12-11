@@ -2,8 +2,12 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { FiRefreshCcw, FiRefreshCw } from "react-icons/fi";
 
 export default function AllPackages() {
+	const token = useSelector((t) => t?.auth?.token);
 	const router = useRouter();
 	const [packages, setPackages] = useState([]);
 	const [destinationsMap, setDestinationsMap] = useState({});
@@ -58,7 +62,6 @@ export default function AllPackages() {
 		fetchPackages();
 	}, []);
 
-	// Helper: normalize image field (string | array | object)
 	const getImageSrc = (images) => {
 		const fallback = "/images/icon.png";
 		if (!images) return fallback;
@@ -68,12 +71,10 @@ export default function AllPackages() {
 		return fallback;
 	};
 
-	// Memoize unique destinations for filter select (stable keys)
 	const uniqueDestinationIds = useMemo(() => {
 		return destinationsList.map((d) => String(d._id));
 	}, [destinationsList]);
 
-	// Filter + Search Logic (guard properties to avoid runtime errors)
 	const filteredPackages = useMemo(() => {
 		const q = (search || "").toLowerCase();
 
@@ -92,12 +93,9 @@ export default function AllPackages() {
 				return `${d.place || ""}${d.state ? ", " + d.state : ""}${d.country ? ", " + d.country : ""}`;
 			})();
 
-			const matchSearch =
-				title.toLowerCase().includes(q) || destinationLabel.toLowerCase().includes(q);
+			const matchSearch = title.toLowerCase().includes(q) || destinationLabel.toLowerCase().includes(q);
 
-			const matchDestination = filterDestination
-				? destinationId === (filterDestination || "")
-				: true;
+			const matchDestination = filterDestination ? destinationId === (filterDestination || "") : true;
 
 			return matchSearch && matchDestination;
 		});
@@ -110,13 +108,14 @@ export default function AllPackages() {
 			const res = await fetch(`${apiBase}/package/${deleteId}`, {
 				method: "DELETE",
 				credentials: "include",
+				headers: token
 			});
 			const data = await res.json();
 
-			if (!res.ok) alert(data.message || "Delete failed");
+			if (!res.ok) toast.error(data.message || "Delete failed");
 			else setPackages((prev) => prev.filter((p) => p._id !== deleteId));
 		} catch (err) {
-			alert(err.message);
+			toast.error(err.message);
 		} finally {
 			setDeleteId(null);
 		}
@@ -129,14 +128,14 @@ export default function AllPackages() {
 			const res = await fetch(`${apiBase}/package/edit-package/${pkgId}`, {
 				method: "PUT",
 				credentials: "include",
-				headers: { "Content-Type": "application/json" },
+				headers: token,
 				body: JSON.stringify({ status: newStatus }),
 			});
 			const data = await res.json();
-			if (!res.ok) throw new Error(data.message || "Failed to update status");
+			if (!res.ok) toast.error(data.message || "Failed to update status");
 			setPackages((prev) => prev.map((p) => (p._id === pkgId ? { ...p, status: newStatus } : p)));
 		} catch (err) {
-			alert(err.message || "Failed to update status");
+			toast.error(err.message || "Failed to update status");
 		} finally {
 			setTogglingIds((s) => s.filter((id) => id !== pkgId));
 		}
@@ -144,8 +143,6 @@ export default function AllPackages() {
 
 	return (
 		<div className="p-6">
-
-			{/* Header */}
 			<div className="flex items-center justify-between mb-6">
 				<h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Packages</h1>
 
@@ -161,7 +158,7 @@ export default function AllPackages() {
 						onClick={fetchPackages}
 						className="px-4 py-2 border rounded-lg dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
 					>
-						Refresh
+						<FiRefreshCw/>
 					</button>
 				</div>
 			</div>
@@ -176,24 +173,24 @@ export default function AllPackages() {
 					className="w-full md:w-1/3 px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
 				/>
 
-					<select
-						value={filterDestination}
-						onChange={(e) => setFilterDestination(e.target.value)}
-						className="w-full md:w-1/4 px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
-					>
-						<option value="">Filter by Destination</option>
-						{uniqueDestinationIds.map((destId, idx) => {
-							const d = destinationsMap[destId];
-							const label = d
-								? `${d.place || ""}${d.state ? ", " + d.state : ""}${d.country ? ", " + d.country : ""}`
-								: destId;
-							return (
-								<option key={`${destId}-${idx}`} value={destId}>
-									{label}
-								</option>
-							);
-						})}
-					</select>
+				<select
+					value={filterDestination}
+					onChange={(e) => setFilterDestination(e.target.value)}
+					className="w-full md:w-1/4 px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-700"
+				>
+					<option value="">Filter by Destination</option>
+					{uniqueDestinationIds.map((destId, idx) => {
+						const d = destinationsMap[destId];
+						const label = d
+							? `${d.place || ""}${d.state ? ", " + d.state : ""}${d.country ? ", " + d.country : ""}`
+							: destId;
+						return (
+							<option key={`${destId}-${idx}`} value={destId}>
+								{label}
+							</option>
+						);
+					})}
+				</select>
 			</div>
 
 			{/* Table */}
@@ -271,11 +268,10 @@ export default function AllPackages() {
 									<button
 										onClick={() => handleToggleStatus(pkg._id, pkg.status)}
 										disabled={togglingIds.includes(pkg._id)}
-										className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-											pkg.status === 'active'
-												? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300'
-												: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
-										} ${togglingIds.includes(pkg._id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+										className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${pkg.status === 'active'
+											? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300'
+											: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+											} ${togglingIds.includes(pkg._id) ? 'opacity-50 cursor-not-allowed' : ''}`}
 									>
 										{togglingIds.includes(pkg._id) ? 'Updating...' : pkg.status || 'draft'}
 									</button>
@@ -314,7 +310,7 @@ export default function AllPackages() {
 							Confirm Delete
 						</h3>
 						<p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-							This package will be permanently deleted.  
+							This package will be permanently deleted.
 							Are you sure you want to continue?
 						</p>
 
