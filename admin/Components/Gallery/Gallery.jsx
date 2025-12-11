@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Loading from "../Loading/Loading";
+import { useSelector } from "react-redux";
 
 const CATEGORIES = [
     "nature",
@@ -16,11 +17,12 @@ const CATEGORIES = [
     "other",
 ];
 
-const input =```w-full rounded-xl border border-gray-300 dark:border-gray-700  bg-white dark:bg-gray-900  px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 \
+const input = `w-full rounded-xl border border-gray-300 dark:border-gray-700  bg-white dark:bg-gray-900  px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 \
 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out`;
 
 export default function AdminGallery() {
-    const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const token = useSelector((t) => t?.auth?.token)
 
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -46,13 +48,7 @@ export default function AdminGallery() {
 
     const totalImages = items.length;
 
-    const authHeader = () => {
-        const token =
-            typeof window !== "undefined"
-                ? localStorage.getItem("auth_token")
-                : null;
-        return token ? { Authorization: `Bearer ${token}` } : undefined;
-    };
+
 
     const resetForm = () => {
         setEditId(null);
@@ -99,12 +95,10 @@ export default function AdminGallery() {
         try {
             setLoading(true);
             setError("");
-            const { data } = await axios.get(`${API_BASE}/gallery`, {
-                headers: authHeader(),
-            });
+            const { data } = await axios.get(`${API_URL}/gallery`)
             setItems(Array.isArray(data) ? data : []);
         } catch (e) {
-            setError("Failed to fetch images");
+            toast.error("Failed to fetch images");
         } finally {
             setLoading(false);
         }
@@ -112,14 +106,14 @@ export default function AdminGallery() {
 
     useEffect(() => {
         fetchItems();
-    }, [API_BASE]);
+    }, [API_URL]);
 
     const onSubmit = async (e) => {
         e.preventDefault();
         if (!title.trim() || !category) return setError("Fill required fields");
 
         if (!editId && !imageFile && !imageUrl.trim()) {
-            return setError("Upload image or paste image URL");
+            return toast.loading("Upload image or paste image URL");
         }
 
         try {
@@ -143,7 +137,7 @@ export default function AdminGallery() {
                 const { data } = await axios.put(
                     `${API_BASE}/gallery/${editId}`,
                     fd,
-                    { headers: authHeader() }
+                    { headers: token }
                 );
                 setItems((p) => p.map((x) => (x._id === editId ? data : x)));
                 toast.success("Updated successfully!");
@@ -169,7 +163,7 @@ export default function AdminGallery() {
         try {
             setLoading(true);
             await axios.delete(`${API_BASE}/gallery/${id}`, {
-                headers: authHeader(),
+                headers: token,
             });
             setItems((p) => p.filter((x) => x._id !== id));
             toast.success("Deleted!");
@@ -180,7 +174,7 @@ export default function AdminGallery() {
         }
     };
 
-    if (loading){
+    if (loading) {
         return <Loading />
     }
 

@@ -12,6 +12,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import Loading from "../Loading/Loading";
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -54,7 +55,6 @@ export default function AllAnalyticsDashboard() {
   const totals = data?.totals || {};
   const revenue = totals.totalRevenue ?? data?.totalRevenue ?? 0;
 
-  // Build one-week chart data from API structure
   const buildWeekData = () => {
     const wc = data?.weeklyCharts;
     if (!wc) return [];
@@ -80,6 +80,10 @@ export default function AllAnalyticsDashboard() {
   };
 
   const weekData = buildWeekData();
+
+  if(loading){
+    return <Loading />
+  }
 
   return (
     <section className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
