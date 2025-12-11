@@ -3,7 +3,17 @@ import Link from "next/link";
 
 export default function FeaturedPackagesCard({ pkg }) {
   const href = `/packages/${pkg?.slug || pkg?._id || pkg?.id}`;
-  const imgSrc = Array.isArray(pkg?.images) ? pkg.images[0] : pkg?.images || "/images/placeholder.jpg";
+  
+  // Resolve image URL properly
+  const resolveImageUrl = (img) => {
+    if (!img) return null;
+    if (Array.isArray(img)) img = img[0];
+    if (typeof img === 'string') return img;
+    if (typeof img === 'object' && img?.url) return img.url;
+    return null;
+  };
+  
+  const imgSrc = resolveImageUrl(pkg?.images) || "/images/placeholder.jpg";
 
   return (
     <Link

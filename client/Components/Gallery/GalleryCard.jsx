@@ -4,20 +4,32 @@ import { useState } from "react";
 const GalleryCard = ({ item, index, onOpen }) => {
     const [loaded, setLoaded] = useState(false);
 
+    // Resolve image URL properly
+    const resolveImageUrl = (img) => {
+        if (!img) return null;
+        if (typeof img === 'string') return img;
+        if (typeof img === 'object' && img?.url) return img.url;
+        return null;
+    };
+
+    const imageUrl = resolveImageUrl(item?.image) || item?.imageUrl || item?.url || null;
+
     const downloadImage = (e) => {
         e.stopPropagation();
+        if (!imageUrl) return;
         const link = document.createElement("a");
-        link.href = item.image;
+        link.href = imageUrl;
         link.download = item.title || "photo.jpg";
         link.click();
     };
 
     const shareImage = async (e) => {
         e.stopPropagation();
+        if (!imageUrl) return;
         if (navigator.share) {
-            await navigator.share({ title: item.title, url: item.image });
+            await navigator.share({ title: item.title, url: imageUrl });
         } else {
-            await navigator.clipboard.writeText(item.image);
+            await navigator.clipboard.writeText(imageUrl);
         }
     };
 
@@ -31,12 +43,14 @@ const GalleryCard = ({ item, index, onOpen }) => {
                 )}
 
                 {/* Image */}
-                <img
-                    src={item.image}
-                    alt={item.title}
-                    onLoad={() => setLoaded(true)}
-                    className="w-full h-auto group-hover:scale-105 transition duration-500"
-                />
+                {imageUrl && (
+                    <img
+                        src={imageUrl}
+                        alt={item.title}
+                        onLoad={() => setLoaded(true)}
+                        className="w-full h-auto group-hover:scale-105 transition duration-500"
+                    />
+                )}
 
                 {/* Hover Overlay */}
                 <div className="

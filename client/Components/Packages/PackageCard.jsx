@@ -8,7 +8,16 @@ import { HiOutlineChevronRight } from "react-icons/hi";
 import { NEXT_PUBLIC_BACKEND_URL } from "../config/env";
 
 export default function PackageCard({ pkg, loading }) {
-  const imgSrc = pkg?.images || "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop";
+  // Resolve image URL properly
+  const resolveImageUrl = (img) => {
+    if (!img) return null;
+    if (Array.isArray(img)) img = img[0];
+    if (typeof img === 'string') return img;
+    if (typeof img === 'object' && img?.url) return img.url;
+    return null;
+  };
+
+  const imgSrc = resolveImageUrl(pkg?.images) || pkg?.imageUrl || "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop";
   const currentPrice = Number(pkg?.price || 0);
   const originalPrice = Number(pkg?.estimatedPrice || 0);
   const hasDiscount = originalPrice > currentPrice && currentPrice > 0;
