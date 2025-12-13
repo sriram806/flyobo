@@ -148,7 +148,6 @@ export default function Page() {
         });
         setDestinationsMap(map);
       } catch (err) {
-        // silently ignore
       }
     };
     fetchDestinations();
@@ -261,72 +260,54 @@ export default function Page() {
       <Header open={open} setOpen={setOpen} route={route} setRoute={setRoute} />
       <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
         {!filtersActive && (
-          <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-[#0a0a0a] dark:via-gray-900 dark:to-indigo-950">
-            <div className="mx-auto max-w-7xl px-4 lg:px-8 py-12 sm:py-16">
-              <div className="relative rounded border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md overflow-hidden p-8 sm:p-12 lg:p-16 text-center">
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold mb-3 text-gray-900 dark:text-gray-50">
-                  <span className="bg-gradient-to-r from-gray-900 via-sky-800 to-indigo-900 dark:from-white dark:via-sky-200 dark:to-indigo-200 bg-clip-text text-transparent">
-                    Discover Your Perfect Journey
-                  </span>
+          <section className="relative bg-linear-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-[#0b0b0b] dark:via-gray-900 dark:to-indigo-950">
+            <div className="mx-auto max-w-7xl px-4 lg:px-8 py-8 sm:py-10">
+              <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-6 sm:px-10 sm:py-8 text-center">
+
+                {/* Heading */}
+                <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                  Discover Your Perfect Journey
                 </h1>
 
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-6">
-                  Explore our handpicked selection of travel packages across India.
-                  From serene beaches to majestic mountains, find your dream destination.
+                {/* Sub text */}
+                <p className="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-4">
+                  Handpicked travel packages across India — beaches, hills & heritage.
                 </p>
 
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <a
-                    href="/contact"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-full shadow-sm text-sm transition-all"
-                  >
-                    Plan a custom trip
-                  </a>
+                {/* CTA */}
+                <div className="flex items-center justify-center gap-3 mb-5">
                   <a
                     href="/packages"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-full shadow-sm text-sm transition-all"
+                    className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-sm font-medium transition"
                   >
-                    View all packages
+                    View Packages
+                  </a>
+                  <a
+                    href="/contact"
+                    className="px-5 py-2 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    Custom Trip
                   </a>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-                  <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600">
-                        <MapPin className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Destinations</p>
-                        <p className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">50+</p>
-                      </div>
-                    </div>
+                {/* Stats */}
+                <div className="flex flex-wrap justify-center gap-6 text-sm">
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <MapPin className="w-4 h-4 text-indigo-600" />
+                    <span><b>{Object.keys(destinationsMap || {}).length}</b> Destinations</span>
                   </div>
 
-                  <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600">
-                        <Sparkles className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Packages</p>
-                        <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{items.length}</p>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <Sparkles className="w-4 h-4 text-emerald-600" />
+                    <span><b>{items.length}</b> Packages</span>
                   </div>
 
-                  <div className="group px-6 py-3 rounded-2xl bg-white/80 dark:bg-gray-800 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600">
-                        <TrendingUp className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Rating</p>
-                        <p className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">4.8★</p>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <TrendingUp className="w-4 h-4 text-amber-600" />
+                    <span><b>4.8★</b> Rating</span>
                   </div>
                 </div>
+
               </div>
             </div>
           </section>

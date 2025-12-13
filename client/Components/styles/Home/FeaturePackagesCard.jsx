@@ -1,8 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/Components/config/env";
 
 export default function FeaturedPackagesCard({ pkg }) {
   const href = `/packages/${pkg?.slug || pkg?._id || pkg?.id}`;
+  const API_URL = NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+  const [destDetailsState, setDestDetailsState] = useState(null);
   
   // Resolve image URL properly
   const resolveImageUrl = (img) => {
@@ -14,6 +19,33 @@ export default function FeaturedPackagesCard({ pkg }) {
   };
   
   const imgSrc = resolveImageUrl(pkg?.images) || "/images/placeholder.jpg";
+
+  // Destination details
+  const destDetails = destDetailsState || pkg?.destinationDetails || (typeof pkg?.destination === 'object' ? pkg.destination : null);
+  const destText = destDetails
+    ? [destDetails.place, destDetails.state, destDetails.country].filter(Boolean).join(", ")
+    : (typeof pkg?.destination === 'string' ? pkg.destination : "");
+
+  // Fetch destination details by ID if missing
+  useEffect(() => {
+    let cancelled = false;
+    const fetchDestination = async () => {
+      try {
+        const destIdCandidate = pkg?.destination || pkg?.destinationId;
+        const hasDetails = !!(pkg?.destinationDetails || (typeof pkg?.destination === 'object'));
+        if (!API_URL || hasDetails || !destIdCandidate || typeof destIdCandidate !== 'string') return;
+        const { data } = await axios.get(`${API_URL}/destinations/${destIdCandidate}`, { params: { fields: 'place,state,country' } });
+        const destItem = data?.data || data?.destination || data;
+        if (!cancelled && destItem && (destItem.place || destItem.state || destItem.country)) {
+          setDestDetailsState({ place: destItem.place, state: destItem.state, country: destItem.country });
+        }
+      } catch {
+        // silently ignore
+      }
+    };
+    fetchDestination();
+    return () => { cancelled = true; };
+  }, [API_URL, pkg?.destination, pkg?.destinationDetails]);
 
   return (
     <Link
@@ -33,7 +65,7 @@ export default function FeaturedPackagesCard({ pkg }) {
 
         <div className="absolute bottom-0 left-0 right-0 px-4 py-3">
           <h3 className="text-white font-semibold text-lg line-clamp-1">{pkg?.title}</h3>
-          <p className="text-sm text-sky-200 mt-1 line-clamp-1">{pkg?.destination || "Amazing Destination"}</p>
+          <p className="text-sm text-sky-200 mt-1 line-clamp-1">{destText || "Amazing Destination"}</p>
         </div>
 
         {pkg?.days && (
