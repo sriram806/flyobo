@@ -1,15 +1,14 @@
 "use client";
 
 import React from "react";
-import { FiX } from "react-icons/fi";
 import { HiOutlineShieldCheck } from "react-icons/hi";
 
 export default function Privacy({ setRoute, setOpen }) {
   return (
-    <div className="w-full max-w-2xl mx-auto px-6 py-6 bg-white dark:bg-slate-900 rounded-2xl shadow-lg max-h-[85vh] overflow-y-auto">
+    <div className="w-full max-w-2xl scroll-smooth mx-auto px-6 py-6 bg-white dark:bg-slate-900 rounded-2xl shadow-lg max-h-[85vh] overflow-y-auto no-scrollbar">
       <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-slate-900 pb-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-600/20">
+          <div className="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-600/20">
             <HiOutlineShieldCheck className="text-white" size={20} />
           </div>
           <div>
@@ -17,20 +16,13 @@ export default function Privacy({ setRoute, setOpen }) {
             <p className="text-xs text-gray-500 dark:text-gray-400">FlyOBO Travelling</p>
           </div>
         </div>
-        <button
-          onClick={() => setOpen && setOpen(false)}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          aria-label="Close"
-        >
-          <FiX className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        </button>
       </div>
 
       <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
         <p className="text-base font-semibold text-gray-900 dark:text-white">
           Your Privacy Matters
         </p>
-        
+
         <p>
           FlyOBO Travelling takes your privacy seriously. This policy explains how we collect, use, and protect your personal data when you use our services.
         </p>
@@ -107,7 +99,7 @@ export default function Privacy({ setRoute, setOpen }) {
         <p className="pt-4 border-t border-gray-200 dark:border-gray-700">
           For more details or to exercise your rights, contact us at{" "}
           <a href="mailto:support@flyobo.com" className="text-sky-600 hover:underline">
-            support@flyobo.com
+            team.flyobo@gmail.com
           </a>
           {" "}or review our{" "}
           <button

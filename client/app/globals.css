@@ -99,11 +99,10 @@ html.dark {
   animation: fadeIn .6s ease-out forwards;
 }
 
-/* Utility: hide native scrollbars for overflow containers */
-.no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-}
 .no-scrollbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

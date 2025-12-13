@@ -162,7 +162,7 @@ export default function ResetPassword({ setRoute, setOpen }) {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label hidden className={`${styles.label} !text-left block`} htmlFor="email">Email address</label>
+          <label hidden className={`${styles.label} text-left! block`} htmlFor="email">Email address</label>
           <input
             hidden
             id="email"
@@ -179,7 +179,7 @@ export default function ResetPassword({ setRoute, setOpen }) {
         </div>
 
         <div>
-          <label className={`${styles.label} !text-left block`} htmlFor="otp-0">4-digit code</label>
+          <label className={`${styles.label} text-left! block`} htmlFor="otp-0">4-digit code</label>
           <div className="mt-2 flex items-center justify-center gap-2 sm:gap-3">
             {Array.from({ length: OTP_LENGTH }).map((_, i) => (
               <input
@@ -210,15 +210,20 @@ export default function ResetPassword({ setRoute, setOpen }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition ${errors.password ? "border-red-500" : "border-gray-400 dark:border-gray-600"} focus:border-gray-800 dark:focus:border-gray-200`}
+              className={`peer w-full bg-white dark:bg-slate-900/80 border-2 rounded-2xl h-14 pr-12 pl-3 pt-5 pb-2 text-gray-900 dark:text-white outline-none transition
+                ${errors.password ? "border-red-500 focus:ring-2 focus:ring-red-400" : "border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-sky-500/60"}`}
               aria-invalid={!!errors.password}
               aria-describedby="password-error"
               autoComplete="new-password"
             />
-            <label htmlFor="password" className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all top-0 -translate-y-1/2 text-xs peer-placeholder-shown:top-1/2 peer-focus:top-0 peer-focus:text-xs">
+            <label htmlFor="password" className="pointer-events-none absolute left-3 px-1 text-gray-500 dark:text-gray-400 transition-all
+              top-0 -translate-y-1/2 text-xs
+              peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
+              peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
+              bg-white dark:bg-slate-900">
               New password
             </label>
-            <button type="button" onClick={() => setShowPwd((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded" aria-label={showPwd ? "Hide password" : "Show password"}>
+            <button type="button" onClick={() => setShowPwd((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 transition" aria-label={showPwd ? "Hide password" : "Show password"}>
               {showPwd ? <AiOutlineEyeInvisible size={20} className="text-gray-600 dark:text-gray-300" /> : <AiOutlineEye size={20} className="text-gray-600 dark:text-gray-300" />}
             </button>
           </div>
@@ -233,15 +238,20 @@ export default function ResetPassword({ setRoute, setOpen }) {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm password"
-              className={`peer w-full bg-transparent border-2 rounded-xl h-14 pr-12 px-3 pt-5 pb-2 text-black dark:text-white outline-none transition ${errors.confirmPassword ? "border-red-500" : "border-gray-400 dark:border-gray-600"} focus:border-gray-800 dark:focus:border-gray-200`}
+              className={`peer w-full bg-white dark:bg-slate-900/80 border-2 rounded-2xl h-14 pr-12 pl-3 pt-5 pb-2 text-gray-900 dark:text-white outline-none transition
+                ${errors.confirmPassword ? "border-red-500 focus:ring-2 focus:ring-red-400" : "border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-sky-500/60"}`}
               aria-invalid={!!errors.confirmPassword}
               aria-describedby="confirmPassword-error"
               autoComplete="new-password"
             />
-            <label htmlFor="confirmPassword" className="pointer-events-none absolute left-3 bg-white dark:bg-slate-900 px-1 text-gray-500 dark:text-gray-400 transition-all top-0 -translate-y-1/2 text-xs peer-placeholder-shown:top-1/2 peer-focus:top-0 peer-focus:text-xs">
+            <label htmlFor="confirmPassword" className="pointer-events-none absolute left-3 px-1 text-gray-500 dark:text-gray-400 transition-all
+              top-0 -translate-y-1/2 text-xs
+              peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
+              peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
+              bg-white dark:bg-slate-900">
               Confirm new password
             </label>
-            <button type="button" onClick={() => setShowConfirm((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded" aria-label={showConfirm ? "Hide password" : "Show password"}>
+            <button type="button" onClick={() => setShowConfirm((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 transition" aria-label={showConfirm ? "Hide password" : "Show password"}>
               {showConfirm ? <AiOutlineEyeInvisible size={20} className="text-gray-600 dark:text-gray-300" /> : <AiOutlineEye size={20} className="text-gray-600 dark:text-gray-300" />}
             </button>
           </div>
